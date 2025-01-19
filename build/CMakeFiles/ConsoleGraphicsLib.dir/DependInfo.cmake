@@ -8,6 +8,7 @@ set(CMAKE_DEPENDS_LANGUAGES
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
+  "/home/szymek/Source/ConsoleGraphicsLib/input.c" "CMakeFiles/ConsoleGraphicsLib.dir/input.c.o" "gcc" "CMakeFiles/ConsoleGraphicsLib.dir/input.c.o.d"
   "/home/szymek/Source/ConsoleGraphicsLib/main.c" "CMakeFiles/ConsoleGraphicsLib.dir/main.c.o" "gcc" "CMakeFiles/ConsoleGraphicsLib.dir/main.c.o.d"
   )
 

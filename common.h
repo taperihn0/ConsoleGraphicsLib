@@ -1,15 +1,14 @@
 #pragma once
+
 #include <stdio.h>
 #include <unistd.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <stdbool.h>
+#include <string.h>
 
 #ifndef _FORCE_INLINE
-#	ifdef _MSC_VER
-#		define _FORCE_INLINE __declspec(forceinline)
-#	else
-#		define _FORCE_INLINE inline __attribute__((always_inline))
-#	endif
+#	define _FORCE_INLINE inline __attribute__((always_inline))
 #endif
 
 #define _INLINE inline
@@ -18,10 +17,10 @@
 #	define UINT unsigned int
 #endif
 
-static _INLINE int _assert_error_terminate(const char* err) {
-	printf("%s\n", err);
-	exit(1);
-	return 1;
+static _INLINE bool _assert_error_terminate(const char* err) {
+	fprintf(stderr, "Assertion failed: %s\n", err);
+	exit(EXIT_FAILURE);
+	return true;
 }
 
 #define ASSERT(val, err) (void)((val) || _assert_error_terminate((err)))

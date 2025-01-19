@@ -1,1 +1,1 @@
-/usr/bin/cc CMakeFiles/ConsoleGraphicsLib.dir/main.c.o -o ConsoleGraphicsLib 
+/usr/bin/cc CMakeFiles/ConsoleGraphicsLib.dir/main.c.o CMakeFiles/ConsoleGraphicsLib.dir/input.c.o -o ConsoleGraphicsLib 

@@ -1,39 +1,37 @@
-#include "common.h"
+#include "input.h"
 
-#include <termios.h>
+#include <stdlib.h>
+#include <unistd.h>
 #include <fcntl.h>
+#include <errno.h>
+#include <linux/input.h>
+#include <string.h>
+#include <stdio.h>
 
-void enableRawMode() {
-    struct termios raw;
-    tcgetattr(STDIN_FILENO, &raw);
+int main(void)
+{
+	enable_raw_mode();
+	
+	device_file kbd;
+	open_keyboard_input_file(&kbd);
 
-    raw.c_lflag &= ~(ECHO | ICANON);
-    raw.c_cc[VMIN] = 0;
-    raw.c_cc[VTIME] = 0;
+	keyboard_events kbd_ev;
+	clear_keyboard_events(&kbd_ev);
 
-    tcsetattr(STDIN_FILENO, TCSANOW, &raw);	
-    fcntl(STDIN_FILENO, F_SETFL, O_NONBLOCK);
-}
+    while (true) {
+		poll_keyboard_events(&kbd_ev, &kbd);
 
-void disableRawMode() {
-    struct termios original;
-    tcgetattr(STDIN_FILENO, &original);
-	// go back to canonical mode, VMIN and VTIME are ignored since then
-    original.c_lflag |= (ECHO | ICANON);
-    tcsetattr(STDIN_FILENO, TCSANOW, &original);
-}
+		if (get_key(&kbd_ev, KEY_Q) == KEY_REPEATED)
+			break;
 
-int main() {
-    enableRawMode();
-
-    char c;
-    while (1) {
-        if (read(STDIN_FILENO, &c, 1) > 0) {
-            if (c == 'q') 
-            	break;
-            printf("You pressed: %c\n", c);
-        }
+		usleep(1000);
     }
 
-    disableRawMode();
+    fflush(stdout);
+    fprintf(stderr, "%s.\n", strerror(errno));	
+    disable_raw_mode();
+
+    close_keyboard_input_file(&kbd);
+
+    return EXIT_FAILURE;
 }

@@ -5,6 +5,7 @@ project(ConsoleGraphicsLib C)
 set(
 	SOURCES 
 	main.c
+	input.c
 )
 
 add_executable(ConsoleGraphicsLib ${SOURCES})

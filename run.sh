@@ -1,2 +1,2 @@
 #!/bin/sh
-./build/ConsoleGraphicsLib $@
+sudo ./build/ConsoleGraphicsLib $@

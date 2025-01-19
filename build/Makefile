@@ -129,6 +129,30 @@ ConsoleGraphicsLib/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/ConsoleGraphicsLib.dir/build.make CMakeFiles/ConsoleGraphicsLib.dir/build
 .PHONY : ConsoleGraphicsLib/fast
 
+input.o: input.c.o
+.PHONY : input.o
+
+# target to build an object file
+input.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/ConsoleGraphicsLib.dir/build.make CMakeFiles/ConsoleGraphicsLib.dir/input.c.o
+.PHONY : input.c.o
+
+input.i: input.c.i
+.PHONY : input.i
+
+# target to preprocess a source file
+input.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/ConsoleGraphicsLib.dir/build.make CMakeFiles/ConsoleGraphicsLib.dir/input.c.i
+.PHONY : input.c.i
+
+input.s: input.c.s
+.PHONY : input.s
+
+# target to generate assembly for a file
+input.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/ConsoleGraphicsLib.dir/build.make CMakeFiles/ConsoleGraphicsLib.dir/input.c.s
+.PHONY : input.c.s
+
 main.o: main.c.o
 .PHONY : main.o
 
@@ -162,6 +186,9 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... ConsoleGraphicsLib"
+	@echo "... input.o"
+	@echo "... input.i"
+	@echo "... input.s"
 	@echo "... main.o"
 	@echo "... main.i"
 	@echo "... main.s"
