@@ -4,10 +4,9 @@
 #include <errno.h>
 #include <linux/input.h>
 
-#define KEY_NO_EVENT -1
+#define KEY_INVALID  -1
 #define KEY_RELEASED  0
 #define KEY_PRESSED   1
-#define KEY_REPEATED  2
 
 // termios manipulations.
 // Sets STD_FILENO file descriptor to be
@@ -36,6 +35,7 @@ void poll_keyboard_events(keyboard_events* kev, device_file* kbd);
 
 int get_key(keyboard_events* kev, int key);
 
+// Depreciated function. Serves no purpose.
 #ifdef DEBUG
 void test_input(keyboard_events* kev);
 #endif

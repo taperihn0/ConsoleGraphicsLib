@@ -1,14 +1,6 @@
 #include "input.h"
 
-#include <stdlib.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <errno.h>
-#include <linux/input.h>
-#include <string.h>
-#include <stdio.h>
-
-int main(void)
+int main()
 {
 	enable_raw_mode();
 	
@@ -20,18 +12,23 @@ int main(void)
 
     while (true) {
 		poll_keyboard_events(&kbd_ev, &kbd);
-
-		if (get_key(&kbd_ev, KEY_Q) == KEY_REPEATED)
+		
+		if (get_key(&kbd_ev, KEY_Q) == KEY_PRESSED)
 			break;
-
+		if (get_key(&kbd_ev, KEY_A) == KEY_PRESSED)
+			printf("PRESSED_A__");
+		if (get_key(&kbd_ev, KEY_A) == KEY_RELEASED)
+			printf("RELEASED_A");
+		if (get_key(&kbd_ev, KEY_D) == KEY_PRESSED) 
+			printf(", PRESSED_D__");
+		if (get_key(&kbd_ev, KEY_D) == KEY_RELEASED) 
+			printf(", RELEASED_D");
+	
+		putchar('\n');
 		usleep(1000);
-    }
-
-    fflush(stdout);
-    fprintf(stderr, "%s.\n", strerror(errno));	
-    disable_raw_mode();
+    }	
 
     close_keyboard_input_file(&kbd);
 
-    return EXIT_FAILURE;
+    disable_raw_mode();
 }

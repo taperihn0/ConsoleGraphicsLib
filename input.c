@@ -3,6 +3,10 @@
 #include <termios.h>
 #include <fcntl.h>
 
+#define _INTERFACE_KEY_RELEASED 0
+#define _INTERFACE_KEY_PRESSED  1
+#define _INTERFACE_KEY_REPEATED 2
+
 void enable_raw_mode() {
     struct termios raw;
     tcgetattr(STDIN_FILENO, &raw);
@@ -50,15 +54,17 @@ int close_keyboard_input_file(device_file* kbd) {
 
 void clear_keyboard_events(keyboard_events* kev) {
 	for (UINT i = 0; i < KEY_CNT; i++)
-		kev->key_map[i] = KEY_NO_EVENT;
+		kev->key_map[i] = KEY_RELEASED;
+}
+
+_FORCE_INLINE int _get_key_state(int value) {
+	return (bool)value;
 }
 
 void poll_keyboard_events(keyboard_events* kev, device_file* kbd) {
 	ssize_t n;
 	struct input_event ev;
 	
-	clear_keyboard_events(kev);
-
 	while (true) {
 		n = read(kbd->fd, &ev, sizeof(ev));
 
@@ -70,22 +76,20 @@ void poll_keyboard_events(keyboard_events* kev, device_file* kbd) {
 		} else if (n != sizeof(ev))
 			continue;
 
-		if (ev.type == EV_KEY && (ev.value == KEY_RELEASED || 
-								  ev.value == KEY_PRESSED  || 
-								  ev.value == KEY_REPEATED)) 
+		if (ev.type == EV_KEY && 
+			ev.value >= _INTERFACE_KEY_RELEASED && 
+			ev.value <= _INTERFACE_KEY_REPEATED)
 		{
-			printf("%d: %d\n", (int)ev.code, (int)ev.value);
-			kev->key_map[ev.code] = ev.value;
+			kev->key_map[ev.code] = _get_key_state(ev.value);
 		}
 	}	
-
-	printf("END\n");
 }
 
 int get_key(keyboard_events* kev, int key) {
 	return kev->key_map[key];
 }
 
+#ifdef DEBUG
 void test_input(keyboard_events* kev) {
 	static const char* const ev_to_str[3] = {
 		"RELEASED",
@@ -93,11 +97,14 @@ void test_input(keyboard_events* kev) {
 		"REPEATED"
 	};
 
+	printf("KEYBOARD_EVENTS_BUFFER: ");
+
 	for (int k = 0; k <= KEY_MAX; k++) {
-		if (kev->key_map[k] != KEY_NO_EVENT) {
-			printf("%s: %d, ", ev_to_str[kev->key_map[k]], (int)k);
+		if (kev->key_map[k] != KEY_INVALID) {
+			printf("%s_%d, ", ev_to_str[kev->key_map[k]], (int)k);
 		}
 	}
 
 	putchar('\n');
 }
+#endif
