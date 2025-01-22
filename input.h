@@ -1,7 +1,6 @@
 #pragma once
 
 #include "common.h"
-#include <errno.h>
 #include <linux/input.h>
 
 #define KEY_INVALID  -1

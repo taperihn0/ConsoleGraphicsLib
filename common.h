@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
+#include <errno.h>
 
 #ifndef _FORCE_INLINE
 #	define _FORCE_INLINE inline __attribute__((always_inline))

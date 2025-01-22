@@ -6,9 +6,13 @@ set(
 	SOURCES 
 	main.c
 	input.c
+	cursor.c
 )
 
 add_executable(ConsoleGraphicsLib ${SOURCES})
+find_package(X11 REQUIRED)
+
+target_link_libraries(ConsoleGraphicsLib X11::X11)
 
 set(CFLAGS -DDEBUG -Wall)
 target_compile_options(ConsoleGraphicsLib PRIVATE ${CFLAGS})

@@ -48,7 +48,6 @@ int close_keyboard_input_file(device_file* kbd) {
 		fprintf(stderr, "Cannot close %s: %s", kbd->file, strerror(errno));
 	
 	fcntl(kbd->fd, F_SETFL, kbd->flags & ~O_NONBLOCK);
-
 	return code; 
 }
 

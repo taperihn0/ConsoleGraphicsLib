@@ -1,4 +1,6 @@
 file(REMOVE_RECURSE
+  "CMakeFiles/ConsoleGraphicsLib.dir/cursor.c.o"
+  "CMakeFiles/ConsoleGraphicsLib.dir/cursor.c.o.d"
   "CMakeFiles/ConsoleGraphicsLib.dir/input.c.o"
   "CMakeFiles/ConsoleGraphicsLib.dir/input.c.o.d"
   "CMakeFiles/ConsoleGraphicsLib.dir/main.c.o"

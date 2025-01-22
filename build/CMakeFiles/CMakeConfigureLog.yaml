@@ -264,3 +264,177 @@ events:
       
       
 ...
+
+---
+events:
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/share/cmake-3.28/Modules/CheckLibraryExists.cmake:69 (try_compile)"
+      - "/usr/share/cmake-3.28/Modules/FindX11.cmake:682 (check_library_exists)"
+      - "CMakeLists.txt:12 (find_package)"
+    checks:
+      - "Looking for XOpenDisplay in /usr/lib/x86_64-linux-gnu/libX11.so;/usr/lib/x86_64-linux-gnu/libXext.so"
+    directories:
+      source: "/home/szymek/Source/ConsoleGraphicsLib/build/CMakeFiles/CMakeScratch/TryCompile-2ekhZW"
+      binary: "/home/szymek/Source/ConsoleGraphicsLib/build/CMakeFiles/CMakeScratch/TryCompile-2ekhZW"
+    cmakeVariables:
+      CMAKE_C_FLAGS: ""
+      CMAKE_C_FLAGS_DEBUG: "-g"
+      CMAKE_EXE_LINKER_FLAGS: ""
+    buildResult:
+      variable: "X11_LIB_X11_SOLO"
+      cached: true
+      stdout: |
+        Change Dir: '/home/szymek/Source/ConsoleGraphicsLib/build/CMakeFiles/CMakeScratch/TryCompile-2ekhZW'
+        
+        Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_b4405/fast
+        gmake[1]: Entering directory '/home/szymek/Source/ConsoleGraphicsLib/build/CMakeFiles/CMakeScratch/TryCompile-2ekhZW'
+        /usr/bin/gmake  -f CMakeFiles/cmTC_b4405.dir/build.make CMakeFiles/cmTC_b4405.dir/build
+        gmake[2]: Entering directory '/home/szymek/Source/ConsoleGraphicsLib/build/CMakeFiles/CMakeScratch/TryCompile-2ekhZW'
+        Building C object CMakeFiles/cmTC_b4405.dir/CheckFunctionExists.c.o
+        /usr/bin/cc   -DCHECK_FUNCTION_EXISTS=XOpenDisplay -o CMakeFiles/cmTC_b4405.dir/CheckFunctionExists.c.o -c /home/szymek/Source/ConsoleGraphicsLib/build/CMakeFiles/CMakeScratch/TryCompile-2ekhZW/CheckFunctionExists.c
+        Linking C executable cmTC_b4405
+        /usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_b4405.dir/link.txt --verbose=1
+        /usr/bin/cc  -DCHECK_FUNCTION_EXISTS=XOpenDisplay CMakeFiles/cmTC_b4405.dir/CheckFunctionExists.c.o -o cmTC_b4405  /usr/lib/x86_64-linux-gnu/libX11.so /usr/lib/x86_64-linux-gnu/libXext.so 
+        gmake[2]: Leaving directory '/home/szymek/Source/ConsoleGraphicsLib/build/CMakeFiles/CMakeScratch/TryCompile-2ekhZW'
+        gmake[1]: Leaving directory '/home/szymek/Source/ConsoleGraphicsLib/build/CMakeFiles/CMakeScratch/TryCompile-2ekhZW'
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/share/cmake-3.28/Modules/CheckFunctionExists.cmake:86 (try_compile)"
+      - "/usr/share/cmake-3.28/Modules/FindX11.cmake:697 (check_function_exists)"
+      - "CMakeLists.txt:12 (find_package)"
+    checks:
+      - "Looking for gethostbyname"
+    directories:
+      source: "/home/szymek/Source/ConsoleGraphicsLib/build/CMakeFiles/CMakeScratch/TryCompile-6mWCxO"
+      binary: "/home/szymek/Source/ConsoleGraphicsLib/build/CMakeFiles/CMakeScratch/TryCompile-6mWCxO"
+    cmakeVariables:
+      CMAKE_C_FLAGS: ""
+      CMAKE_C_FLAGS_DEBUG: "-g"
+      CMAKE_EXE_LINKER_FLAGS: ""
+    buildResult:
+      variable: "CMAKE_HAVE_GETHOSTBYNAME"
+      cached: true
+      stdout: |
+        Change Dir: '/home/szymek/Source/ConsoleGraphicsLib/build/CMakeFiles/CMakeScratch/TryCompile-6mWCxO'
+        
+        Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_97bd3/fast
+        gmake[1]: Entering directory '/home/szymek/Source/ConsoleGraphicsLib/build/CMakeFiles/CMakeScratch/TryCompile-6mWCxO'
+        /usr/bin/gmake  -f CMakeFiles/cmTC_97bd3.dir/build.make CMakeFiles/cmTC_97bd3.dir/build
+        gmake[2]: Entering directory '/home/szymek/Source/ConsoleGraphicsLib/build/CMakeFiles/CMakeScratch/TryCompile-6mWCxO'
+        Building C object CMakeFiles/cmTC_97bd3.dir/CheckFunctionExists.c.o
+        /usr/bin/cc   -DCHECK_FUNCTION_EXISTS=gethostbyname -o CMakeFiles/cmTC_97bd3.dir/CheckFunctionExists.c.o -c /home/szymek/Source/ConsoleGraphicsLib/build/CMakeFiles/CMakeScratch/TryCompile-6mWCxO/CheckFunctionExists.c
+        Linking C executable cmTC_97bd3
+        /usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_97bd3.dir/link.txt --verbose=1
+        /usr/bin/cc  -DCHECK_FUNCTION_EXISTS=gethostbyname CMakeFiles/cmTC_97bd3.dir/CheckFunctionExists.c.o -o cmTC_97bd3 
+        gmake[2]: Leaving directory '/home/szymek/Source/ConsoleGraphicsLib/build/CMakeFiles/CMakeScratch/TryCompile-6mWCxO'
+        gmake[1]: Leaving directory '/home/szymek/Source/ConsoleGraphicsLib/build/CMakeFiles/CMakeScratch/TryCompile-6mWCxO'
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/share/cmake-3.28/Modules/CheckFunctionExists.cmake:86 (try_compile)"
+      - "/usr/share/cmake-3.28/Modules/FindX11.cmake:711 (check_function_exists)"
+      - "CMakeLists.txt:12 (find_package)"
+    checks:
+      - "Looking for connect"
+    directories:
+      source: "/home/szymek/Source/ConsoleGraphicsLib/build/CMakeFiles/CMakeScratch/TryCompile-Q7vGtd"
+      binary: "/home/szymek/Source/ConsoleGraphicsLib/build/CMakeFiles/CMakeScratch/TryCompile-Q7vGtd"
+    cmakeVariables:
+      CMAKE_C_FLAGS: ""
+      CMAKE_C_FLAGS_DEBUG: "-g"
+      CMAKE_EXE_LINKER_FLAGS: ""
+    buildResult:
+      variable: "CMAKE_HAVE_CONNECT"
+      cached: true
+      stdout: |
+        Change Dir: '/home/szymek/Source/ConsoleGraphicsLib/build/CMakeFiles/CMakeScratch/TryCompile-Q7vGtd'
+        
+        Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_6a116/fast
+        gmake[1]: Entering directory '/home/szymek/Source/ConsoleGraphicsLib/build/CMakeFiles/CMakeScratch/TryCompile-Q7vGtd'
+        /usr/bin/gmake  -f CMakeFiles/cmTC_6a116.dir/build.make CMakeFiles/cmTC_6a116.dir/build
+        gmake[2]: Entering directory '/home/szymek/Source/ConsoleGraphicsLib/build/CMakeFiles/CMakeScratch/TryCompile-Q7vGtd'
+        Building C object CMakeFiles/cmTC_6a116.dir/CheckFunctionExists.c.o
+        /usr/bin/cc   -DCHECK_FUNCTION_EXISTS=connect -o CMakeFiles/cmTC_6a116.dir/CheckFunctionExists.c.o -c /home/szymek/Source/ConsoleGraphicsLib/build/CMakeFiles/CMakeScratch/TryCompile-Q7vGtd/CheckFunctionExists.c
+        Linking C executable cmTC_6a116
+        /usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_6a116.dir/link.txt --verbose=1
+        /usr/bin/cc  -DCHECK_FUNCTION_EXISTS=connect CMakeFiles/cmTC_6a116.dir/CheckFunctionExists.c.o -o cmTC_6a116 
+        gmake[2]: Leaving directory '/home/szymek/Source/ConsoleGraphicsLib/build/CMakeFiles/CMakeScratch/TryCompile-Q7vGtd'
+        gmake[1]: Leaving directory '/home/szymek/Source/ConsoleGraphicsLib/build/CMakeFiles/CMakeScratch/TryCompile-Q7vGtd'
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/share/cmake-3.28/Modules/CheckFunctionExists.cmake:86 (try_compile)"
+      - "/usr/share/cmake-3.28/Modules/FindX11.cmake:720 (check_function_exists)"
+      - "CMakeLists.txt:12 (find_package)"
+    checks:
+      - "Looking for remove"
+    directories:
+      source: "/home/szymek/Source/ConsoleGraphicsLib/build/CMakeFiles/CMakeScratch/TryCompile-xBe23M"
+      binary: "/home/szymek/Source/ConsoleGraphicsLib/build/CMakeFiles/CMakeScratch/TryCompile-xBe23M"
+    cmakeVariables:
+      CMAKE_C_FLAGS: ""
+      CMAKE_C_FLAGS_DEBUG: "-g"
+      CMAKE_EXE_LINKER_FLAGS: ""
+    buildResult:
+      variable: "CMAKE_HAVE_REMOVE"
+      cached: true
+      stdout: |
+        Change Dir: '/home/szymek/Source/ConsoleGraphicsLib/build/CMakeFiles/CMakeScratch/TryCompile-xBe23M'
+        
+        Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_d78cd/fast
+        gmake[1]: Entering directory '/home/szymek/Source/ConsoleGraphicsLib/build/CMakeFiles/CMakeScratch/TryCompile-xBe23M'
+        /usr/bin/gmake  -f CMakeFiles/cmTC_d78cd.dir/build.make CMakeFiles/cmTC_d78cd.dir/build
+        gmake[2]: Entering directory '/home/szymek/Source/ConsoleGraphicsLib/build/CMakeFiles/CMakeScratch/TryCompile-xBe23M'
+        Building C object CMakeFiles/cmTC_d78cd.dir/CheckFunctionExists.c.o
+        /usr/bin/cc   -DCHECK_FUNCTION_EXISTS=remove -o CMakeFiles/cmTC_d78cd.dir/CheckFunctionExists.c.o -c /home/szymek/Source/ConsoleGraphicsLib/build/CMakeFiles/CMakeScratch/TryCompile-xBe23M/CheckFunctionExists.c
+        Linking C executable cmTC_d78cd
+        /usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_d78cd.dir/link.txt --verbose=1
+        /usr/bin/cc  -DCHECK_FUNCTION_EXISTS=remove CMakeFiles/cmTC_d78cd.dir/CheckFunctionExists.c.o -o cmTC_d78cd 
+        gmake[2]: Leaving directory '/home/szymek/Source/ConsoleGraphicsLib/build/CMakeFiles/CMakeScratch/TryCompile-xBe23M'
+        gmake[1]: Leaving directory '/home/szymek/Source/ConsoleGraphicsLib/build/CMakeFiles/CMakeScratch/TryCompile-xBe23M'
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/share/cmake-3.28/Modules/CheckFunctionExists.cmake:86 (try_compile)"
+      - "/usr/share/cmake-3.28/Modules/FindX11.cmake:729 (check_function_exists)"
+      - "CMakeLists.txt:12 (find_package)"
+    checks:
+      - "Looking for shmat"
+    directories:
+      source: "/home/szymek/Source/ConsoleGraphicsLib/build/CMakeFiles/CMakeScratch/TryCompile-PGMvPK"
+      binary: "/home/szymek/Source/ConsoleGraphicsLib/build/CMakeFiles/CMakeScratch/TryCompile-PGMvPK"
+    cmakeVariables:
+      CMAKE_C_FLAGS: ""
+      CMAKE_C_FLAGS_DEBUG: "-g"
+      CMAKE_EXE_LINKER_FLAGS: ""
+    buildResult:
+      variable: "CMAKE_HAVE_SHMAT"
+      cached: true
+      stdout: |
+        Change Dir: '/home/szymek/Source/ConsoleGraphicsLib/build/CMakeFiles/CMakeScratch/TryCompile-PGMvPK'
+        
+        Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_e39a8/fast
+        gmake[1]: Entering directory '/home/szymek/Source/ConsoleGraphicsLib/build/CMakeFiles/CMakeScratch/TryCompile-PGMvPK'
+        /usr/bin/gmake  -f CMakeFiles/cmTC_e39a8.dir/build.make CMakeFiles/cmTC_e39a8.dir/build
+        gmake[2]: Entering directory '/home/szymek/Source/ConsoleGraphicsLib/build/CMakeFiles/CMakeScratch/TryCompile-PGMvPK'
+        Building C object CMakeFiles/cmTC_e39a8.dir/CheckFunctionExists.c.o
+        /usr/bin/cc   -DCHECK_FUNCTION_EXISTS=shmat -o CMakeFiles/cmTC_e39a8.dir/CheckFunctionExists.c.o -c /home/szymek/Source/ConsoleGraphicsLib/build/CMakeFiles/CMakeScratch/TryCompile-PGMvPK/CheckFunctionExists.c
+        Linking C executable cmTC_e39a8
+        /usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_e39a8.dir/link.txt --verbose=1
+        /usr/bin/cc  -DCHECK_FUNCTION_EXISTS=shmat CMakeFiles/cmTC_e39a8.dir/CheckFunctionExists.c.o -o cmTC_e39a8 
+        gmake[2]: Leaving directory '/home/szymek/Source/ConsoleGraphicsLib/build/CMakeFiles/CMakeScratch/TryCompile-PGMvPK'
+        gmake[1]: Leaving directory '/home/szymek/Source/ConsoleGraphicsLib/build/CMakeFiles/CMakeScratch/TryCompile-PGMvPK'
+        
+      exitCode: 0
+...
