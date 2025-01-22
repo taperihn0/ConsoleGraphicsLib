@@ -7,34 +7,31 @@
 #define KEY_RELEASED  0
 #define KEY_PRESSED   1
 
-// termios manipulations.
-// Sets STD_FILENO file descriptor to be
-// non canonical. Disables echo and setting 
-// input non blocking.
-void enable_raw_mode();
-
-// disables raw input mode
-void disable_raw_mode();
-
-typedef struct device_file {
+typedef struct _device_file {
 	char*  file;
 	int    fd;
 	int    flags;
-} device_file;
+} _device_file;
 
-int open_keyboard_input_file(device_file* kbd);
-int close_keyboard_input_file(device_file* kbd);
+int _open_keyboard_input_file(_device_file* kbd);
+int _close_keyboard_input_file(_device_file* kbd);
 
-typedef struct keyboard_events {
+typedef struct _keyboard_events {
 	int key_map[KEY_CNT];
-} keyboard_events;
+} _keyboard_events;
 
-void clear_keyboard_events(keyboard_events* kev);
-void poll_keyboard_events(keyboard_events* kev, device_file* kbd);
+void _clear_keyboard_events(_keyboard_events* kev);
+void _poll_keyboard_events(_keyboard_events* kev, _device_file* kbd);
 
-int get_key(keyboard_events* kev, int key);
+int _get_key_from_events(_keyboard_events* kev, int key);
 
-// Depreciated function. Serves no purpose.
-#ifdef DEBUG
-void test_input(keyboard_events* kev);
-#endif
+typedef struct keyboard {
+	_device_file device_file;
+	_keyboard_events events;
+} keyboard;
+
+void init_keyboard(keyboard* keyboard);
+void clear_events(keyboard* keyboard);
+void poll_events(keyboard* keyboard);
+int  get_key(keyboard* keyboard, int key);
+void close_keyboard(keyboard* keyboard);

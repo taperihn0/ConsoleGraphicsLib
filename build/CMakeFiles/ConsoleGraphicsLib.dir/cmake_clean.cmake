@@ -5,6 +5,8 @@ file(REMOVE_RECURSE
   "CMakeFiles/ConsoleGraphicsLib.dir/input.c.o.d"
   "CMakeFiles/ConsoleGraphicsLib.dir/main.c.o"
   "CMakeFiles/ConsoleGraphicsLib.dir/main.c.o.d"
+  "CMakeFiles/ConsoleGraphicsLib.dir/terminal.c.o"
+  "CMakeFiles/ConsoleGraphicsLib.dir/terminal.c.o.d"
   "ConsoleGraphicsLib"
   "ConsoleGraphicsLib.pdb"
 )

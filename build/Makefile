@@ -201,6 +201,30 @@ main.c.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/ConsoleGraphicsLib.dir/build.make CMakeFiles/ConsoleGraphicsLib.dir/main.c.s
 .PHONY : main.c.s
 
+terminal.o: terminal.c.o
+.PHONY : terminal.o
+
+# target to build an object file
+terminal.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/ConsoleGraphicsLib.dir/build.make CMakeFiles/ConsoleGraphicsLib.dir/terminal.c.o
+.PHONY : terminal.c.o
+
+terminal.i: terminal.c.i
+.PHONY : terminal.i
+
+# target to preprocess a source file
+terminal.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/ConsoleGraphicsLib.dir/build.make CMakeFiles/ConsoleGraphicsLib.dir/terminal.c.i
+.PHONY : terminal.c.i
+
+terminal.s: terminal.c.s
+.PHONY : terminal.s
+
+# target to generate assembly for a file
+terminal.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/ConsoleGraphicsLib.dir/build.make CMakeFiles/ConsoleGraphicsLib.dir/terminal.c.s
+.PHONY : terminal.c.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -219,6 +243,9 @@ help:
 	@echo "... main.o"
 	@echo "... main.i"
 	@echo "... main.s"
+	@echo "... terminal.o"
+	@echo "... terminal.i"
+	@echo "... terminal.s"
 .PHONY : help
 
 

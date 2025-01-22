@@ -85,4 +85,5 @@ CMakeFiles/ConsoleGraphicsLib.dir/main.c.o: \
  /usr/include/x86_64-linux-gnu/asm/posix_types_64.h \
  /usr/include/asm-generic/posix_types.h \
  /usr/include/linux/input-event-codes.h \
- /home/szymek/Source/ConsoleGraphicsLib/cursor.h
+ /home/szymek/Source/ConsoleGraphicsLib/cursor.h \
+ /home/szymek/Source/ConsoleGraphicsLib/terminal.h

@@ -7,6 +7,7 @@ set(
 	main.c
 	input.c
 	cursor.c
+	terminal.c
 )
 
 add_executable(ConsoleGraphicsLib ${SOURCES})

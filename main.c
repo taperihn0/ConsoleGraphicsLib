@@ -1,14 +1,14 @@
 #include "input.h"
 #include "cursor.h"
+#include "terminal.h"
 
 int main() {
 	enable_raw_mode();
-	
-	device_file kbd;
-	open_keyboard_input_file(&kbd);
 
-	keyboard_events kbd_ev;
-	clear_keyboard_events(&kbd_ev);
+	make_terminal_fullscreen();
+	
+	keyboard* const kbd = malloc(sizeof(keyboard));
+	init_keyboard(kbd);
 
 	int code = hide_cursor();
 
@@ -16,9 +16,9 @@ int main() {
 		exit(EXIT_FAILURE);
 	
 	while (true) {
-		poll_keyboard_events(&kbd_ev, &kbd);
+		poll_events(kbd);
 		
-		if (get_key(&kbd_ev, KEY_Q) == KEY_PRESSED)
+		if (get_key(kbd, KEY_Q) == KEY_PRESSED)
 			break;
 
 		printf("RUNNING...\n");
@@ -27,7 +27,8 @@ int main() {
 
 	show_cursor();
 
-	close_keyboard_input_file(&kbd);
+	close_keyboard(kbd);
+	free(kbd);
 
 	disable_raw_mode();
 }

@@ -11,6 +11,7 @@ set(CMAKE_DEPENDS_DEPENDENCY_FILES
   "/home/szymek/Source/ConsoleGraphicsLib/cursor.c" "CMakeFiles/ConsoleGraphicsLib.dir/cursor.c.o" "gcc" "CMakeFiles/ConsoleGraphicsLib.dir/cursor.c.o.d"
   "/home/szymek/Source/ConsoleGraphicsLib/input.c" "CMakeFiles/ConsoleGraphicsLib.dir/input.c.o" "gcc" "CMakeFiles/ConsoleGraphicsLib.dir/input.c.o.d"
   "/home/szymek/Source/ConsoleGraphicsLib/main.c" "CMakeFiles/ConsoleGraphicsLib.dir/main.c.o" "gcc" "CMakeFiles/ConsoleGraphicsLib.dir/main.c.o.d"
+  "/home/szymek/Source/ConsoleGraphicsLib/terminal.c" "CMakeFiles/ConsoleGraphicsLib.dir/terminal.c.o" "gcc" "CMakeFiles/ConsoleGraphicsLib.dir/terminal.c.o.d"
   )
 
 # Targets to which this target links which contain Fortran sources.
