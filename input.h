@@ -63,14 +63,17 @@ void close_keyboard(keyboard* keyboard);
 	Real-time event sampling may be added in the future.
 */
 
-typedef void (*mouse_callback_t)(int, int);
+typedef void (*mouse_pos_callback_t)   (int /* x_pos_offset */, int /* y_pos_offset */);
+typedef void (*mouse_button_callback_t)(unsigned short /* button_action */, int /* button */);
 
 typedef struct mouse {
 	_device_file device_file;
-	mouse_callback_t callback_func;
+	mouse_pos_callback_t pos_callback_func;
+	mouse_button_callback_t btn_callback_func;
 } mouse;
 
 void init_mouse(mouse* mouse);
 void poll_events_mouse(mouse* mouse);
-void set_pos_callback(mouse* mouse, mouse_callback_t callback_func);
+void set_pos_callback(mouse* mouse, mouse_pos_callback_t callback_func);
+void set_button_callback(mouse* mouse, mouse_button_callback_t callback_func);
 void close_mouse();

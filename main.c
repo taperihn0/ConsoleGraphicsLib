@@ -6,6 +6,13 @@ void mouse_callback(int dx, int dy) {
 	printf("(%d, %d)\n", dx, dy);
 }
 
+void button_callback(unsigned short btn_action, int btn) {
+	if (btn_action == KEY_PRESSED && btn == BTN_LEFT)
+		printf("PRESSED LEFT MOUSE BUTTON\n");
+	else if (btn_action == KEY_PRESSED && btn == BTN_RIGHT)
+		printf("PRESSED RIGHT MOUSE BUTTON\n");
+}
+
 int main() {
 	enable_raw_mode();
 	make_terminal_fullscreen();
@@ -21,6 +28,7 @@ int main() {
 	mouse* mice = malloc(sizeof(mouse));
 	init_mouse(mice);
 	set_pos_callback(mice, &mouse_callback);
+	set_button_callback(mice, &button_callback);
 
 	while (true) {
 		poll_events_keyboard(kbd);

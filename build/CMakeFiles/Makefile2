@@ -64,6 +64,7 @@ CMAKE_BINARY_DIR = /home/szymek/Source/ConsoleGraphicsLib/build
 
 # The main recursive "all" target.
 all: CMakeFiles/ConsoleGraphicsLib.dir/all
+all: CMakeFiles/hhpc.dir/all
 .PHONY : all
 
 # The main recursive "preinstall" target.
@@ -72,6 +73,7 @@ preinstall:
 
 # The main recursive "clean" target.
 clean: CMakeFiles/ConsoleGraphicsLib.dir/clean
+clean: CMakeFiles/hhpc.dir/clean
 .PHONY : clean
 
 #=============================================================================
@@ -99,6 +101,32 @@ ConsoleGraphicsLib: CMakeFiles/ConsoleGraphicsLib.dir/rule
 CMakeFiles/ConsoleGraphicsLib.dir/clean:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/ConsoleGraphicsLib.dir/build.make CMakeFiles/ConsoleGraphicsLib.dir/clean
 .PHONY : CMakeFiles/ConsoleGraphicsLib.dir/clean
+
+#=============================================================================
+# Target rules for target CMakeFiles/hhpc.dir
+
+# All Build rule for target.
+CMakeFiles/hhpc.dir/all:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/hhpc.dir/build.make CMakeFiles/hhpc.dir/depend
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/hhpc.dir/build.make CMakeFiles/hhpc.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/szymek/Source/ConsoleGraphicsLib/build/CMakeFiles --progress-num=6,7 "Built target hhpc"
+.PHONY : CMakeFiles/hhpc.dir/all
+
+# Build rule for subdir invocation for target.
+CMakeFiles/hhpc.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/szymek/Source/ConsoleGraphicsLib/build/CMakeFiles 2
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/hhpc.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/szymek/Source/ConsoleGraphicsLib/build/CMakeFiles 0
+.PHONY : CMakeFiles/hhpc.dir/rule
+
+# Convenience name for target.
+hhpc: CMakeFiles/hhpc.dir/rule
+.PHONY : hhpc
+
+# clean rule for target.
+CMakeFiles/hhpc.dir/clean:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/hhpc.dir/build.make CMakeFiles/hhpc.dir/clean
+.PHONY : CMakeFiles/hhpc.dir/clean
 
 #=============================================================================
 # Special targets to cleanup operation of make.

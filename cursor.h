@@ -4,13 +4,11 @@
 #include <sys/types.h>
 
 // Calls underlaying fork() function
-// to create another child process
-// for uncutter program.
+// to create another child process taking care of invisible mouse cursor.
 // Returns -1 when error occured, else 0 
 int hide_cursor();
 
 // Shows previously hidden cursor.
-// Uses pid of a uncutter process.
-// Calling it before hide_cursor() 
-// is unexpected behaviour.
+// Uses PID of a previously process.
+// Calling it before hide_cursor() is just unexpected.
 void show_cursor();

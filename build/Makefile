@@ -129,6 +129,19 @@ ConsoleGraphicsLib/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/ConsoleGraphicsLib.dir/build.make CMakeFiles/ConsoleGraphicsLib.dir/build
 .PHONY : ConsoleGraphicsLib/fast
 
+#=============================================================================
+# Target rules for targets named hhpc
+
+# Build rule for target.
+hhpc: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 hhpc
+.PHONY : hhpc
+
+# fast build rule for target.
+hhpc/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/hhpc.dir/build.make CMakeFiles/hhpc.dir/build
+.PHONY : hhpc/fast
+
 cursor.o: cursor.c.o
 .PHONY : cursor.o
 
@@ -152,6 +165,30 @@ cursor.s: cursor.c.s
 cursor.c.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/ConsoleGraphicsLib.dir/build.make CMakeFiles/ConsoleGraphicsLib.dir/cursor.c.s
 .PHONY : cursor.c.s
+
+hhpc/hhpc.o: hhpc/hhpc.c.o
+.PHONY : hhpc/hhpc.o
+
+# target to build an object file
+hhpc/hhpc.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/hhpc.dir/build.make CMakeFiles/hhpc.dir/hhpc/hhpc.c.o
+.PHONY : hhpc/hhpc.c.o
+
+hhpc/hhpc.i: hhpc/hhpc.c.i
+.PHONY : hhpc/hhpc.i
+
+# target to preprocess a source file
+hhpc/hhpc.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/hhpc.dir/build.make CMakeFiles/hhpc.dir/hhpc/hhpc.c.i
+.PHONY : hhpc/hhpc.c.i
+
+hhpc/hhpc.s: hhpc/hhpc.c.s
+.PHONY : hhpc/hhpc.s
+
+# target to generate assembly for a file
+hhpc/hhpc.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/hhpc.dir/build.make CMakeFiles/hhpc.dir/hhpc/hhpc.c.s
+.PHONY : hhpc/hhpc.c.s
 
 input.o: input.c.o
 .PHONY : input.o
@@ -234,9 +271,13 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... ConsoleGraphicsLib"
+	@echo "... hhpc"
 	@echo "... cursor.o"
 	@echo "... cursor.i"
 	@echo "... cursor.s"
+	@echo "... hhpc/hhpc.o"
+	@echo "... hhpc/hhpc.i"
+	@echo "... hhpc/hhpc.s"
 	@echo "... input.o"
 	@echo "... input.i"
 	@echo "... input.s"

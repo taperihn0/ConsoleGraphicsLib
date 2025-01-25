@@ -46,4 +46,5 @@ set(CMAKE_MAKEFILE_PRODUCTS
 # Dependency information for all targets:
 set(CMAKE_DEPEND_INFO_FILES
   "CMakeFiles/ConsoleGraphicsLib.dir/DependInfo.cmake"
+  "CMakeFiles/hhpc.dir/DependInfo.cmake"
   )

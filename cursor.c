@@ -13,10 +13,10 @@ int hide_cursor() {
 	}
 
 	if (pid == 0) {
-		int res = execlp("unclutter", "unclutter", "-jitter", "1000000", NULL);
+		int res = execlp("./hhpc/hhpc", "./hhpc/hhpc", "-i", "500", NULL);
 
 		if (res == -1) {
-			fprintf(stderr, "execlp for unclutter failed: %s", strerror(errno));
+			fprintf(stderr, "execlp for hhpc failed: %s", strerror(errno));
 			return -1;
 		}
 	}

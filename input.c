@@ -38,6 +38,10 @@ _FORCE_INLINE int _get_key_state(int value) {
 	return (bool)value;
 }
 
+_FORCE_INLINE int _get_btn_state(int value) {
+	return (bool)value;
+}
+
 int _get_key_from_events(_keyboard_events* kev, int key) {
 	return kev->key_map[key];
 }
@@ -85,15 +89,19 @@ void close_keyboard(keyboard* keyboard) {
 
 void init_mouse(mouse* mouse) {
 	_open_keyboard_input_file(&mouse->device_file, "/dev/input/event4");
-	mouse->callback_func = NULL;
+
+	mouse->pos_callback_func = NULL;
+	mouse->btn_callback_func = NULL;
 }
 
 void poll_events_mouse(mouse* mouse) {
 	ssize_t n;
 	struct input_event ev;
 
-	if (mouse->callback_func == NULL)
-		return;
+	static const char* const null_pol_err = "Polling mouse events with null callback";
+
+	ASSERT(mouse->pos_callback_func != NULL, null_pol_err);
+	ASSERT(mouse->btn_callback_func != NULL, null_pol_err);
 
 	while (true) {
 		n = read(mouse->device_file.fd, &ev, sizeof(ev));
@@ -109,20 +117,26 @@ void poll_events_mouse(mouse* mouse) {
 		if (ev.type == EV_REL) 
 		{
 			if (ev.code == REL_X) 
-				(*mouse->callback_func)(ev.value, 0u);
+				(*mouse->pos_callback_func)(ev.value, 0u);
 			else if (ev.code == REL_Y)
-				(*mouse->callback_func)(0u, ev.value);
-		} //else if (ev.type == EV_KEY) {
+				(*mouse->pos_callback_func)(0u, ev.value);
+		} else if (ev.type == EV_KEY) {
 			//if (ev.value == _INTERFACE_KEY_PRESSED)
 				// get pressed button code
 			//else if (ev.value == _INTERFACE_KEY_RELEASED)
 				// get released button code
-		//}
+
+			(*mouse->btn_callback_func)(_get_btn_state(ev.value), ev.code);
+		}
 	}
 }
 
-void set_pos_callback(mouse* mouse, mouse_callback_t callback_func) {
-	mouse->callback_func = callback_func;
+void set_pos_callback(mouse* mouse, mouse_pos_callback_t pos_callback_func) {
+	mouse->pos_callback_func = pos_callback_func;
+}
+
+void set_button_callback(mouse* mouse, mouse_button_callback_t callback_func) {
+	mouse->btn_callback_func = callback_func;
 }
 
 void close_mouse(mouse* mouse) {
