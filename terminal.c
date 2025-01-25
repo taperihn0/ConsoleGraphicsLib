@@ -6,6 +6,21 @@ void make_terminal_fullscreen() {
     system("wmctrl -r :ACTIVE: -b add,fullscreen");
 }
 
+void unmake_terminal_fullscreen() {
+	system("wmctrl -r :ACTIVE: -b remove,fullscreen");
+}
+
+void set_terminal_title(const char* const s) {
+	char* comm = malloc(23 * sizeof(char) + sizeof(s));
+
+	strcpy(comm, "wmctrl -r :ACTIVE: -T ");
+	strcat(comm, s);
+
+	system(comm);
+	
+	free(comm);
+}
+
 void enable_raw_mode() {
     struct termios raw;
     tcgetattr(STDIN_FILENO, &raw);

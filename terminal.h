@@ -3,6 +3,8 @@
 #include "common.h"
 
 void make_terminal_fullscreen();
+void unmake_terminal_fullscreen();
+void set_terminal_title();
 
 // termios manipulations.
 // Sets STD_FILENO file descriptor to be
