@@ -1,4 +1,0 @@
-/home/szymek/Source/ConsoleGraphicsLib/build/CMakeFiles/ConsoleGraphicsLib.dir
-/home/szymek/Source/ConsoleGraphicsLib/build/CMakeFiles/hhpc.dir
-/home/szymek/Source/ConsoleGraphicsLib/build/CMakeFiles/edit_cache.dir
-/home/szymek/Source/ConsoleGraphicsLib/build/CMakeFiles/rebuild_cache.dir

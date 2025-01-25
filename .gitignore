@@ -1,0 +1,5 @@
+# Ignore CMake build files
+build/*
+
+# Ignore binaries
+hhpc/hhpc

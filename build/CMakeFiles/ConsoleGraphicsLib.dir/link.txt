@@ -1,1 +1,0 @@
-/usr/bin/cc CMakeFiles/ConsoleGraphicsLib.dir/main.c.o CMakeFiles/ConsoleGraphicsLib.dir/input.c.o CMakeFiles/ConsoleGraphicsLib.dir/cursor.c.o CMakeFiles/ConsoleGraphicsLib.dir/terminal.c.o -o ConsoleGraphicsLib  /usr/lib/x86_64-linux-gnu/libX11.so 
