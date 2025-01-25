@@ -121,11 +121,6 @@ void poll_events_mouse(mouse* mouse) {
 			else if (ev.code == REL_Y)
 				(*mouse->pos_callback_func)(0u, ev.value);
 		} else if (ev.type == EV_KEY) {
-			//if (ev.value == _INTERFACE_KEY_PRESSED)
-				// get pressed button code
-			//else if (ev.value == _INTERFACE_KEY_RELEASED)
-				// get released button code
-
 			(*mouse->btn_callback_func)(_get_btn_state(ev.value), ev.code);
 		}
 	}

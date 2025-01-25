@@ -2,6 +2,7 @@
 
 #include "common.h"
 
+// wmctrl command wrappers.
 void make_terminal_fullscreen();
 void unmake_terminal_fullscreen();
 void set_terminal_title();

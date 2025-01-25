@@ -28,8 +28,8 @@
 /*
 	MODIFIED VERSION of hhpc by Nicolas Hillegeer.
 	Adjusted to needs of a console library.
-	Hides cursor totally, undependently on events.
-	For original source code, visit:
+	Hides cursor totally, independently on any mouse events.
+	For original source code visit:
 	https://github.com/aktau/hhpc/tree/master
 */
 

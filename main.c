@@ -16,7 +16,7 @@ void button_callback(unsigned short btn_action, int btn) {
 int main() {
 	enable_raw_mode();
 	make_terminal_fullscreen();
-	set_terminal_title("TEST");
+	set_terminal_title("ASCIIGRAPHICS");
 	int code = hide_cursor();
 
 	if (code == -1)
@@ -29,6 +29,8 @@ int main() {
 	init_mouse(mice);
 	set_pos_callback(mice, &mouse_callback);
 	set_button_callback(mice, &button_callback);
+	
+	unsigned long long cnt = 0;
 
 	while (true) {
 		poll_events_keyboard(kbd);
@@ -37,10 +39,9 @@ int main() {
 		if (get_key(kbd, KEY_Q) == KEY_PRESSED)
 			break;
 
-		//printf("RUNNING...\n");
+		printf("RUNNING... %llu\n", cnt++);
 		usleep(10000);
-	}	
-
+	}
 
 	close_keyboard(kbd);
 	free(kbd);
