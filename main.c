@@ -15,7 +15,8 @@ void button_callback(unsigned short btn_action, int btn) {
 
 int main() {
 	enable_raw_mode();
-	make_terminal_fullscreen();
+	enable_focus_events();
+	//make_terminal_fullscreen();
 	set_terminal_title("ASCIIGRAPHICS");
 	int code = hide_cursor();
 
@@ -39,8 +40,8 @@ int main() {
 		if (get_key(kbd, KEY_Q) == KEY_PRESSED)
 			break;
 
-		printf("RUNNING... %llu\n", cnt++);
-		usleep(10000);
+		//printf("RUNNING... %llu\n", cnt++);
+		usleep(100);
 	}
 
 	close_keyboard(kbd);
@@ -49,5 +50,6 @@ int main() {
 	
 	unmake_terminal_fullscreen();
 	disable_raw_mode();
-	show_cursor(); 
+	disable_focus_events();
+	show_cursor();
 }

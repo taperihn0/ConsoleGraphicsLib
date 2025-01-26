@@ -1,4 +1,5 @@
 #include "input.h"
+#include "terminal.h"
 #include <fcntl.h>
 
 #define _INTERFACE_KEY_RELEASED 0
@@ -58,10 +59,12 @@ void clear_events_keyboard(keyboard* keyboard) {
 void poll_events_keyboard(keyboard* keyboard) {
 	ssize_t n;
 	struct input_event ev;
-	
+
+	const bool focus = _check_focus();
+
 	while (true) {
 		n = read(keyboard->device_file.fd, &ev, sizeof(ev));
-
+				
 		if (n == (ssize_t)-1) {
 			if (errno == EINTR) continue;
             else break;
@@ -69,6 +72,8 @@ void poll_events_keyboard(keyboard* keyboard) {
 			break;
 		} else if (n != sizeof(ev))
 			continue;
+
+		if (!focus) continue;
 
 		if (ev.type == EV_KEY && 
 			ev.value >= _INTERFACE_KEY_RELEASED && 
@@ -103,6 +108,8 @@ void poll_events_mouse(mouse* mouse) {
 	ASSERT(mouse->pos_callback_func != NULL, null_pol_err);
 	ASSERT(mouse->btn_callback_func != NULL, null_pol_err);
 
+	const bool focus = _check_focus();
+
 	while (true) {
 		n = read(mouse->device_file.fd, &ev, sizeof(ev));
 
@@ -113,6 +120,8 @@ void poll_events_mouse(mouse* mouse) {
 			break;
 		} else if (n != sizeof(ev))
 			continue;
+
+		if (!focus) continue;
 		
 		if (ev.type == EV_REL) 
 		{

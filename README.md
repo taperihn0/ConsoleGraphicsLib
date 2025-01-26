@@ -1,0 +1,1 @@
+xterm -xrm 'XTerm.vt100.allowTitleOps: false' -u8 &

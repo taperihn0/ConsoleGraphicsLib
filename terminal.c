@@ -40,3 +40,27 @@ void disable_raw_mode() {
     original.c_lflag |= (ECHO | ICANON);
     tcsetattr(STDIN_FILENO, TCSANOW, &original);
 }
+
+void enable_focus_events() {
+	system("echo -ne '\e[?1004h'");
+}
+
+void disable_focus_events() {
+	system("echo -ne '\e[?1004l'");
+}
+
+bool _check_focus() {
+	static char c[3];
+	static bool focus = true;
+
+	ssize_t n = read(STDIN_FILENO, c, sizeof(c));
+	
+	if (n == sizeof(c)) {
+		if (strncmp(c, "\e[O", 3) == 0)
+			focus = false;
+		else if (strncmp(c, "\e[I", 3) == 0)
+			focus = true;
+	}
+
+	return focus;
+}
