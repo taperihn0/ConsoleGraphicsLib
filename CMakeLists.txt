@@ -12,8 +12,9 @@ set(
 
 add_executable(ConsoleGraphicsLib ${SOURCES})
 find_package(X11 REQUIRED)
+find_library(TERMCAP_LIB termcap REQUIRED)
 
-target_link_libraries(ConsoleGraphicsLib X11::X11)
+target_link_libraries(ConsoleGraphicsLib X11::X11 ${TERMCAP_LIB})
 
 set(CFLAGS -DDEBUG -Wall)
 target_compile_options(ConsoleGraphicsLib PRIVATE ${CFLAGS})

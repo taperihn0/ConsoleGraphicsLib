@@ -2,6 +2,18 @@
 
 #include "common.h"
 
+typedef struct _main_terminal {
+	UINT width, height;
+	bool fullscreen;
+	bool focus_events;
+	bool raw_mode;
+	bool is_focus;
+} _main_terminal;
+
+static _main_terminal _terminal;
+
+void init_terminal_state();
+
 // wmctrl command wrappers.
 void make_terminal_fullscreen();
 void unmake_terminal_fullscreen();
@@ -24,3 +36,10 @@ void disable_focus_events();
 // internal function used in polling.
 // returns true if console window has focus, else false.
 bool _check_focus();
+
+// updates size of this terminal using ioctl. For internal usage.
+void _update_terminal_size();
+
+// returns cached width and height of main terminal.
+UINT get_terminal_width();
+UINT get_terminal_height();
