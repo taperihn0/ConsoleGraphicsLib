@@ -38,6 +38,9 @@ void disable_raw_mode();
 void enable_focus_events();
 void disable_focus_events();
 
+void enable_console_cursor();
+void disable_console_cursor();
+
 // internal function used in polling.
 // returns true if console window has focus, else false.
 bool _check_focus();

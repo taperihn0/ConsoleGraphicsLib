@@ -8,6 +8,8 @@
 
 #define _MAX_FRAMES (UINT)(-1)
 
+#define _get_terminal_elem_cnt() (_terminal.width * _terminal.height + 1)
+
 _main_terminal _terminal;
 
 void _terminate() {
@@ -49,6 +51,11 @@ void _setup_signals() {
 		fprintf(stderr, "Could not register SIGSEGV: %s", strerror(errno));
 		return;
 	}
+
+	if (sigaction(SIGTERM, &sa, NULL) == -1) {
+		fprintf(stderr, "Could not register SIGETRM: %s", strerror(errno));
+		return;
+	}
 }
 
 void init_terminal_state() {
@@ -76,10 +83,13 @@ void unmake_terminal_fullscreen() {
 }
 
 void set_terminal_title(const char* const s) {
-	char* comm = malloc(23 * sizeof(char) + sizeof(s));
+	static size_t buff_size = 128 * sizeof(char);
+	ASSERT(sizeof(s) + sizeof("wmctrl -r :ACTIVE: -T ") <= buff_size, "Title too long.");
+
+	char* comm = malloc(buff_size);
 	strcpy(comm, "wmctrl -r :ACTIVE: -T ");
 	strcat(comm, s);
-
+	
 	system(comm);
 	free(comm);
 }
@@ -129,6 +139,16 @@ void _update_terminal_size() {
 	_terminal.width = tgetnum("co");
 	
 	resize_buffer(&_terminal.buff, _terminal.width, _terminal.height);
+}
+
+void enable_console_cursor() {
+	printf("\e[?25h");
+	fflush(stdout);
+}
+
+void disable_console_cursor() {
+	printf("\e[?25l");
+	fflush(stdout);
 }
 
 bool _check_focus() {

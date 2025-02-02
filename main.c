@@ -24,6 +24,7 @@ int main() {
 	enable_focus_events();
 	make_terminal_fullscreen();
 	set_terminal_title("ASCIIGRAPHICS");
+	//disable_console_cursor();
 	hide_cursor();
 
 	keyboard* kbd = malloc(sizeof(keyboard));
@@ -34,7 +35,7 @@ int main() {
 	set_pos_callback(mice, &mouse_callback);
 	set_button_callback(mice, &button_callback);
 
-	set_framerate_limit(10);
+	set_framerate_limit(60);
 	
 	int i = 0;
 	setlocale(LC_ALL, "");
@@ -43,24 +44,13 @@ int main() {
 		poll_events_keyboard(kbd);
 		poll_events_mouse(mice);
 
-		clear_terminal((CHAR_T)'.');//0x00002588);
-		_terminal.buff.mem[0] = 'X';
+		clear_terminal((CHAR_T)(' '));
+		//_terminal.buff.mem[i++] = (CHAR_T)0x00002588;
 
 		if (get_key(kbd, KEY_Q) == KEY_PRESSED)
 			break;
 
 		flush_terminal();
-		/*
-		wchar_t* mem = malloc(sizeof(wchar_t) * 10);
-		
-		for (int i = 0; i < 10; i++)
-			mem[i] = 0x00002588;
-
-		mem[9] = 0;
-
-		printf("%S\n", mem);
-
-		free(mem);*/
 	}
 
 	close_keyboard(kbd);
@@ -70,7 +60,11 @@ int main() {
 	unmake_terminal_fullscreen();
 	disable_raw_mode();
 	disable_focus_events();
+	fflush(stdout);
 	show_cursor();
+	//enable_console_cursor();
 
 	close_terminal_state();
+
+	fflush(stdout);
 }

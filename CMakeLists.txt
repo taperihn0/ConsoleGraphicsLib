@@ -18,7 +18,7 @@ find_library(TERMCAP_LIB termcap REQUIRED)
 
 target_link_libraries(ConsoleGraphicsLib X11::X11 ${TERMCAP_LIB})
 
-set(CFLAGS -DDEBUG -Wall)
+set(CFLAGS -DDEBUG -Wall -O2)
 target_compile_options(ConsoleGraphicsLib PRIVATE ${CFLAGS})
 
 
