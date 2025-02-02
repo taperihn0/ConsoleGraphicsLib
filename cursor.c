@@ -2,17 +2,17 @@
 #include <sys/wait.h>
 #include <signal.h>
 
-static pid_t pid;
+_main_cursor _cursor;
 
 int hide_cursor() {
-	pid = fork();
+	_cursor.pid = fork();
 	
-	if (pid == -1) {
+	if (_cursor.pid == -1) {
 		fprintf(stderr, "Cannot fork: %s", strerror(errno));
 		return -1;
 	}
 
-	if (pid == 0) {
+	if (_cursor.pid == 0) {
 		int res = execlp("./hhpc/hhpc", "./hhpc/hhpc", "-i", "500", NULL);
 
 		if (res == -1) {
@@ -20,13 +20,15 @@ int hide_cursor() {
 			return -1;
 		}
 	}
-
-	return pid;
+	
+	_cursor.visible = false;
+	return _cursor.pid;
 }
 
 void show_cursor() {
-	if (pid > 0) {
-		kill(pid, SIGTERM);
-        waitpid(pid, NULL, 0);
+	if (_cursor.pid > 0) {
+		kill(_cursor.pid, SIGTERM);
+		waitpid(_cursor.pid, NULL, 0);
+		_cursor.visible = true;
 	}
 }

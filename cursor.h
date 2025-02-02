@@ -3,6 +3,13 @@
 #include "common.h"
 #include <sys/types.h>
 
+typedef struct _main_cursor {
+	bool  visible;
+	pid_t pid;
+} _main_cursor;
+
+extern _main_cursor _cursor;
+
 // Calls underlaying fork() function
 // to create another child process taking care of invisible mouse cursor.
 // Returns -1 when error occured, else 0 

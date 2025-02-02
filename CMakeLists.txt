@@ -8,6 +8,8 @@ set(
 	input.c
 	cursor.c
 	terminal.c
+	buffer.c
+	render.c
 )
 
 add_executable(ConsoleGraphicsLib ${SOURCES})

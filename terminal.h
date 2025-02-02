@@ -1,18 +1,24 @@
 #pragma once
 
 #include "common.h"
+#include "buffer.h"
 
 typedef struct _main_terminal {
-	UINT width, height;
-	bool fullscreen;
-	bool focus_events;
-	bool raw_mode;
-	bool is_focus;
+	UINT 		 width, 
+				 height;
+	bool 		 fullscreen;
+	bool 		 focus_events;
+	bool 		 raw_mode;
+	bool 		 is_focus;
+	bool 		 over;
+	UINT 		 delay;
+	_core_buffer buff;
 } _main_terminal;
 
-static _main_terminal _terminal;
+extern _main_terminal _terminal;
 
 void init_terminal_state();
+void close_terminal_state();
 
 // wmctrl command wrappers.
 void make_terminal_fullscreen();
@@ -24,7 +30,6 @@ void set_terminal_title();
 // non canonical. Disables echo and setting 
 // input non blocking.
 void enable_raw_mode();
-
 // disables raw input mode
 void disable_raw_mode();
 
@@ -40,6 +45,13 @@ bool _check_focus();
 // updates size of this terminal using ioctl. For internal usage.
 void _update_terminal_size();
 
+// sets rate of flush_terminal calls per second.
+void set_framerate_limit(UINT cnt);
+
+void _sync_with_next_frame();
+
 // returns cached width and height of main terminal.
 UINT get_terminal_width();
 UINT get_terminal_height();
+
+bool should_quit();
