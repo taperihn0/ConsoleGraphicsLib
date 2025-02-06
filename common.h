@@ -7,6 +7,9 @@
 #include <stdbool.h>
 #include <string.h>
 #include <errno.h>
+#include <locale.h>
+#include <ncurses.h>
+#include <signal.h>
 
 #ifndef _FORCE_INLINE
 #	define _FORCE_INLINE inline __attribute__((always_inline))
@@ -20,6 +23,8 @@
 
 static _INLINE bool _assert_error_terminate(const char* err) {
 	fprintf(stderr, "Assertion failed: %s\n", err);
+	// allow terminal to close its state properly by handling a signal
+	raise(SIGTERM);
 	exit(EXIT_FAILURE);
 	return true;
 }

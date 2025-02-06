@@ -66,10 +66,13 @@ void init_terminal_state() {
 	_terminal.over = false;
 
 	_setup_signals();
+
+	initscr();
 }
 
 void close_terminal_state() {
 	close_buffer(&_terminal.buff);
+	endwin();
 }
 
 void make_terminal_fullscreen() {
@@ -139,6 +142,7 @@ void _update_terminal_size() {
 	_terminal.width = tgetnum("co");
 	
 	resize_buffer(&_terminal.buff, _terminal.width, _terminal.height);
+	resizeterm(_terminal.height, _terminal.width);
 }
 
 void enable_console_cursor() {

@@ -3,6 +3,7 @@
 #include "terminal.h"
 #include "render.h"
 #include "render_core.h"
+#include <ncurses.h>
 
 void mouse_callback(int dx, int dy) {
 	/*printf("(%d, %d)\n", dx, dy);*/
@@ -36,25 +37,28 @@ int main() {
 	set_button_callback(mice, &button_callback);
 
 	set_framerate_limit(60);
-
+	
+	UINT i = 0;
 	while (!should_quit()) {
 		poll_events_keyboard(kbd);
 		poll_events_mouse(mice);
-
-		clear_terminal((CHAR_T)(' '));
-		_draw_triangle_edges(1, 1, 40, 10, 5, 20);
+		
+		clear_terminal((CHAR_T)('7'));
+		//_draw_triangle_edges(1, 1, 30, 3, 15, 40);
+		set(&_terminal.buff, i, 1, ' ');
+		i++;
 
 		if (get_key(kbd, KEY_Q) == KEY_PRESSED)
 			break;
 
-		flush_terminal();
+	    flush_terminal();
 	}
 
 	close_keyboard(kbd);
 	free(kbd);
 	free(mice);
 	
-	//unmake_terminal_fullscreen();
+	unmake_terminal_fullscreen();
 	disable_raw_mode();
 	disable_focus_events();
 	show_cursor();

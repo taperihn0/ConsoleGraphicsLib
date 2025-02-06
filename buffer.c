@@ -1,5 +1,4 @@
 #include "buffer.h"
-#include <locale.h>
 
 #define _get_buff_elem_cnt(buff) (buff->width * buff->height + 1) 
 
@@ -7,7 +6,8 @@ int init_buffer(_core_buffer* buff, size_t width, size_t height) {
 	ASSERT(buff != NULL, "Operation init on invalid null pointer");
 	ASSERT(sizeof(_BUFF_ELEM_TYPE) == sizeof(wchar_t), "Only underlaying wchar_t type supported.");
 
-	setlocale(LC_ALL, "");
+	if (sizeof(_BUFF_ELEM_TYPE) == sizeof(wchar_t))
+		setlocale(LC_ALL, "");
 
 	buff->width = width;
 	buff->height = height;
@@ -46,15 +46,14 @@ void close_buffer(_core_buffer* buff) {
 	}
 }
 
-void set(_core_buffer* buff, size_t x, size_t y, _BUFF_ELEM_TYPE c) {
-	ASSERT(y < buff->height && x < buff->width, "Invalid buffer element position.");
+void set(_core_buffer* buff, int x, int y, _BUFF_ELEM_TYPE c) {
 	ASSERT(buff != NULL, "Trying to fetch from null buffer");
+	ASSERT(y < buff->height && x < buff->width && y >= 0 && x >= 0, "Invalid buffer element position");
 	buff->mem[buff->width * y + x] = c;
 }
 
 void flush_buffer(_core_buffer* buff) {
 	ASSERT(buff->mem != NULL, "Operation flush on null buffer");
-	system("clear");
-	printf("%S", buff->mem);
-	fflush(stdout);
+	mvprintw(0, 0, "%S", buff->mem);
+	refresh(); 
 }

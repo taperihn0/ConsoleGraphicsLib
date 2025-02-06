@@ -21,5 +21,5 @@ void clear_buffer(_core_buffer* buff);
 void clear_buffer_with(_core_buffer* buff, _BUFF_ELEM_TYPE c);
 void close_buffer(_core_buffer* buff);
 
-void set(_core_buffer* buff, size_t x, size_t y, _BUFF_ELEM_TYPE c);
+void set(_core_buffer* buff, int x, int y, _BUFF_ELEM_TYPE c);
 void flush_buffer(_core_buffer* buff);

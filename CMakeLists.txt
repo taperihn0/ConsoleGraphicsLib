@@ -19,7 +19,7 @@ find_library(TERMCAP_LIB termcap REQUIRED)
 find_package(Curses REQUIRED)
 
 # ncurses aren't needed for now
-target_link_libraries(ConsoleGraphicsLib X11::X11 ${TERMCAP_LIB} ncurses)
+target_link_libraries(ConsoleGraphicsLib X11::X11 ${TERMCAP_LIB} ncursesw)
 
 set(CFLAGS -DDEBUG -Wall -O2)
 target_compile_options(ConsoleGraphicsLib PRIVATE ${CFLAGS})
