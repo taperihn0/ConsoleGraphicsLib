@@ -33,3 +33,9 @@ static _FORCE_INLINE int min(int a, int b) {
 static _FORCE_INLINE int max(int a, int b) {
 	return a < b ? b : a;
 }
+
+static _FORCE_INLINE void swap(UINT* a, UINT* b) {
+	UINT tmp = *a;
+	*a = *b;
+	*b = tmp;
+}

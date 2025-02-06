@@ -10,13 +10,16 @@ set(
 	terminal.c
 	buffer.c
 	render.c
+	render_core.c
 )
 
 add_executable(ConsoleGraphicsLib ${SOURCES})
 find_package(X11 REQUIRED)
 find_library(TERMCAP_LIB termcap REQUIRED)
+find_package(Curses REQUIRED)
 
-target_link_libraries(ConsoleGraphicsLib X11::X11 ${TERMCAP_LIB})
+# ncurses aren't needed for now
+target_link_libraries(ConsoleGraphicsLib X11::X11 ${TERMCAP_LIB} ncurses)
 
 set(CFLAGS -DDEBUG -Wall -O2)
 target_compile_options(ConsoleGraphicsLib PRIVATE ${CFLAGS})

@@ -4,5 +4,4 @@
 #include "terminal.h"
 
 void clear_terminal(CHAR_T c);
-
 void flush_terminal();

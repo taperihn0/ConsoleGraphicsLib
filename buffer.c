@@ -1,10 +1,13 @@
 #include "buffer.h"
+#include <locale.h>
 
 #define _get_buff_elem_cnt(buff) (buff->width * buff->height + 1) 
 
 int init_buffer(_core_buffer* buff, size_t width, size_t height) {
 	ASSERT(buff != NULL, "Operation init on invalid null pointer");
 	ASSERT(sizeof(_BUFF_ELEM_TYPE) == sizeof(wchar_t), "Only underlaying wchar_t type supported.");
+
+	setlocale(LC_ALL, "");
 
 	buff->width = width;
 	buff->height = height;
@@ -51,6 +54,7 @@ void set(_core_buffer* buff, size_t x, size_t y, _BUFF_ELEM_TYPE c) {
 
 void flush_buffer(_core_buffer* buff) {
 	ASSERT(buff->mem != NULL, "Operation flush on null buffer");
+	system("clear");
 	printf("%S", buff->mem);
 	fflush(stdout);
 }

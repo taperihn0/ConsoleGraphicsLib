@@ -2,7 +2,7 @@
 #include "cursor.h"
 #include "terminal.h"
 #include "render.h"
-#include <locale.h>
+#include "render_core.h"
 
 void mouse_callback(int dx, int dy) {
 	/*printf("(%d, %d)\n", dx, dy);*/
@@ -24,7 +24,7 @@ int main() {
 	enable_focus_events();
 	make_terminal_fullscreen();
 	set_terminal_title("ASCIIGRAPHICS");
-	//disable_console_cursor();
+	disable_console_cursor();
 	hide_cursor();
 
 	keyboard* kbd = malloc(sizeof(keyboard));
@@ -36,16 +36,13 @@ int main() {
 	set_button_callback(mice, &button_callback);
 
 	set_framerate_limit(60);
-	
-	int i = 0;
-	setlocale(LC_ALL, "");
-	
+
 	while (!should_quit()) {
 		poll_events_keyboard(kbd);
 		poll_events_mouse(mice);
 
 		clear_terminal((CHAR_T)(' '));
-		//_terminal.buff.mem[i++] = (CHAR_T)0x00002588;
+		_draw_triangle_edges(1, 1, 40, 10, 5, 20);
 
 		if (get_key(kbd, KEY_Q) == KEY_PRESSED)
 			break;
@@ -57,12 +54,11 @@ int main() {
 	free(kbd);
 	free(mice);
 	
-	unmake_terminal_fullscreen();
+	//unmake_terminal_fullscreen();
 	disable_raw_mode();
 	disable_focus_events();
-	fflush(stdout);
 	show_cursor();
-	//enable_console_cursor();
+	enable_console_cursor();
 
 	close_terminal_state();
 
