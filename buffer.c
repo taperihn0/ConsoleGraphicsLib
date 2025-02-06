@@ -11,6 +11,8 @@ int init_buffer(_core_buffer* buff, size_t width, size_t height) {
 
 	buff->width = width;
 	buff->height = height;
+	buff->xcenter = width / 2;
+	buff->ycenter = height / 2;
 	buff->mem = malloc(_get_buff_elem_cnt(buff) * sizeof(_BUFF_ELEM_TYPE));
 
 	if (buff->mem == NULL) {
@@ -48,6 +50,8 @@ void close_buffer(_core_buffer* buff) {
 
 void set(_core_buffer* buff, int x, int y, _BUFF_ELEM_TYPE c) {
 	ASSERT(buff != NULL, "Trying to fetch from null buffer");
+	x += buff->xcenter;
+	y = buff->ycenter - y;
 	ASSERT(y < buff->height && x < buff->width && y >= 0 && x >= 0, "Invalid buffer element position");
 	buff->mem[buff->width * y + x] = c;
 }

@@ -12,7 +12,9 @@
 typedef struct _core_buffer {
 	_BUFF_ELEM_TYPE* mem;
 	size_t   		 width,
-			 		 height;
+			 		 height,
+			 		 xcenter,
+			 		 ycenter;
 } _core_buffer;
 
 int init_buffer(_core_buffer* buff, size_t width, size_t height);

@@ -45,8 +45,8 @@ int main() {
 		
 		clear_terminal((CHAR_T)('7'));
 		//_draw_triangle_edges(1, 1, 30, 3, 15, 40);
-		set(&_terminal.buff, i, 1, ' ');
-		i++;
+		set(&_terminal.buff, -60, 10, ' ');
+		//i++;
 
 		if (get_key(kbd, KEY_Q) == KEY_PRESSED)
 			break;
