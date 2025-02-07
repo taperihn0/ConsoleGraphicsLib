@@ -5,6 +5,7 @@
 #include <sys/ioctl.h>
 #include <termcap.h>
 #include <signal.h>
+#include <time.h>
 
 #define _MAX_FRAMES (UINT)(-1)
 
@@ -173,11 +174,19 @@ bool _check_focus() {
 
 void set_framerate_limit(UINT cnt) {
 	UINT frame_rate = cnt > 0 ? cnt : _MAX_FRAMES;
-	_terminal.delay = 1000000u / frame_rate;
+	_terminal.microsec_delay = 1000000u / frame_rate;
 }
 
 void _sync_with_next_frame() {
-	usleep(_terminal.delay);
+	static time_t last_time_p = (time_t)0;
+	time_t curr_time_p = time(NULL);
+
+	useconds_t microsec_diff = difftime(curr_time_p, last_time_p) * 1000000u;
+	
+	if (_terminal.microsec_delay > microsec_diff)
+		usleep(_terminal.microsec_delay - microsec_diff);
+
+	last_time_p = curr_time_p;
 }
 
 UINT get_terminal_width() {

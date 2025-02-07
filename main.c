@@ -42,13 +42,17 @@ int main() {
 	float pos[] = {
 		1.f, 1.f, 1.f
 	};
-
+	
 	UINT id = 0;
 	gen_mem_buff(pos, sizeof(pos), &id);
 	printf("%u\n", id);
 	UINT id_1 = 0;
 	gen_mem_buff(pos, sizeof(pos), &id_1);
 	printf("%u\n", id_1);
+	set_mem_buff(pos, sizeof(pos), id_1);
+	size_t size;
+	void* ptr = get_mem_buff(&size, id_1);
+	printf("%llu %lu\n", (unsigned long long)ptr, size);
 	delete_mem_buff(id);
 	delete_mem_buff(id_1);
 	delete_mem_buff(8);

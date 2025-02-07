@@ -38,7 +38,6 @@ bool _is_empty(_buff_array_t* ba) {
 
 int gen_mem_buff(void* mem, size_t size, UINT* idx) {
 	if (_buff_array == NULL) {
-		printf("ALLOCATING\n");
 		_buff_array = malloc(sizeof(_buff_array_t));
 
 		if (_buff_array == NULL) {
@@ -47,6 +46,9 @@ int gen_mem_buff(void* mem, size_t size, UINT* idx) {
 		}
 
 		_init_buff_array(_buff_array);
+	} else if (size == 0) {
+		fprintf(stderr, "Invalid zero size");
+		return -1;
 	}
 
 	UINT next = _get_next_idx(_buff_array);
@@ -86,10 +88,44 @@ int delete_mem_buff(UINT idx) {
 	entry->size = 0;
 
 	if (_is_empty(_buff_array)) {
-		printf("DEALLOCATING\n");
 		free(_buff_array);
 		_buff_array = NULL;
 	}
 
 	return 0;
+}
+
+int set_mem_buff(void* mem, size_t size, UINT idx) {
+	if (idx >= _BUFFER_LIMIT || _buff_array == NULL) {
+		fprintf(stderr, "Invalid buffer index\n");
+		return -1;
+	} else if (size == 0) {
+		fprintf(stderr, "Invalid zero size");
+		return -1;
+	}
+
+	_mem_buff* entry = &_buff_array->arr[idx];
+
+	entry->mem = realloc(entry->mem, size);
+
+	if (entry->mem == NULL) {
+		fprintf(stderr, "Cannot realloc %lu bytes\n", size);
+		return -1;
+	}
+	
+	memcpy(entry->mem, mem, size);
+	entry->size = size;
+	
+	return 0;
+}
+
+void* get_mem_buff(size_t* size, UINT idx) {
+	if (idx >= _BUFFER_LIMIT) {
+		fprintf(stderr, "Invalid buffer index\n");
+		return NULL;
+	}
+
+	_mem_buff* entry = &_buff_array->arr[idx];
+	*size = entry->size;
+	return entry->mem;
 }
