@@ -40,7 +40,7 @@ static _FORCE_INLINE int max(int a, int b) {
 }
 
 static _FORCE_INLINE void swap(int* a, int* b) {
-	UINT tmp = *a;
+	int tmp = *a;
 	*a = *b;
 	*b = tmp;
 }

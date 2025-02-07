@@ -29,8 +29,8 @@ typedef struct _core_buffer {
 			 		 	   ycenter;
 } _core_buffer;
 
-int init_buffer(_core_buffer* buff, size_t width, size_t height);
-int resize_buffer(_core_buffer* buff, size_t width, size_t height);
+int  init_buffer(_core_buffer* buff, size_t width, size_t height);
+int  resize_buffer(_core_buffer* buff, size_t width, size_t height);
 void clear_buffer(_core_buffer* buff);
 void clear_buffer_with(_core_buffer* buff, _BUFF_ELEM_TYPE c);
 void close_buffer(_core_buffer* buff);

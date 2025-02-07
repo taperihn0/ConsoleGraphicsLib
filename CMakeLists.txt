@@ -11,6 +11,7 @@ set(
 	buffer.c
 	render.c
 	render_core.c
+	mem.c
 )
 
 add_executable(ConsoleGraphicsLib ${SOURCES})
