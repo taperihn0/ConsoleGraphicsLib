@@ -1,9 +1,12 @@
 #include "render_core.h"
 #include <math.h>
 
-#define _UNICODE_SOLID (CHAR_T)(0x00002588)
+#define _UNICODE_SOLID /*0x00002588*/'*'
 
-#define _plot(x, y, c) set(&_terminal.buff, (x), (y), (c))
+// TEMPORARY
+#define TEMP_LINE_DEPTH 0.
+
+#define _plot(x, y, c) set(&_terminal.buff, (x), (y), TEMP_LINE_DEPTH, (c))
 
 
 // YouTube video by NoBS Code explaining the magics behind 
@@ -13,7 +16,7 @@
 // Also Wikipedia pages helped a little bit:
 // https://en.wikipedia.org/wiki/Line_drawing_algorithm
 
-static _FORCE_INLINE void _draw_line_horizontal(UINT x1, UINT y1, UINT x2, UINT y2) {
+static _FORCE_INLINE void _draw_line_horizontal(int x1, int y1, int x2, int y2) {
 	if (x2 < x1) {
 		swap(&x2, &x1);
 		swap(&y2, &y1);
@@ -26,8 +29,8 @@ static _FORCE_INLINE void _draw_line_horizontal(UINT x1, UINT y1, UINT x2, UINT 
 	int iy = dy < 0 ? -1 : 1;
 	dy *= iy;
 
-	UINT y = y1;
-	for (UINT i = x1; i <= x2; i++) {
+	int y = y1;
+	for (int i = x1; i <= x2; i++) {
 		_plot(i, y, _UNICODE_SOLID);
 		
 		if (d > 0) {
@@ -38,7 +41,7 @@ static _FORCE_INLINE void _draw_line_horizontal(UINT x1, UINT y1, UINT x2, UINT 
 	}
 }
 
-static _FORCE_INLINE void _draw_line_vertical(UINT x1, UINT y1, UINT x2, UINT y2) {
+static _FORCE_INLINE void _draw_line_vertical(int x1, int y1, int x2, int y2) {
 	if (y2 < y1) {
 		swap(&x2, &x1);
 		swap(&y2, &y1);
@@ -51,8 +54,8 @@ static _FORCE_INLINE void _draw_line_vertical(UINT x1, UINT y1, UINT x2, UINT y2
 	int ix = dx < 0 ? -1 : 1;
 	dx *= ix;
 
-	UINT x = x1;
-	for (UINT i = y1; i <= y2; i++) {
+	int x = x1;
+	for (int i = y1; i <= y2; i++) {
 		_plot(x, i, _UNICODE_SOLID);
 		
 		if (d > 0) {
@@ -63,14 +66,14 @@ static _FORCE_INLINE void _draw_line_vertical(UINT x1, UINT y1, UINT x2, UINT y2
 	}
 }
 
-void _draw_line(UINT x1, UINT y1, UINT x2, UINT y2) {
+void _draw_line(int x1, int y1, int x2, int y2) {
 	if (abs(x1 - x2) > abs(y1 - y2))
 		_draw_line_horizontal(x1, y1, x2, y2);
 	else 
 		_draw_line_vertical(x1, y1, x2, y2);
 }
 
-void _draw_triangle_edges(UINT x1, UINT y1, UINT x2, UINT y2, UINT x3, UINT y3) {
+void _draw_triangle_edges(int x1, int y1, int x2, int y2, int x3, int y3) {
 	_draw_line(x1, y1, x2, y2);
 	_draw_line(x2, y2, x3, y3);
 	_draw_line(x3, y3, x1, y1);
