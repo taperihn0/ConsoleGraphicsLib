@@ -18,13 +18,13 @@ void _init_buff_array(_buff_array_t* ba) {
 	memset(ba->arr, 0, sizeof(ba->arr));
 }
 
-UINT _get_next_idx(_buff_array_t* ba) {
+buff_idx_t _get_next_idx(_buff_array_t* ba) {
 	for (UINT i = 0; i < _BUFFER_LIMIT; i++) {
 		if (ba->arr[i].mem == NULL)
 			return i;
 	}
 
-	return (UINT)_INVALID_BUFFER_INDEX;
+	return (buff_idx_t)_INVALID_BUFFER_INDEX;
 }
 
 bool _is_empty(_buff_array_t* ba) {
@@ -36,7 +36,7 @@ bool _is_empty(_buff_array_t* ba) {
 	return true;
 } 
 
-int gen_mem_buff(void* mem, size_t size, UINT* idx) {
+int gen_mem_buff(void* mem, size_t size, buff_idx_t* idx) {
 	if (_buff_array == NULL) {
 		_buff_array = malloc(sizeof(_buff_array_t));
 
@@ -51,9 +51,9 @@ int gen_mem_buff(void* mem, size_t size, UINT* idx) {
 		return -1;
 	}
 
-	UINT next = _get_next_idx(_buff_array);
+	buff_idx_t next = _get_next_idx(_buff_array);
 
-	if (next == (UINT)_INVALID_BUFFER_INDEX) {
+	if (next == (buff_idx_t)_INVALID_BUFFER_INDEX) {
 		fprintf(stderr, "Invalid buffer index (probably excedeed buffer limit)\n");
 		return -1;
 	}
@@ -73,7 +73,7 @@ int gen_mem_buff(void* mem, size_t size, UINT* idx) {
 	return 0;
 }
 
-int delete_mem_buff(UINT idx) {
+int delete_mem_buff(buff_idx_t idx) {
 	if (idx >= _BUFFER_LIMIT) {
 		fprintf(stderr, "Invalid buffer index\n");
 		return -1;
@@ -95,7 +95,7 @@ int delete_mem_buff(UINT idx) {
 	return 0;
 }
 
-int set_mem_buff(void* mem, size_t size, UINT idx) {
+int set_mem_buff(void* mem, size_t size, buff_idx_t idx) {
 	if (idx >= _BUFFER_LIMIT || _buff_array == NULL) {
 		fprintf(stderr, "Invalid buffer index\n");
 		return -1;
@@ -119,7 +119,7 @@ int set_mem_buff(void* mem, size_t size, UINT idx) {
 	return 0;
 }
 
-void* get_mem_buff(size_t* size, UINT idx) {
+void* get_mem_buff(size_t* size, buff_idx_t idx) {
 	if (idx >= _BUFFER_LIMIT) {
 		fprintf(stderr, "Invalid buffer index\n");
 		return NULL;

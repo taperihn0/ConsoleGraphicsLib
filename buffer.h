@@ -3,11 +3,11 @@
 #include "common.h"
 #include <wchar.h>
 
-// UNDERLAYING BUFFER TYPES
 typedef float   	_prec0_t;
 typedef double  	_prec1_t;
 typedef long double _prec2_t;
 
+// UNDERLAYING BUFFER TYPES
 #ifndef _BUFF_ELEM_TYPE
 #	define _BUFF_ELEM_TYPE wchar_t
 #endif

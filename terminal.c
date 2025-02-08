@@ -178,14 +178,15 @@ void set_framerate_limit(UINT cnt) {
 }
 
 void _sync_with_next_frame() {
-	static time_t last_time_p = (time_t)0;
-	time_t curr_time_p = time(NULL);
+	static struct timespec last_time_p;
+	struct timespec curr_time_p;
+	clock_gettime(CLOCK_REALTIME, &curr_time_p);
 
-	useconds_t microsec_diff = difftime(curr_time_p, last_time_p) * 1000000u;
+	long microsec_diff = (curr_time_p.tv_nsec - last_time_p.tv_nsec) / 1000;
 	
-	if (_terminal.microsec_delay > microsec_diff)
-		usleep(_terminal.microsec_delay - microsec_diff);
-
+	//if (_terminal.microsec_delay > microsec_diff)
+	//	usleep(_terminal.microsec_delay - microsec_diff);
+	
 	last_time_p = curr_time_p;
 }
 
