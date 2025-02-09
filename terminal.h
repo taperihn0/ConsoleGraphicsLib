@@ -2,7 +2,6 @@
 
 #include "common.h"
 #include "buffer.h"
-#include <time.h>
 
 typedef struct _main_terminal {
 	UINT 		 width, 
@@ -12,7 +11,7 @@ typedef struct _main_terminal {
 	bool 		 raw_mode;
 	bool 		 is_focus;
 	bool 		 over;
-	useconds_t	 microsec_delay;
+	long		 microsec_delay;
 	_core_buffer buff;
 } _main_terminal;
 

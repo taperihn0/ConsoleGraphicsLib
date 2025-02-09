@@ -36,7 +36,7 @@ int main() {
 	set_pos_callback(mice, &mouse_callback);
 	set_button_callback(mice, &button_callback);
 
-	set_framerate_limit(60);
+	set_framerate_limit(30);
 	
 	float pos[] = {
 		1.f, 1.f, 1.f,
@@ -45,7 +45,7 @@ int main() {
 
 	buff_idx_t id;
 	gen_mem_buff(pos, sizeof(pos), &id);
-
+	
 	while (!should_quit()) {
 		poll_events_keyboard(kbd);
 		poll_events_mouse(mice);

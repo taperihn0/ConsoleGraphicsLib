@@ -1,11 +1,11 @@
 #include "terminal.h"
 #include "cursor.h"
+#include "timeman.h"
 #include <termios.h>
 #include <fcntl.h>
 #include <sys/ioctl.h>
 #include <termcap.h>
 #include <signal.h>
-#include <time.h>
 
 #define _MAX_FRAMES (UINT)(-1)
 
@@ -174,20 +174,21 @@ bool _check_focus() {
 
 void set_framerate_limit(UINT cnt) {
 	UINT frame_rate = cnt > 0 ? cnt : _MAX_FRAMES;
-	_terminal.microsec_delay = 1000000u / frame_rate;
+	_terminal.microsec_delay = 1000000 / frame_rate;
 }
 
 void _sync_with_next_frame() {
-	static struct timespec last_time_p;
-	struct timespec curr_time_p;
-	clock_gettime(CLOCK_REALTIME, &curr_time_p);
+	static utime_t last_tp = 0;
+	utime_t curr_tp = gettime_mcs(CLOCK_PROCESS_CPUTIME_ID);
 
-	long microsec_diff = (curr_time_p.tv_nsec - last_time_p.tv_nsec) / 1000;
+	utime_t microsec_diff = curr_tp - last_tp;
+
+	useconds_t microsec_delay = _terminal.microsec_delay > microsec_diff ? 
+						  		_terminal.microsec_delay - microsec_diff : 0u;
 	
-	//if (_terminal.microsec_delay > microsec_diff)
-	//	usleep(_terminal.microsec_delay - microsec_diff);
+	usleep(microsec_delay);
 	
-	last_time_p = curr_time_p;
+	last_tp = curr_tp;
 }
 
 UINT get_terminal_width() {
