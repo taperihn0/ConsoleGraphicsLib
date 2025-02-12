@@ -48,7 +48,7 @@ int _get_key_from_events(_keyboard_events* kev, int key) {
 }
 
 void init_keyboard(keyboard* keyboard) {
-	_open_keyboard_input_file(&keyboard->device_file, "/dev/input/event3");
+	_open_keyboard_input_file(&keyboard->device_file, "/dev/input/event6");
 	_clear_keyboard_events(&keyboard->events);
 }
 

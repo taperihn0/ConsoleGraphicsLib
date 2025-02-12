@@ -16,7 +16,7 @@
 // Also Wikipedia pages helped a little bit:
 // https://en.wikipedia.org/wiki/Line_drawing_algorithm
 
-static _FORCE_INLINE void _draw_line_horizontal(int x1, int y1, int x2, int y2) {
+_FORCE_INLINE void _draw_line_horizontal(int x1, int y1, int x2, int y2) {
 	if (x2 < x1) {
 		swap(&x2, &x1);
 		swap(&y2, &y1);
@@ -41,7 +41,7 @@ static _FORCE_INLINE void _draw_line_horizontal(int x1, int y1, int x2, int y2) 
 	}
 }
 
-static _FORCE_INLINE void _draw_line_vertical(int x1, int y1, int x2, int y2) {
+_FORCE_INLINE void _draw_line_vertical(int x1, int y1, int x2, int y2) {
 	if (y2 < y1) {
 		swap(&x2, &x1);
 		swap(&y2, &y1);

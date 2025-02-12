@@ -20,19 +20,34 @@ vec4 vec4f(MATH_PREC_T x, MATH_PREC_T y, MATH_PREC_T z, MATH_PREC_T w) {
 
 mat2 mat2f(MATH_PREC_T* elems) {
 	mat2 m;
-	memcpy(m.rc, elems, 2 * 2 * sizeof(MATH_PREC_T));
+
+	if (elems == NULL)
+		memset(m.rc, 0, sizeof(m.rc));
+	else
+		memcpy(m.rc, elems, 2 * 2 * sizeof(MATH_PREC_T));
+
 	return m;
 }
 
 mat3 mat3f(MATH_PREC_T* elems) {
 	mat3 m;
-	memcpy(m.rc, elems, 3 * 3 * sizeof(MATH_PREC_T));
+
+	if (elems == NULL) 
+		memset(m.rc, 0, sizeof(m.rc));
+	else
+		memcpy(m.rc, elems, 3 * 3 * sizeof(MATH_PREC_T));
+
 	return m;
 }
 
 mat4 mat4f(MATH_PREC_T* elems) {
 	mat4 m;
-	memcpy(m.rc, elems, 4 * 4 * sizeof(MATH_PREC_T));
+	
+	if (elems == NULL)
+		memset(m.rc, 0, sizeof(m.rc));
+	else
+		memcpy(m.rc, elems, 4 * 4 * sizeof(MATH_PREC_T));
+
 	return m;
 }
 
@@ -57,8 +72,7 @@ vec3 cross3f(vec3* a, vec3* b) {
 }
 
 mat2 mult_m2(mat2* a, mat2* b) {
-	mat2 m;
-	memset(m.rc, 0, sizeof(m.rc));
+	mat2 m = mat2f(NULL);
 
 	for (UINT i = 0; i < 2; i++) {
 		for (UINT j = 0; j < 2; j++) {
@@ -72,8 +86,7 @@ mat2 mult_m2(mat2* a, mat2* b) {
 }
 
 mat3 mult_m3(mat3* a, mat3* b) {
-	mat3 m;
-	memset(m.rc, 0, sizeof(m.rc));
+	mat3 m = mat3f(NULL);
 
 	for (UINT i = 0; i < 3; i++) {
 		for (UINT j = 0; j < 3; j++) {
@@ -87,8 +100,7 @@ mat3 mult_m3(mat3* a, mat3* b) {
 }
 
 mat4 mult_m4(mat4* a, mat4* b) {
-	mat4 m;
-	memset(m.rc, 0, sizeof(m.rc));
+	mat4 m = mat4f(NULL);
 
 	for (UINT i = 0; i < 4; i++) {
 		for (UINT j = 0; j < 4; j++) {
@@ -121,6 +133,6 @@ vec4 mult_mv4(mat4* a, vec4* v) {
 	r.x = a->rc[0][0] * v->x + a->rc[0][1] * v->y + a->rc[0][2] * v->z + a->rc[0][3] * v->w;
 	r.y = a->rc[1][0] * v->x + a->rc[1][1] * v->y + a->rc[0][2] * v->z + a->rc[1][3] * v->w;
 	r.z = a->rc[2][0] * v->x + a->rc[2][1] * v->y + a->rc[2][2] * v->z + a->rc[2][3] * v->w;
-	r.z = a->rc[3][0] * v->x + a->rc[3][1] * v->y + a->rc[3][2] * v->z + a->rc[3][3] * v->w;
+	r.w = a->rc[3][0] * v->x + a->rc[3][1] * v->y + a->rc[3][2] * v->z + a->rc[3][3] * v->w;
 	return r;
 }

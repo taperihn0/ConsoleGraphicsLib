@@ -1,11 +1,8 @@
 #pragma once
 
 #include "common.h"
+#include "gmath.h"
 #include <wchar.h>
-
-typedef float   	_prec0_t;
-typedef double  	_prec1_t;
-typedef long double _prec2_t;
 
 // UNDERLAYING BUFFER TYPES
 #ifndef _BUFF_ELEM_TYPE
@@ -23,7 +20,7 @@ typedef _BUFF_DEPTH_PREC_TYPE PREC_T;
 typedef struct _core_buffer {
 	_BUFF_ELEM_TYPE* 	   mem;
 	_BUFF_DEPTH_PREC_TYPE* depth;
-	
+
 	size_t   		 	   width,
 			 		 	   height,
 			 		 	   xcenter,

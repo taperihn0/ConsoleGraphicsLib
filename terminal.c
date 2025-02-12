@@ -179,7 +179,7 @@ void set_framerate_limit(UINT cnt) {
 
 void _sync_with_next_frame() {
 	static utime_t last_tp = 0;
-	utime_t curr_tp = gettime_mcs(CLOCK_PROCESS_CPUTIME_ID);
+	utime_t curr_tp = gettime_mcs(CLOCK_MONOTONIC_RAW);
 
 	utime_t microsec_diff = curr_tp - last_tp;
 
@@ -187,7 +187,7 @@ void _sync_with_next_frame() {
 						  		_terminal.microsec_delay - microsec_diff : 0u;
 	
 	usleep(microsec_delay);
-	
+
 	last_tp = curr_tp;
 }
 

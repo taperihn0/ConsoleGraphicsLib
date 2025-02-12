@@ -4,6 +4,8 @@
 #include "render.h"
 #include "render_core.h"
 #include "mem.h"
+#include "gmath.h"
+#include "timeman.h"
 
 void mouse_callback(int dx, int dy) {
 	/*printf("(%d, %d)\n", dx, dy);*/
@@ -36,22 +38,70 @@ int main() {
 	set_pos_callback(mice, &mouse_callback);
 	set_button_callback(mice, &button_callback);
 
-	set_framerate_limit(30);
-	
+	set_framerate_limit(100);
+
 	float pos[] = {
-		1.f, 1.f, 1.f,
-		5.f, 5.f, 5.f
+		10.f, -10.f, -0.1f,
+		10.f, 10.f, -0.1f,
+		10.f, 10.f, -0.15f,
+		10.f, -10.f, -0.1f,
+		10.f, -10.f, -0.15f,
+		10.f, 10.f, -0.15f,
 	};
 
 	buff_idx_t id;
 	gen_mem_buff(pos, sizeof(pos), &id);
+
+	float n = 0.1f;
+	float r = get_terminal_width() / 2;
+	float t = get_terminal_height() / 2;
+
+	mat4 p = mat4f(NULL);
+
+	p.rc[0][0] = n / r;
+	p.rc[1][1] = n / t;
+	p.rc[2][2] = -1;
+	p.rc[2][3] = -2 * n;
+	p.rc[3][2] = -1;
+
+	float angle = 0.f;
+	utime_t prev_time = gettime_mls(CLOCK_MONOTONIC_RAW);
 	
 	while (!should_quit()) {
 		poll_events_keyboard(kbd);
 		poll_events_mouse(mice);
 		
 		clear_terminal((CHAR_T)' ');
-		draw_buffer(id);
+
+		mat4 m = mat4f(NULL);
+		utime_t time = gettime_mls(CLOCK_MONOTONIC_RAW);
+		utime_t delta_time = time - prev_time;
+		prev_time = time;
+		angle += 0.003f * delta_time;
+
+		m.rc[0][0] =  cos(angle);
+		m.rc[0][1] =  sin(angle);
+		m.rc[1][0] = -sin(angle);
+		m.rc[1][1] =  cos(angle);
+		m.rc[2][2] = 1;
+		m.rc[3][3] = 1;
+		
+		vec3 cam_pos = vec3f(0.f, 0.f, 0.06f);
+
+		mat4 v = mat4f(NULL);
+			
+		v.rc[0][0] = 1;
+		v.rc[1][1] = 1;
+		v.rc[2][2] = -1;
+		v.rc[0][3] = -cam_pos.x;
+		v.rc[1][3] = -cam_pos.y;
+		v.rc[2][3] = -cam_pos.z;
+		v.rc[3][3] = 1;
+
+		mat4 vm = mult_m4(&v, &m);
+		mat4 pvm = mult_m4(&p, &vm);
+
+		draw_buffer(id, &pvm);
 
 		if (get_key(kbd, KEY_Q) == KEY_PRESSED)
 			break;
