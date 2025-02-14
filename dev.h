@@ -5,7 +5,8 @@
 
 #define _STR_DEV_NAME_SIZE_LIMIT 	 64
 #define _STR_HANDLER_NAME_SIZE_LIMIT 8
-#define _STR_KEYS_SIZE_LIMIT 		 KEY_CNT / 4 + 1
+#define _BITS_IN_BYTE				 4
+#define _STR_KEYS_SIZE_LIMIT 		 KEY_CNT / _BITS_IN_BYTE + 1
 
 typedef struct _dev_simple {
 	unsigned short id_vendor;

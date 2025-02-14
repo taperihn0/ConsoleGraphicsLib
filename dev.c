@@ -14,9 +14,9 @@
 typedef int _device_info_t;
 
 #define _DEVICE_BITMAP_KEYS_FIELD_SIZE 16
-#define _BITS_IN_BYTE				   4
 
-#define _char_to_int_16(c) (isdigit(c) ? c - '0' : 10 + c - 'a')
+#define _char_to_int_16(c) 		 (isdigit(c) ? c - '0' : 10 + c - 'a')
+#define _is_bit_set(mask, shift) (mask & (1 << shift))
 
 _INLINE long _get_value_of(char* line, char* str, size_t n) {
 	char* b = strstr(line, str) + strlen(str) + strlen("=");
@@ -116,6 +116,7 @@ int _next_device(_devices_file* f, _dev_simple* dev) {
 		case _DEVICE_INFO_ID:
 			dev->id_vendor  = _get_value_of(line, "Vendor", r);
 			ASSERT(dev->id_vendor != (unsigned short)_INVALID_BUFFER_SYNTAX, "Invalid device file syntax");
+
 			dev->id_product = _get_value_of(line, "Product", r);
 			ASSERT(dev->id_product != (unsigned short)_INVALID_BUFFER_SYNTAX, "Invalid device file syntax");
 			break;
@@ -147,7 +148,6 @@ int _next_device(_devices_file* f, _dev_simple* dev) {
 			ASSERT(evs < _STR_HANDLER_NAME_SIZE_LIMIT, "Too long handler name");
 			memmove(dev->handler, ev_occ, evs);
 			dev->handler[evs] = '\0';
-
 			break;
 		case _DEVICE_INFO_BITMAP_EV:
 			dev->ev_types = _get_value_of(line, "EV", r);
@@ -160,7 +160,6 @@ int _next_device(_devices_file* f, _dev_simple* dev) {
 			ASSERT(ck != _INVALID_BUFFER_SYNTAX && sk < _STR_KEYS_SIZE_LIMIT, "Invalid device file syntax");
 
 			_store_hex_keys(dev->keys, pk, sk);
-
 			break;
 		default: break;
 		}
@@ -179,12 +178,14 @@ _FORCE_INLINE bool _is_key_masked(char* mask, int key_shift) {
 }
 
 // troubles with KEY_KEYBOARD since it's sometimes not present.
-// Instead, defining keyboard as having at least W, A, S and D keys.
+// Instead, defining keyboard as having at least W, A, S and D keys and having keyboard-like events.
 int _is_keyboard_device(_dev_simple* dev) {
 	return _is_key_masked(dev->keys, KEY_W) &&
 		   _is_key_masked(dev->keys, KEY_A) &&
 		   _is_key_masked(dev->keys, KEY_S) &&
-		   _is_key_masked(dev->keys, KEY_D);
+		   _is_key_masked(dev->keys, KEY_D) &&
+		   _is_bit_set(dev->ev_types, EV_KEY) &&
+		   _is_bit_set(dev->ev_types, EV_REP);
 }
 
 int _is_mouse_device(_dev_simple* dev) {
