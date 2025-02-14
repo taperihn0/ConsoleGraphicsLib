@@ -13,7 +13,12 @@
 
 typedef int _device_info_t;
 
-_INLINE long _get_value_of(const char* line, const char* str, size_t n) {
+#define _DEVICE_BITMAP_KEYS_FIELD_SIZE 16
+#define _BITS_IN_BYTE				   4
+
+#define _char_to_int_16(c) (isdigit(c) ? c - '0' : 10 + c - 'a')
+
+_INLINE long _get_value_of(char* line, char* str, size_t n) {
 	char* b = strstr(line, str) + strlen(str) + strlen("=");
 	char* e = b;
 
@@ -28,7 +33,7 @@ _INLINE long _get_value_of(const char* line, const char* str, size_t n) {
 	return id;
 }
 
-_INLINE int _get_str_of(const char* line, const char* str, char** beg, size_t* strsize, size_t n) {
+_INLINE int _get_str_of(char* line, char* str, char** beg, size_t* strsize, size_t n) {
 	char* b = strstr(line, str) + strlen(str) + strlen("=");
 	
 	if (*b == '\"') b++;
@@ -44,6 +49,34 @@ _INLINE int _get_str_of(const char* line, const char* str, char** beg, size_t* s
 	*beg = b;
 	*strsize = e - b;
 
+	return 0;
+}
+
+_INLINE int _store_hex_keys(char* dest, char* b, size_t n) {
+	char* e = b + n - 1;
+	
+	size_t field_size = 0;
+	size_t i = 0;
+
+	for (; e >= b; e--) {
+		if (*e != ' ') {
+			ASSERT(i < _STR_KEYS_SIZE_LIMIT, "Index overflow while converting to bin value");
+			dest[i++] = *e;
+			field_size++;
+			continue;
+		}
+		
+		size_t fill = _DEVICE_BITMAP_KEYS_FIELD_SIZE - field_size;
+
+		for (size_t j = 0; j < fill; j++) {
+			ASSERT(i < _STR_KEYS_SIZE_LIMIT, "Index overflow while converting to bin value");
+			dest[i++] = '0';
+		}
+
+		field_size = 0;
+	}
+	
+	dest[i] = '\0';
 	return 0;
 }
 
@@ -69,9 +102,11 @@ _INLINE int _get_dev_info_from(const char* line, size_t n) {
 	return _DEVICE_INFO_REDUNDANT;
 }
 
-int _next_device(_devices_file* f, _simple_dev* dev) {
+int _next_device(_devices_file* f, _dev_simple* dev) {
 	size_t n = 1024;
 	char* line = malloc(n * sizeof(char));
+
+	memset(dev->keys, 0, _STR_KEYS_SIZE_LIMIT * sizeof(char));
 
 	int r;
 	while ((r = getline(&line, &n, f)) != EOF && (r > 0 && line[0] != '\n')) {
@@ -123,15 +158,8 @@ int _next_device(_devices_file* f, _simple_dev* dev) {
 			size_t sk;
 			int ck = _get_str_of(line, "KEY", &pk, &sk, r); 
 			ASSERT(ck != _INVALID_BUFFER_SYNTAX && sk < _STR_KEYS_SIZE_LIMIT, "Invalid device file syntax");
-			
-			size_t i = 0, j = 0;
 
-			while (i < sk) {
-				if (pk[i] != ' ') dev->keys[j++] = pk[i];
-				i++;
-			}
-
-			dev->keys[j] = '\0';
+			_store_hex_keys(dev->keys, pk, sk);
 
 			break;
 		default: break;
@@ -140,4 +168,25 @@ int _next_device(_devices_file* f, _simple_dev* dev) {
 
 	free(line);
 	return r > 0;
+}
+
+_FORCE_INLINE bool _is_key_masked(char* mask, int key_shift) {
+	size_t idx = key_shift / _BITS_IN_BYTE;
+	int hex = mask[idx] != 0 ? _char_to_int_16(mask[idx]) : 0;
+
+	UINT mod = key_shift & (_BITS_IN_BYTE - 1);
+	return hex & (1 << mod);
+}
+
+// troubles with KEY_KEYBOARD since it's sometimes not present.
+// Instead, defining keyboard as having at least W, A, S and D keys.
+int _is_keyboard_device(_dev_simple* dev) {
+	return _is_key_masked(dev->keys, KEY_W) &&
+		   _is_key_masked(dev->keys, KEY_A) &&
+		   _is_key_masked(dev->keys, KEY_S) &&
+		   _is_key_masked(dev->keys, KEY_D);
+}
+
+int _is_mouse_device(_dev_simple* dev) {
+	return _is_key_masked(dev->keys, BTN_MOUSE);
 }

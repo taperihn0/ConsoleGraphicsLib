@@ -21,7 +21,7 @@ void button_callback(unsigned short btn_action, int btn) {
 	*/
 }
 
-void print_dev(_simple_dev* dev) {
+void print_dev(_dev_simple* dev) {
 	printf("%x %x \n%s. \n%d \n%s. \n%x \n%s. \n", dev->id_vendor, dev->id_product, dev->name, dev->usb, dev->handler,
 		dev->ev_types, dev->keys);
 	fflush(stdout);
@@ -29,10 +29,11 @@ void print_dev(_simple_dev* dev) {
 
 int main() {
 	FILE* f = fopen(_DEVICES_FILEPATH, "r");
-	_simple_dev d; 
+	_dev_simple d; 
 	
 	while (_next_device(f, &d)) {
 		printf("DEVICE:\n");
+		printf("Is mouse: %d, is keyboard: %d\n", _is_mouse_device(&d), _is_keyboard_device(&d));
 		print_dev(&d);
 		putchar('\n');
 	}
