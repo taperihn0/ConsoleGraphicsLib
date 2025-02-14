@@ -12,24 +12,26 @@ set(
 	render.c
 	render_core.c
 	mem.c
-	gmath.c
+	coremath.c
+	dev.c
 )
 
 add_executable(ConsoleGraphicsLib ${SOURCES})
+
 find_package(X11 REQUIRED)
 find_library(TERMCAP_LIB termcap REQUIRED)
 find_package(Curses REQUIRED)
+find_library(LIBUSB_LIBRARY usb-1.0 REQUIRED)
 
-# ncurses aren't needed for now
-target_link_libraries(ConsoleGraphicsLib X11::X11 ${TERMCAP_LIB} ncursesw m)
+target_link_libraries(ConsoleGraphicsLib X11::X11 ${TERMCAP_LIB} ncursesw m ${LIBUSB_LIBRARY})
 
 set(CFLAGS -DDEBUG -Wall -O2)
 target_compile_options(ConsoleGraphicsLib PRIVATE ${CFLAGS})
 
-
+# hhpc background program
 project(hhpc C)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "../hhpc/")
 add_executable(hhpc hhpc/hhpc.c)
 
 target_link_libraries(hhpc X11::X11)
-target_compile_options(hhpc PRIVATE -Wall)
+target_compile_options(hhpc PRIVATE -Wall -O3)

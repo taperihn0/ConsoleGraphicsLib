@@ -3,7 +3,7 @@
 #include "common.h"
 #include "terminal.h"
 #include "mem.h"
-#include "gmath.h"
+#include "coremath.h"
 
 void clear_terminal(CHAR_T c);
 void flush_terminal();

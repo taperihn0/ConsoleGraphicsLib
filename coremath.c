@@ -1,4 +1,4 @@
-#include "gmath.h"
+#include "coremath.h"
 
 vec2 vec2f(MATH_PREC_T x, MATH_PREC_T y) {
 	vec2 v;

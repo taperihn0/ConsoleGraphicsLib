@@ -1,7 +1,7 @@
 #pragma once
 
 #include "common.h"
-#include "gmath.h"
+#include "coremath.h"
 #include <wchar.h>
 
 // UNDERLAYING BUFFER TYPES

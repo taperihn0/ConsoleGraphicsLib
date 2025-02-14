@@ -4,8 +4,9 @@
 #include "render.h"
 #include "render_core.h"
 #include "mem.h"
-#include "gmath.h"
 #include "timeman.h"
+#include "dev.h"
+//#include <libusb-1.0/libusb.h>
 
 void mouse_callback(int dx, int dy) {
 	/*printf("(%d, %d)\n", dx, dy);*/
@@ -20,7 +21,26 @@ void button_callback(unsigned short btn_action, int btn) {
 	*/
 }
 
+void print_dev(_simple_dev* dev) {
+	printf("%x %x \n%s. \n%d \n%s. \n%x \n%s. \n", dev->id_vendor, dev->id_product, dev->name, dev->usb, dev->handler,
+		dev->ev_types, dev->keys);
+	fflush(stdout);
+}
+
 int main() {
+	FILE* f = fopen(_DEVICES_FILEPATH, "r");
+	_simple_dev d; 
+	
+	while (_next_device(f, &d)) {
+		printf("DEVICE:\n");
+		print_dev(&d);
+		putchar('\n');
+	}
+
+	fclose(f);
+	raise(SIGTERM);
+	return 0;
+
 	init_terminal_state();
 
 	enable_raw_mode();
