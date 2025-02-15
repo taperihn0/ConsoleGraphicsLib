@@ -1,5 +1,6 @@
 #include "dev.h"
 #include <ctype.h>
+#include <libudev.h>
 
 #define _INVALID_BUFFER_SYNTAX  -1
 #define _DEVICE_INFO_INVALID    -1
@@ -28,9 +29,7 @@ _INLINE long _get_value_of(char* line, char* str, size_t n) {
 	if (e - line >= n)
 		return _INVALID_BUFFER_SYNTAX;
 
-	long id = strtol(b, &e, 16);
-
-	return id;
+	return strtol(b, &e, 16);
 }
 
 _INLINE int _get_str_of(char* line, char* str, char** beg, size_t* strsize, size_t n) {
@@ -50,6 +49,20 @@ _INLINE int _get_str_of(char* line, char* str, char** beg, size_t* strsize, size
 	*strsize = e - b;
 
 	return 0;
+}
+
+_INLINE int _input_num(char* b, size_t n) {
+	static const size_t input_len = strlen("input");
+	
+	if (!b)
+		return _PRIMARY_INPUT_NUM;
+
+	if (n <= input_len)
+		return _INVALID_BUFFER_SYNTAX;
+	
+	b += input_len;
+
+	return _PRIMARY_INPUT_NUM + (*b - '0');
 }
 
 _INLINE int _store_hex_keys(char* dest, char* b, size_t n) {
@@ -132,10 +145,14 @@ int _next_device(_devices_file* f, _dev_simple* dev) {
 		case _DEVICE_INFO_PHYS:
 			char* pp; 
 			size_t sp;
+
 			int cp = _get_str_of(line, "Phys", &pp, &sp, r);
 			ASSERT(cp != _INVALID_BUFFER_SYNTAX, "Invalid device file syntax");
-
 			dev->usb = (strstr(pp, "usb") != NULL);
+
+			char* in_occ = strstr(line, "input");
+			dev->input_num = _input_num(in_occ, line + r - pp);
+
 			break;
 		case _DEVICE_INFO_HANDLER:
 			char* ev_occ = strstr(line, "event");

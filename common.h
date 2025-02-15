@@ -26,6 +26,7 @@ _INLINE bool _assert_error_terminate(const char* err, const char* file, UINT lin
 	fprintf(stderr, "Assertion failed: %s\nfile: %s, line: %u\n", err, file, line);
 	if (errno != 0) 
 		fprintf(stderr, "Error: %s\n", strerror(errno));
+	raise(SIGTERM);
 	exit(EXIT_FAILURE);
 	return true;
 }

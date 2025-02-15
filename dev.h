@@ -7,11 +7,13 @@
 #define _STR_HANDLER_NAME_SIZE_LIMIT 8
 #define _BITS_IN_BYTE				 4
 #define _STR_KEYS_SIZE_LIMIT 		 KEY_CNT / _BITS_IN_BYTE + 1
+#define _PRIMARY_INPUT_NUM 			 0
 
 typedef struct _dev_simple {
 	unsigned short id_vendor;
 	unsigned short id_product;
 	char 		   name[_STR_DEV_NAME_SIZE_LIMIT];
+	unsigned short input_num;
 	int 		   usb;
 	char		   handler[_STR_HANDLER_NAME_SIZE_LIMIT];
 	unsigned int   ev_types;

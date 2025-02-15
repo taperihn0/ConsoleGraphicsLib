@@ -1,22 +1,69 @@
 #include "input.h"
 #include "terminal.h"
+#include "dev.h"
 #include <fcntl.h>
+#include <libusb-1.0/libusb.h>
+#include <libudev.h>
 
 #define _INTERFACE_KEY_RELEASED 0
 #define _INTERFACE_KEY_PRESSED  1
 #define _INTERFACE_KEY_REPEATED 2
 
-int _open_keyboard_input_file(_device_file* kbd, const char* path) {
+#define _HANDLER_PATH_SIZE 		32
+#define _HANDLER_DIR_PATH 		"/dev/input/"
+
+#define _FILE_KEYBOARD			0
+#define _FILE_MOUSE				1
+
+typedef int _dev_filetype_t;
+
+int _get_input_file_of(_dev_filetype_t devtype, char* path, size_t n) {
+	_devices_file* f = fopen(_DEVICES_FILEPATH, "r");
+	_dev_simple dev, kbd;
+	bool found = false;
+
+	strcpy(path, _HANDLER_DIR_PATH);
+	size_t ncat = _HANDLER_PATH_SIZE - strlen(_HANDLER_DIR_PATH);
+	
+	while (_next_device(f, &dev)) {
+		if (dev.input_num != _PRIMARY_INPUT_NUM) 
+			continue;
+		else if (devtype == _FILE_KEYBOARD && !_is_keyboard_device(&dev))
+			continue;
+		else if (devtype == _FILE_MOUSE && !_is_mouse_device(&dev))
+			continue;
+
+		if (dev.usb) {
+			strncat(path, dev.handler, ncat);
+			return 0;
+		}
+
+		kbd = dev;
+		found = true;
+	}
+
+	fclose(f);
+
+	if (!found)
+		return -1;
+
+	strncat(path, kbd.handler, ncat);
+	return 0;
+}
+
+int _open_device_input_file(_device_file* kbd, char* path) {
 	kbd->file = path;
     kbd->fd = open(kbd->file, O_RDONLY);
-    kbd->flags = fcntl(kbd->fd, F_GETFL);
 
     if (kbd->fd == -1) {
-    	fprintf(stderr, "Cannot open %s: %s", kbd->file, strerror(errno));
+    	fprintf(stderr, "Cannot open %s: %s\n", kbd->file, strerror(errno));
     	return -1;
     }
 
+    kbd->flags = fcntl(kbd->fd, F_GETFL);
+
     fcntl(kbd->fd, F_SETFL, kbd->flags | O_NONBLOCK);
+
     return 0;
 }
 
@@ -48,7 +95,9 @@ int _get_key_from_events(_keyboard_events* kev, int key) {
 }
 
 void init_keyboard(keyboard* keyboard) {
-	_open_keyboard_input_file(&keyboard->device_file, "/dev/input/event6");
+	char path[_HANDLER_PATH_SIZE];
+	_get_input_file_of(_FILE_KEYBOARD, path, _HANDLER_PATH_SIZE);
+	_open_device_input_file(&keyboard->device_file, path);
 	_clear_keyboard_events(&keyboard->events);
 }
 
@@ -93,7 +142,9 @@ void close_keyboard(keyboard* keyboard) {
 }
 
 void init_mouse(mouse* mouse) {
-	_open_keyboard_input_file(&mouse->device_file, "/dev/input/event4");
+	char path[_HANDLER_PATH_SIZE];
+	_get_input_file_of(_FILE_MOUSE, path, _HANDLER_PATH_SIZE);
+	_open_device_input_file(&mouse->device_file, path);
 
 	mouse->pos_callback_func = NULL;
 	mouse->btn_callback_func = NULL;

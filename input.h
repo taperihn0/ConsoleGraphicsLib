@@ -21,7 +21,7 @@ typedef struct _device_file {
 	int    		 flags;
 } _device_file;
 
-int _open_keyboard_input_file(_device_file* kbd, const char* path);
+int _open_keyboard_input_file(_device_file* kbd, char* path);
 int _close_keyboard_input_file(_device_file* kbd);
 
 

@@ -6,7 +6,6 @@
 #include "mem.h"
 #include "timeman.h"
 #include "dev.h"
-//#include <libusb-1.0/libusb.h>
 
 void mouse_callback(int dx, int dy) {
 	/*printf("(%d, %d)\n", dx, dy);*/
@@ -28,20 +27,6 @@ void print_dev(_dev_simple* dev) {
 }
 
 int main() {
-	FILE* f = fopen(_DEVICES_FILEPATH, "r");
-	_dev_simple d; 
-	
-	while (_next_device(f, &d)) {
-		printf("DEVICE:\n");
-		printf("Is mouse: %d, is keyboard: %d\n", _is_mouse_device(&d), _is_keyboard_device(&d));
-		print_dev(&d);
-		putchar('\n');
-	}
-
-	fclose(f);
-	raise(SIGTERM);
-	return 0;
-
 	init_terminal_state();
 
 	enable_raw_mode();
@@ -107,7 +92,7 @@ int main() {
 		m.rc[2][2] = 1;
 		m.rc[3][3] = 1;
 		
-		vec3 cam_pos = vec3f(0.f, 0.f, 0.06f);
+		vec3 cam_pos = vec3f(0.f, 0.f, 0.18f);
 
 		mat4 v = mat4f(NULL);
 			
