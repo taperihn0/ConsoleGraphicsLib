@@ -96,6 +96,7 @@ int _get_key_from_events(_keyboard_events* kev, int key) {
 
 void init_keyboard(keyboard* keyboard) {
 	char path[_HANDLER_PATH_SIZE];
+
 	_get_input_file_of(_FILE_KEYBOARD, path, _HANDLER_PATH_SIZE);
 	_open_device_input_file(&keyboard->device_file, path);
 	_clear_keyboard_events(&keyboard->events);
@@ -143,6 +144,7 @@ void close_keyboard(keyboard* keyboard) {
 
 void init_mouse(mouse* mouse) {
 	char path[_HANDLER_PATH_SIZE];
+
 	_get_input_file_of(_FILE_MOUSE, path, _HANDLER_PATH_SIZE);
 	_open_device_input_file(&mouse->device_file, path);
 

@@ -5,44 +5,108 @@
 #include "render_core.h"
 #include "mem.h"
 #include "timeman.h"
-#include "dev.h"
+
+static vec3 cam_pos = {
+	.x = 0.f, 
+	.y = 0.f, 
+	.z = 0.18f
+};
+
+static vec3 cam_dir = {
+	.x = 0.f,
+	.y = 0.f,
+	.z = -1.f
+};
+
+static vec3 cam_right = {
+	.x = 1.f,
+	.y = 0.f,
+	.z = 0.f
+};
+
+static vec3 cam_up = {
+	.x = 0.f,
+	.y = 1.f,
+	.z = 0.f
+};
+
+#define PI 3.141592
+#define RAD(deg) deg / 180. * PI
+
+_FORCE_INLINE void normalize_3(vec3* v) {
+	UINT norm = sqrt(dot3f(v, v));
+	v->x /= norm;
+	v->y /= norm;
+	v->z /= norm;
+}
 
 void mouse_callback(int dx, int dy) {
-	/*printf("(%d, %d)\n", dx, dy);*/
+	static float yaw = -90.f;
+	static float pitch = 0.f;
+
+	float xoffset = dx * 0.0001f;
+	float yoffset = dy * 0.0001f;
+
+	yaw += xoffset;
+	pitch += yoffset;
+
+	cam_dir.x = cos(RAD(yaw)) * cos(RAD(pitch));
+	cam_dir.y = sin(RAD(pitch));
+	cam_dir.z = sin(RAD(yaw)) * cos(RAD(pitch));
+
+	cam_right = cross3f(&cam_dir, &cam_up);
+	cam_up = cross3f(&cam_dir, &cam_right);
+
+	normalize_3(&cam_dir);
+	normalize_3(&cam_up);
+	normalize_3(&cam_right);
 }
 
 void button_callback(unsigned short btn_action, int btn) {
 	/*
-	if (btn_action == KEY_PRESSED && btn == BTN_LEFT)
-		printf("PRESSED LEFT MOUSE BUTTON\n");
-	else if (btn_action == KEY_PRESSED && btn == BTN_RIGHT)
-		printf("PRESSED RIGHT MOUSE BUTTON\n");
+	if (btn_action == KEY_PRESSED && btn == BTN_LEFT) {
+		// do something
+	}
+	else if (btn_action == KEY_PRESSED && btn == BTN_RIGHT) {
+		// do something
+	}
 	*/
 }
 
-void print_dev(_dev_simple* dev) {
-	printf("%x %x \n%s. \n%d \n%s. \n%x \n%s. \n", dev->id_vendor, dev->id_product, dev->name, dev->usb, dev->handler,
-		dev->ev_types, dev->keys);
-	fflush(stdout);
+void process_kbd_events(keyboard* kbd) {
+	static utime_t prev_time = 0;
+	utime_t curr_time = gettime_mls(CLOCK_MONOTONIC_RAW);
+	utime_t delta_time = curr_time - prev_time;
+
+	if (get_key(kbd, KEY_W) == KEY_PRESSED)
+		cam_pos.z -= 0.00001 * delta_time;
+	if (get_key(kbd, KEY_S) == KEY_PRESSED)
+		cam_pos.z += 0.00001 * delta_time;
+	if (get_key(kbd, KEY_A) == KEY_PRESSED)
+		cam_pos.x -= 0.1 * delta_time;
+	if (get_key(kbd, KEY_D) == KEY_PRESSED)
+		cam_pos.x += 0.1 * delta_time;
+
+	prev_time = curr_time;
 }
 
 int main() {
 	init_terminal_state();
-
 	enable_raw_mode();
 	enable_focus_events();
-	make_terminal_fullscreen();
-	set_terminal_title("ASCIIGRAPHICS");
-	disable_console_cursor();
-	hide_cursor();
-
-	keyboard* kbd = malloc(sizeof(keyboard));
-	init_keyboard(kbd);
 
 	mouse* mice = malloc(sizeof(mouse));
 	init_mouse(mice);
 	set_pos_callback(mice, &mouse_callback);
 	set_button_callback(mice, &button_callback);
+
+	keyboard* kbd = malloc(sizeof(keyboard));
+	init_keyboard(kbd);
+	
+	make_terminal_fullscreen();
+	set_terminal_title("ASCIIGRAPHICS");
+	disable_console_cursor();
+	hide_cursor();
 
 	set_framerate_limit(100);
 
@@ -76,6 +140,7 @@ int main() {
 	while (!should_quit()) {
 		poll_events_keyboard(kbd);
 		poll_events_mouse(mice);
+		process_kbd_events(kbd);
 		
 		clear_terminal((CHAR_T)' ');
 
@@ -91,21 +156,25 @@ int main() {
 		m.rc[1][1] =  cos(angle);
 		m.rc[2][2] = 1;
 		m.rc[3][3] = 1;
-		
-		vec3 cam_pos = vec3f(0.f, 0.f, 0.18f);
 
 		mat4 v = mat4f(NULL);
 			
-		v.rc[0][0] = 1;
-		v.rc[1][1] = 1;
-		v.rc[2][2] = -1;
+		v.rc[0][0] = cam_right.x;
+		v.rc[1][0] = cam_right.y;
+		v.rc[2][0] = cam_right.z;
+		v.rc[0][1] = cam_up.x;
+		v.rc[1][1] = cam_up.y;
+		v.rc[2][1] = cam_up.z;
+		v.rc[0][2] = cam_dir.x;
+		v.rc[1][2] = cam_dir.y;
+		v.rc[2][2] = cam_dir.z;
 		v.rc[0][3] = -cam_pos.x;
 		v.rc[1][3] = -cam_pos.y;
 		v.rc[2][3] = -cam_pos.z;
 		v.rc[3][3] = 1;
 
-		mat4 vm = mult_m4(&v, &m);
-		mat4 pvm = mult_m4(&p, &vm);
+		mat4 pv = mult_m4(&p, &v);
+		mat4 pvm = mult_m4(&pv, &m);
 
 		draw_buffer(id, &pvm);
 
@@ -118,6 +187,7 @@ int main() {
 	delete_mem_buff(id);
 
 	close_keyboard(kbd);
+	close_mouse(mice);
 	free(kbd);
 	free(mice);
 	
@@ -130,4 +200,5 @@ int main() {
 	close_terminal_state();
 
 	fflush(stdout);
+	return 0;
 }

@@ -9,6 +9,7 @@ typedef struct _main_terminal {
 	bool 		 fullscreen;
 	bool 		 focus_events;
 	bool 		 raw_mode;
+	bool 		 console_cursor;
 	bool 		 is_focus;
 	bool 		 over;
 	long		 microsec_delay;

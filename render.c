@@ -18,6 +18,15 @@ void flush_terminal() {
 	_sync_with_next_frame();
 }
 
+int set_elem(size_t x, size_t y, CHAR_T c, PREC_T d) {
+	if (0 <= x && x < _TERMINAL_WIDTH && 0 <= y && y < _TERMINAL_HEIGHT) {
+		set(&_terminal.buff, x, y, d, c);
+		return 0;
+	}
+
+	return -1;
+}
+
 extern void _triangle_pipeline(vec3* mem, mat4* vt);
 
 int draw_buffer(buff_idx_t id, mat4* vt) {

@@ -25,6 +25,9 @@ void _terminate() {
 	if (_terminal.focus_events)
 		disable_focus_events();
 
+	if (!_terminal.console_cursor)
+		enable_console_cursor();
+
 	if (!_cursor.visible)
 		show_cursor();
 
@@ -54,7 +57,7 @@ void _setup_signals() {
 	}
 
 	if (sigaction(SIGTERM, &sa, NULL) == -1) {
-		fprintf(stderr, "Could not register SIGETRM: %s", strerror(errno));
+		fprintf(stderr, "Could not register SIGTERM: %s", strerror(errno));
 		return;
 	}
 }
@@ -64,7 +67,7 @@ void init_terminal_state() {
 	_update_terminal_size();
 
 	_terminal.is_focus = true;
-	_terminal.over = false;
+	_terminal.console_cursor = true;
 
 	_setup_signals();
 
@@ -149,11 +152,13 @@ void _update_terminal_size() {
 void enable_console_cursor() {
 	printf("\e[?25h");
 	fflush(stdout);
+	_terminal.console_cursor = true;
 }
 
 void disable_console_cursor() {
 	printf("\e[?25l");
 	fflush(stdout);
+	_terminal.console_cursor = false;
 }
 
 bool _check_focus() {

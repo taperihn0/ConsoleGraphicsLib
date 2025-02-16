@@ -22,10 +22,14 @@
 #endif
 
 _INLINE bool _assert_error_terminate(const char* err, const char* file, UINT line) {
-	// allow terminal to close its state properly by handling a signal
+	if (stdscr)
+		endwin();
+
 	fprintf(stderr, "Assertion failed: %s\nfile: %s, line: %u\n", err, file, line);
+
 	if (errno != 0) 
 		fprintf(stderr, "Error: %s\n", strerror(errno));
+	
 	raise(SIGTERM);
 	exit(EXIT_FAILURE);
 	return true;
