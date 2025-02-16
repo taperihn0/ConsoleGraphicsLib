@@ -51,6 +51,27 @@ mat4 mat4f(MATH_PREC_T* elems) {
 	return m;
 }
 
+void normalize2f(vec2* v) {
+	MATH_PREC_T l = LENGTH2F(v);
+	v->x /= l;
+	v->y /= l;
+}
+
+void normalize3f(vec3* v) {
+	MATH_PREC_T l = LENGTH3F(v);
+	v->x /= l;
+	v->y /= l;
+	v->z /= l;
+}
+
+void normalize4f(vec4* v) {
+	MATH_PREC_T l = LENGTH4F(v);
+	v->x /= l;
+	v->y /= l;
+	v->z /= l;
+	v->w /= l;
+}
+
 MATH_PREC_T dot2f(vec2* a, vec2* b) {
 	return a->x * b->x + a->y * b->y;
 }
@@ -69,6 +90,30 @@ vec3 cross3f(vec3* a, vec3* b) {
 	v.y = b->x * a->z - b->z * a->x;
 	v.z = a->x * b->y - a->y * b->x;
 	return v;
+}
+
+mat2 diagmat2f(MATH_PREC_T a) {
+	mat2 m = mat2f(NULL);
+	m.rc[0][0] = a;
+	m.rc[1][1] = a;
+	return m;
+}
+
+mat3 diagmat3f(MATH_PREC_T a) {
+	mat3 m = mat3f(NULL);
+	m.rc[0][0] = a;
+	m.rc[1][1] = a;
+	m.rc[2][2] = a;
+	return m;
+}
+
+mat4 diagmat4f(MATH_PREC_T a) {
+	mat4 m = mat4f(NULL);
+	m.rc[0][0] = a;
+	m.rc[1][1] = a;
+	m.rc[2][2] = a;
+	m.rc[3][3] = a;
+	return m;
 }
 
 mat2 mult_m2(mat2* a, mat2* b) {

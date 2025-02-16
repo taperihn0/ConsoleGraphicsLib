@@ -4,7 +4,7 @@
 #include <math.h>
 
 /*
-	MAIN MATH HEADER FOR GRAPHICS PURPOSES (GMATH)	
+	MAIN MINIMALISTIC MATH HEADER FOR GRAPHICS PURPOSES (MATH CORE)
 */
 
 typedef float   	_prec0_t;
@@ -14,6 +14,10 @@ typedef long double _prec2_t;
 #ifndef MATH_PREC_T
 #	define MATH_PREC_T _prec0_t
 #endif
+
+#define PI 3.14159265358979
+
+#define RADIANS(deg) deg / 180. * PI
 
 typedef struct vec_2fl {
 	MATH_PREC_T x, y;
@@ -47,11 +51,26 @@ mat2 mat2f(MATH_PREC_T* elems);
 mat3 mat3f(MATH_PREC_T* elems);
 mat4 mat4f(MATH_PREC_T* elems);
 
+#define LENGTH2F(v2) sqrt(dot2f(v2, v2))
+#define LENGTHSQ2F(v2) dot2f(v2, v2)
+#define LENGTH3F(v3) sqrt(dot3f(v3, v3))
+#define LENGTHSQ3F(v3) dot3f(v3, v3)
+#define LENGTH4F(v4) sqrt(dot4f(v4, v4))
+#define LENGTHSQ4F(v4) dot4f(v4, v4)
+
+void normalize2f(vec2* v);
+void normalize3f(vec3* v);
+void normalize4f(vec4* v);
+
 MATH_PREC_T dot2f(vec2* a, vec2* b);
 MATH_PREC_T dot3f(vec3* a, vec3* b);
 MATH_PREC_T dot4f(vec4* a, vec4* b);
 
 vec3 cross3f(vec3* a, vec3* b);
+
+mat2 diagmat2f(MATH_PREC_T a);
+mat3 diagmat3f(MATH_PREC_T a);
+mat4 diagmat4f(MATH_PREC_T a);
 
 mat2 mult_m2(mat2* a, mat2* b);
 mat3 mult_m3(mat3* a, mat3* b);

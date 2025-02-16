@@ -30,16 +30,6 @@ static vec3 cam_up = {
 	.z = 0.f
 };
 
-#define PI 3.141592
-#define RAD(deg) deg / 180. * PI
-
-_FORCE_INLINE void normalize_3(vec3* v) {
-	float norm = sqrt(dot3f(v, v));
-	v->x /= norm;
-	v->y /= norm;
-	v->z /= norm;
-}
-
 void mouse_callback(int dx, int dy) {
 	static float yaw = -90.f;
 	static float pitch = 0.f;
@@ -50,16 +40,16 @@ void mouse_callback(int dx, int dy) {
 	yaw += xoffset;
 	pitch -= yoffset;
 
-	cam_dir.x = cos(RAD(yaw)) * cos(RAD(pitch));
-	cam_dir.y = sin(RAD(pitch));
-	cam_dir.z = sin(RAD(yaw)) * cos(RAD(pitch));
+	cam_dir.x = cos(RADIANS(yaw)) * cos(RADIANS(pitch));
+	cam_dir.y = sin(RADIANS(pitch));
+	cam_dir.z = sin(RADIANS(yaw)) * cos(RADIANS(pitch));
 
 	cam_right = cross3f(&cam_dir, &cam_up);
 	cam_up = cross3f(&cam_right, &cam_dir);
 	
-	normalize_3(&cam_dir);
-	normalize_3(&cam_right);
-	normalize_3(&cam_up);
+	normalize3f(&cam_dir);
+	normalize3f(&cam_right);
+	normalize3f(&cam_up);
 }
 
 void button_callback(unsigned short btn_action, int btn) {
@@ -158,7 +148,7 @@ int main() {
 		clear_terminal((CHAR_T)' ');
 		
 		/*
-		mat4 m = mat4f(NULL);
+		mat4 m = diagmat4f(NULL);
 		utime_t time = gettime_mls(CLOCK_MONOTONIC_RAW);
 		utime_t delta_time = time - prev_time;
 		prev_time = time;
@@ -167,12 +157,6 @@ int main() {
 		m.rc[0][1] =  sin(angle);
 		m.rc[1][0] = -sin(angle);
 		m.rc[1][1] =  cos(angle);
-		m.rc[2][2] = 1;
-		m.rc[3][3] = 1;
-		m.rc[0][0] = 1;
-		m.rc[1][1] = 1;
-		m.rc[2][2] = 1;
-		m.rc[3][3] = 1;
 		*/
 
 		mat4 view = mat4f(NULL);
@@ -188,12 +172,8 @@ int main() {
 		view.rc[2][2] = cam_dir.z;
 		view.rc[3][3] = 1;
 
-		mat4 cam_translation = mat4f(NULL);
+		mat4 cam_translation = diagmat4f(1);
 
-		cam_translation.rc[0][0] = 1;
-		cam_translation.rc[1][1] = 1;
-		cam_translation.rc[2][2] = 1;
-		cam_translation.rc[3][3] = 1;
 		cam_translation.rc[0][3] = -cam_pos.x;
 		cam_translation.rc[1][3] = -cam_pos.y;
 		cam_translation.rc[2][3] = -cam_pos.z;
