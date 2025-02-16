@@ -9,7 +9,7 @@
 static vec3 cam_pos = {
 	.x = 0.f, 
 	.y = 0.f, 
-	.z = 0.18f
+	.z = 20.f,
 };
 
 static vec3 cam_dir = {
@@ -34,7 +34,7 @@ static vec3 cam_up = {
 #define RAD(deg) deg / 180. * PI
 
 _FORCE_INLINE void normalize_3(vec3* v) {
-	UINT norm = sqrt(dot3f(v, v));
+	float norm = sqrt(dot3f(v, v));
 	v->x /= norm;
 	v->y /= norm;
 	v->z /= norm;
@@ -44,22 +44,22 @@ void mouse_callback(int dx, int dy) {
 	static float yaw = -90.f;
 	static float pitch = 0.f;
 
-	float xoffset = dx * 0.0001f;
-	float yoffset = dy * 0.0001f;
+	float xoffset = dx * 0.1f;
+	float yoffset = dy * 0.1f;
 
 	yaw += xoffset;
-	pitch += yoffset;
+	pitch -= yoffset;
 
 	cam_dir.x = cos(RAD(yaw)) * cos(RAD(pitch));
 	cam_dir.y = sin(RAD(pitch));
 	cam_dir.z = sin(RAD(yaw)) * cos(RAD(pitch));
 
 	cam_right = cross3f(&cam_dir, &cam_up);
-	cam_up = cross3f(&cam_dir, &cam_right);
-
+	cam_up = cross3f(&cam_right, &cam_dir);
+	
 	normalize_3(&cam_dir);
-	normalize_3(&cam_up);
 	normalize_3(&cam_right);
+	normalize_3(&cam_up);
 }
 
 void button_callback(unsigned short btn_action, int btn) {
@@ -78,14 +78,26 @@ void process_kbd_events(keyboard* kbd) {
 	utime_t curr_time = gettime_mls(CLOCK_MONOTONIC_RAW);
 	utime_t delta_time = curr_time - prev_time;
 
-	if (get_key(kbd, KEY_W) == KEY_PRESSED)
-		cam_pos.z -= 0.00001 * delta_time;
-	if (get_key(kbd, KEY_S) == KEY_PRESSED)
-		cam_pos.z += 0.00001 * delta_time;
-	if (get_key(kbd, KEY_A) == KEY_PRESSED)
-		cam_pos.x -= 0.1 * delta_time;
-	if (get_key(kbd, KEY_D) == KEY_PRESSED)
-		cam_pos.x += 0.1 * delta_time;
+	if (get_key(kbd, KEY_W) == KEY_PRESSED) {
+		cam_pos.x += 0.01 * delta_time * cam_dir.x;
+		cam_pos.y += 0.01 * delta_time * cam_dir.y;
+		cam_pos.z += 0.01 * delta_time * cam_dir.z;
+	}
+	if (get_key(kbd, KEY_S) == KEY_PRESSED) {
+		cam_pos.x -= 0.01 * delta_time * cam_dir.x;
+		cam_pos.y -= 0.01 * delta_time * cam_dir.y;
+		cam_pos.z -= 0.01 * delta_time * cam_dir.z;
+	}
+	if (get_key(kbd, KEY_A) == KEY_PRESSED) {
+		cam_pos.x -= 0.01 * delta_time * cam_right.x;
+		cam_pos.y -= 0.01 * delta_time * cam_right.y;
+		cam_pos.z -= 0.01 * delta_time * cam_right.z;
+	}
+	if (get_key(kbd, KEY_D) == KEY_PRESSED) {
+		cam_pos.x += 0.01 * delta_time * cam_right.x;
+		cam_pos.y += 0.01 * delta_time * cam_right.y;
+		cam_pos.z += 0.01 * delta_time * cam_right.z;
+	}
 
 	prev_time = curr_time;
 }
@@ -111,28 +123,29 @@ int main() {
 	set_framerate_limit(100);
 
 	float pos[] = {
-		10.f, -10.f, -0.1f,
-		10.f, 10.f, -0.1f,
-		10.f, 10.f, -0.15f,
-		10.f, -10.f, -0.1f,
-		10.f, -10.f, -0.15f,
-		10.f, 10.f, -0.15f,
+		10.f, -10.f, 0.f,
+		10.f, 10.f, 0.f,
+		10.f, 10.f, -10.f,
+		10.f, -10.f, 0.f,
+		10.f, -10.f, -10.f,
+		10.f, 10.f, -10.f,
 	};
 
 	buff_idx_t id;
 	gen_mem_buff(pos, sizeof(pos), &id);
 
-	float n = 0.1f;
-	float r = get_terminal_width() / 2;
-	float t = get_terminal_height() / 2;
+	float n = 1.f;
+	float f = 100.f;
+	float r = 1.f;
+	float t = 1.f;
 
-	mat4 p = mat4f(NULL);
+	mat4 proj = mat4f(NULL);
 
-	p.rc[0][0] = n / r;
-	p.rc[1][1] = n / t;
-	p.rc[2][2] = -1;
-	p.rc[2][3] = -2 * n;
-	p.rc[3][2] = -1;
+	proj.rc[0][0] = n / r;
+	proj.rc[1][1] = n / t;
+	proj.rc[2][2] = -(f + n) / (n - f);
+	proj.rc[2][3] = 2 * f * n / (n - f);
+	proj.rc[3][2] = 1;
 
 	float angle = 0.f;
 	utime_t prev_time = gettime_mls(CLOCK_MONOTONIC_RAW);
@@ -143,40 +156,52 @@ int main() {
 		process_kbd_events(kbd);
 		
 		clear_terminal((CHAR_T)' ');
-
+		
+		/*
 		mat4 m = mat4f(NULL);
 		utime_t time = gettime_mls(CLOCK_MONOTONIC_RAW);
 		utime_t delta_time = time - prev_time;
 		prev_time = time;
 		angle += 0.003f * delta_time;
-
 		m.rc[0][0] =  cos(angle);
 		m.rc[0][1] =  sin(angle);
 		m.rc[1][0] = -sin(angle);
 		m.rc[1][1] =  cos(angle);
 		m.rc[2][2] = 1;
 		m.rc[3][3] = 1;
+		m.rc[0][0] = 1;
+		m.rc[1][1] = 1;
+		m.rc[2][2] = 1;
+		m.rc[3][3] = 1;
+		*/
 
-		mat4 v = mat4f(NULL);
+		mat4 view = mat4f(NULL);
 			
-		v.rc[0][0] = cam_right.x;
-		v.rc[1][0] = cam_right.y;
-		v.rc[2][0] = cam_right.z;
-		v.rc[0][1] = cam_up.x;
-		v.rc[1][1] = cam_up.y;
-		v.rc[2][1] = cam_up.z;
-		v.rc[0][2] = cam_dir.x;
-		v.rc[1][2] = cam_dir.y;
-		v.rc[2][2] = cam_dir.z;
-		v.rc[0][3] = -cam_pos.x;
-		v.rc[1][3] = -cam_pos.y;
-		v.rc[2][3] = -cam_pos.z;
-		v.rc[3][3] = 1;
+		view.rc[0][0] = cam_right.x;
+		view.rc[0][1] = cam_right.y;
+		view.rc[0][2] = cam_right.z;
+		view.rc[1][0] = cam_up.x;
+		view.rc[1][1] = cam_up.y;
+		view.rc[1][2] = cam_up.z;
+		view.rc[2][0] = cam_dir.x;
+		view.rc[2][1] = cam_dir.y;
+		view.rc[2][2] = cam_dir.z;
+		view.rc[3][3] = 1;
 
-		mat4 pv = mult_m4(&p, &v);
-		mat4 pvm = mult_m4(&pv, &m);
+		mat4 cam_translation = mat4f(NULL);
 
-		draw_buffer(id, &pvm);
+		cam_translation.rc[0][0] = 1;
+		cam_translation.rc[1][1] = 1;
+		cam_translation.rc[2][2] = 1;
+		cam_translation.rc[3][3] = 1;
+		cam_translation.rc[0][3] = -cam_pos.x;
+		cam_translation.rc[1][3] = -cam_pos.y;
+		cam_translation.rc[2][3] = -cam_pos.z;
+
+		mat4 view_final  = mult_m4(&view, &cam_translation);
+		mat4 proj_view = mult_m4(&proj, &view_final);
+
+		draw_buffer(id, &proj_view);
 
 		if (get_key(kbd, KEY_Q) == KEY_PRESSED)
 			break;
