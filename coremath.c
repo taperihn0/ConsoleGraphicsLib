@@ -72,6 +72,33 @@ void normalize4f(vec4* v) {
 	v->w /= l;
 }
 
+vec2 add2f(vec2* a, vec2* b) {
+	vec2 r = {
+		.x = a->x + b->x,
+		.y = a->y + b->y
+	};
+	return r;
+}
+
+vec3 add3f(vec3* a, vec3* b) {
+	vec3 r = {
+		.x = a->x + b->x,
+		.y = a->y + b->y,
+		.z = a->z + b->z
+	};
+	return r;
+}
+
+vec4 add4f(vec4* a, vec4* b) {
+	vec4 r = {
+		.x = a->x + b->x,
+		.y = a->y + b->y,
+		.z = a->z + b->z,
+		.w = a->w + b->w
+	};
+	return r;
+}
+
 MATH_PREC_T dot2f(vec2* a, vec2* b) {
 	return a->x * b->x + a->y * b->y;
 }
@@ -168,7 +195,7 @@ vec2 mult_mv2(mat2* a, vec2* v) {
 vec3 mult_mv3(mat3* a, vec3* v) {
 	vec3 r;
 	r.x = a->rc[0][0] * v->x + a->rc[0][1] * v->y + a->rc[0][2] * v->z;
-	r.y = a->rc[1][0] * v->x + a->rc[1][1] * v->y + a->rc[0][2] * v->z;
+	r.y = a->rc[1][0] * v->x + a->rc[1][1] * v->y + a->rc[1][2] * v->z;
 	r.z = a->rc[2][0] * v->x + a->rc[2][1] * v->y + a->rc[2][2] * v->z;
 	return r;
 }
@@ -176,7 +203,7 @@ vec3 mult_mv3(mat3* a, vec3* v) {
 vec4 mult_mv4(mat4* a, vec4* v) {
 	vec4 r;
 	r.x = a->rc[0][0] * v->x + a->rc[0][1] * v->y + a->rc[0][2] * v->z + a->rc[0][3] * v->w;
-	r.y = a->rc[1][0] * v->x + a->rc[1][1] * v->y + a->rc[0][2] * v->z + a->rc[1][3] * v->w;
+	r.y = a->rc[1][0] * v->x + a->rc[1][1] * v->y + a->rc[1][2] * v->z + a->rc[1][3] * v->w;
 	r.z = a->rc[2][0] * v->x + a->rc[2][1] * v->y + a->rc[2][2] * v->z + a->rc[2][3] * v->w;
 	r.w = a->rc[3][0] * v->x + a->rc[3][1] * v->y + a->rc[3][2] * v->z + a->rc[3][3] * v->w;
 	return r;

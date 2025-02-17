@@ -3,7 +3,6 @@
 #include "timeman.h"
 #include "render_core.h"
 
-#define _HORIZON_REDUCTION 	  0.5f
 #define _TERMINAL_WIDTH  	  get_terminal_width()
 #define _TERMINAL_HEIGHT 	  get_terminal_height()
 #define _HALF_TERMINAL_WIDTH  (_TERMINAL_WIDTH / 2)
@@ -18,13 +17,9 @@ void flush_terminal() {
 	_sync_with_next_frame();
 }
 
-int set_elem(size_t x, size_t y, CHAR_T c, PREC_T d) {
-	if (0 <= x && x < _TERMINAL_WIDTH && 0 <= y && y < _TERMINAL_HEIGHT) {
-		set(&_terminal.buff, x, y, d, c);
-		return 0;
-	}
-
-	return -1;
+int set_elem(int x, int y, CHAR_T c, PREC_T d) {
+	set(&_terminal.buff, x, y, d, c);
+	return 0;
 }
 
 extern void _triangle_pipeline(vec3* mem, mat4* vt);
@@ -65,15 +60,15 @@ _FORCE_INLINE void _stage_vertex_triangle(vec4* v1, vec4* v2, vec4* v3, mat4* vt
 	*v3 = mult_mv4(vt, v3);
 
 	v1->x = (v1->x / v1->w) * _HALF_TERMINAL_WIDTH;
-	v1->y = (v1->y / v1->w) * _HALF_TERMINAL_HEIGHT * _HORIZON_REDUCTION;
+	v1->y = (v1->y / v1->w) * _HALF_TERMINAL_HEIGHT;
 	v1->z = (v1->z / v1->w);
 
 	v2->x = (v2->x / v2->w) * _HALF_TERMINAL_WIDTH;
-	v2->y = (v2->y / v2->w) * _HALF_TERMINAL_HEIGHT * _HORIZON_REDUCTION;
+	v2->y = (v2->y / v2->w) * _HALF_TERMINAL_HEIGHT;
 	v2->z = (v2->z / v2->w);
 	
 	v3->x = (v3->x / v3->w) * _HALF_TERMINAL_WIDTH;
-	v3->y = (v3->y / v3->w) * _HALF_TERMINAL_HEIGHT * _HORIZON_REDUCTION;
+	v3->y = (v3->y / v3->w) * _HALF_TERMINAL_HEIGHT;
 	v3->z = (v3->z / v3->w);
 }
 

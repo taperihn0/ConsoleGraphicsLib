@@ -51,16 +51,20 @@ mat2 mat2f(MATH_PREC_T* elems);
 mat3 mat3f(MATH_PREC_T* elems);
 mat4 mat4f(MATH_PREC_T* elems);
 
-#define LENGTH2F(v2) sqrt(dot2f(v2, v2))
 #define LENGTHSQ2F(v2) dot2f(v2, v2)
-#define LENGTH3F(v3) sqrt(dot3f(v3, v3))
+#define LENGTH2F(v2) sqrt(LENGTHSQ2F(v2))
 #define LENGTHSQ3F(v3) dot3f(v3, v3)
-#define LENGTH4F(v4) sqrt(dot4f(v4, v4))
+#define LENGTH3F(v3) sqrt(LENGTHSQ3F(v3))
 #define LENGTHSQ4F(v4) dot4f(v4, v4)
+#define LENGTH4F(v4) sqrt(LENGTHSQ4F(v4))
 
 void normalize2f(vec2* v);
 void normalize3f(vec3* v);
 void normalize4f(vec4* v);
+
+vec2 add2f(vec2* a, vec2* b);
+vec3 add3f(vec3* a, vec3* b);
+vec4 add4f(vec4* a, vec4* b);
 
 MATH_PREC_T dot2f(vec2* a, vec2* b);
 MATH_PREC_T dot3f(vec3* a, vec3* b);

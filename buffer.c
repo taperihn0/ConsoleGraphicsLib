@@ -63,7 +63,9 @@ void set(_core_buffer* buff, int x, int y, _BUFF_DEPTH_PREC_TYPE d, _BUFF_ELEM_T
 	ASSERT(buff != NULL, "Trying to fetch from null buffer");
 	x += buff->xcenter;
 	y = buff->ycenter - y;
-	ASSERT(y < buff->height && x < buff->width && y >= 0 && x >= 0, "Invalid buffer element position");
+	//ASSERT(y < buff->height && x < buff->width && y >= 0 && x >= 0, "Invalid buffer element position");
+	if (!(y < buff->height && x < buff->width && y >= 0 && x >= 0))
+		return;
 
 	UINT idx = buff->width * y + x;
 	buff->mem[idx] = buff->depth[idx] > d ? c : buff->mem[idx];
