@@ -2,33 +2,50 @@
 #include <sys/wait.h>
 #include <signal.h>
 
+#include <X11/X.h>
+#include <X11/Xlib.h>
+
+Display* dpy;
+Cursor empty_cursor;
+
+_INLINE Cursor nullCursor(Display *dpy, Drawable dw) {
+    XColor color  = { 0 };
+    const char data[] = { 0 };
+
+    Pixmap pixmap = XCreateBitmapFromData(dpy, dw, data, 1, 1);
+    Cursor cursor = XCreatePixmapCursor(dpy, pixmap, pixmap, &color, &color, 0, 0);
+
+    XFreePixmap(dpy, pixmap);
+
+    return cursor;
+}
+
 _main_cursor _cursor;
 
 int hide_cursor() {
-	_cursor.pid = fork();
-	
-	if (_cursor.pid == -1) {
-		fprintf(stderr, "Cannot fork: %s", strerror(errno));
+	dpy = XOpenDisplay(NULL);
+
+	if (!dpy) {
+		fprintf(stderr, "Failed to open display\n");
 		return -1;
 	}
 
-	if (_cursor.pid == 0) {
-		int res = execlp("./hhpc/hhpc", "./hhpc/hhpc", "-i", "500", NULL);
+	int scr = DefaultScreen(dpy);
+   	Window win = RootWindow(dpy, scr);
 
-		if (res == -1) {
-			fprintf(stderr, "execlp for hhpc failed: %s", strerror(errno));
-			return -1;
-		}
-	}
-	
+    const unsigned int mask = PointerMotionMask | ButtonPressMask;
+    empty_cursor = nullCursor(dpy, win);
+
+	XGrabPointer(dpy, win, True, mask, GrabModeSync, GrabModeAsync, None, empty_cursor, CurrentTime);
+
 	_cursor.visible = false;
-	return _cursor.pid;
+	return 0;
 }
 
 void show_cursor() {
-	if (_cursor.pid > 0) {
-		kill(_cursor.pid, SIGTERM);
-		waitpid(_cursor.pid, NULL, 0);
-		_cursor.visible = true;
-	}
+	XUngrabPointer(dpy, CurrentTime);
+    XFreeCursor(dpy, empty_cursor);
+    XCloseDisplay(dpy);
+
+    _cursor.visible = true;
 }

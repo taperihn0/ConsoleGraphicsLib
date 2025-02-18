@@ -5,7 +5,6 @@
 
 typedef struct _main_cursor {
 	bool  visible;
-	pid_t pid;
 } _main_cursor;
 
 extern _main_cursor _cursor;

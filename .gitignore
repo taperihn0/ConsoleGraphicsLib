@@ -1,5 +1,5 @@
 # Ignore CMake build files
 build/*
 
-# Ignore binaries
-hhpc/hhpc
+# Ignore daemon, it's not needed anymore
+hhpc
