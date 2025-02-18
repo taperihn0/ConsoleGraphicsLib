@@ -143,6 +143,51 @@ mat4 diagmat4f(MATH_PREC_T a) {
 	return m;
 }
 
+mat4 projmat4f(float fov, float aspect_ratio, float n, float f) {
+	mat4 proj = mat4f(NULL);
+	
+	float t = tan(RADIANS(fov / 2.f)) * n;
+	float r = t * aspect_ratio;
+
+	proj.rc[0][0] = n / r;
+	proj.rc[1][1] = n / t;
+	proj.rc[2][2] = -(f + n) / (n - f);
+	proj.rc[2][3] = 2 * f * n / (n - f);
+	proj.rc[3][2] = 1;
+
+	return proj;
+}
+
+mat4 viewmat4f(vec3* pos, vec3* dir, vec3* up, vec3* right) {
+	mat4 view = mat4f(NULL);
+
+	if (!right) {
+		right = malloc(sizeof(vec3));
+		*right = cross3f(dir, up);
+		normalize3f(right);
+	}
+
+	view.rc[0][0] = right->x;
+	view.rc[0][1] = right->y;
+	view.rc[0][2] = right->z;
+	view.rc[1][0] = up->x;
+	view.rc[1][1] = up->y;
+	view.rc[1][2] = up->z;
+	view.rc[2][0] = dir->x;
+	view.rc[2][1] = dir->y;
+	view.rc[2][2] = dir->z;
+	view.rc[3][3] = 1;
+
+	mat4 translation = diagmat4f(1);
+
+	translation.rc[0][3] = -pos->x;
+	translation.rc[1][3] = -pos->y;
+	translation.rc[2][3] = -pos->z;
+
+	mat4 final = mult_m4(&view, &translation);
+	return final;
+}
+
 mat2 mult_m2(mat2* a, mat2* b) {
 	mat2 m = mat2f(NULL);
 

@@ -35,7 +35,7 @@ int resize_buffer(_core_buffer* buff, size_t width, size_t height) {
 	return code;
 }
 
-_INLINE void _clear_depth_buff(_core_buffer* buff) {
+_FORCE_INLINE void _clear_depth_buff(_core_buffer* buff) {
 	for (UINT i = 0; i < _get_buff_depth_cnt(buff); i++)
 		buff->depth[i] = (_BUFF_DEPTH_PREC_TYPE)_DEPTH_MAX;
 }
@@ -63,7 +63,7 @@ void set(_core_buffer* buff, int x, int y, _BUFF_DEPTH_PREC_TYPE d, _BUFF_ELEM_T
 	ASSERT(buff != NULL, "Trying to fetch from null buffer");
 	x += buff->xcenter;
 	y = buff->ycenter - y;
-	//ASSERT(y < buff->height && x < buff->width && y >= 0 && x >= 0, "Invalid buffer element position");
+	
 	if (!(y < buff->height && x < buff->width && y >= 0 && x >= 0))
 		return;
 
@@ -73,6 +73,6 @@ void set(_core_buffer* buff, int x, int y, _BUFF_DEPTH_PREC_TYPE d, _BUFF_ELEM_T
 
 void flush_buffer(_core_buffer* buff) {
 	ASSERT(buff->mem != NULL, "Operation flush on null buffer");
-	mvprintw(0, 0, "%S", buff->mem);
+	mvaddwstr(0, 0, buff->mem);
 	refresh(); 
 }

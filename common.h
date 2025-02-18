@@ -8,6 +8,7 @@
 #include <string.h>
 #include <errno.h>
 #include <locale.h>
+#define NCURSES_WIDECHAR 1
 #include <ncurses.h>
 #include <signal.h>
 

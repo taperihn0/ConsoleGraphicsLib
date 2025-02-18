@@ -1,14 +1,13 @@
 #include "cursor.h"
 #include <sys/wait.h>
 #include <signal.h>
-
 #include <X11/X.h>
 #include <X11/Xlib.h>
 
 Display* dpy;
 Cursor empty_cursor;
 
-_INLINE Cursor nullCursor(Display *dpy, Drawable dw) {
+_INLINE Cursor nullCursor(Display* dpy, Drawable dw) {
     XColor color  = { 0 };
     const char data[] = { 0 };
 
@@ -16,7 +15,6 @@ _INLINE Cursor nullCursor(Display *dpy, Drawable dw) {
     Cursor cursor = XCreatePixmapCursor(dpy, pixmap, pixmap, &color, &color, 0, 0);
 
     XFreePixmap(dpy, pixmap);
-
     return cursor;
 }
 
@@ -46,6 +44,5 @@ void show_cursor() {
 	XUngrabPointer(dpy, CurrentTime);
     XFreeCursor(dpy, empty_cursor);
     XCloseDisplay(dpy);
-
     _cursor.visible = true;
 }

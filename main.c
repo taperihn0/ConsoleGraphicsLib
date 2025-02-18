@@ -116,45 +116,6 @@ void log_msg(int x, int y, char* msg) {
 	}
 }
 
-mat4 projection_mat4f(float fov, float aspect_ratio, float n, float f) {
-	mat4 proj = mat4f(NULL);
-	
-	float t = tan(RADIANS(fov / 2.f)) * n;
-	float r = t * aspect_ratio;
-
-	proj.rc[0][0] = n / r;
-	proj.rc[1][1] = n / t;
-	proj.rc[2][2] = -(f + n) / (n - f);
-	proj.rc[2][3] = 2 * f * n / (n - f);
-	proj.rc[3][2] = 1;
-
-	return proj;
-}
-
-mat4 view_mat4f(vec3* pos, vec3* dir, vec3* up, vec3* right) {
-	mat4 view = mat4f(NULL);
-
-	view.rc[0][0] = right->x;
-	view.rc[0][1] = right->y;
-	view.rc[0][2] = right->z;
-	view.rc[1][0] = up->x;
-	view.rc[1][1] = up->y;
-	view.rc[1][2] = up->z;
-	view.rc[2][0] = dir->x;
-	view.rc[2][1] = dir->y;
-	view.rc[2][2] = dir->z;
-	view.rc[3][3] = 1;
-
-	mat4 translation = diagmat4f(1);
-
-	translation.rc[0][3] = -pos->x;
-	translation.rc[1][3] = -pos->y;
-	translation.rc[2][3] = -pos->z;
-
-	mat4 final = mult_m4(&view, &translation);
-	return final;
-}
-
 int main() {
 	init_terminal_state();
 	enable_raw_mode();
@@ -173,7 +134,7 @@ int main() {
 	disable_console_cursor();
 	hide_cursor();
 
-	set_framerate_limit(30);
+	set_framerate_limit(60);
 
 	float pos[] = {
 		10.f, -10.f, 10.f,
@@ -225,7 +186,7 @@ int main() {
 		return -1;
 	}
 	
-	mat4 proj = projection_mat4f(60.f, 16 / 9.f, 0.1f, 100.f);
+	mat4 proj = projmat4f(60.f, 16 / 9.f, 0.1f, 100.f);
 
 	float angle = 0.f;
 	utime_t prev_time = gettime_mls(CLOCK_MONOTONIC_RAW);
@@ -250,7 +211,7 @@ int main() {
 		m.rc[1][0] = -sin(angle);
 		m.rc[1][1] =  cos(angle);
 
-		mat4 view = view_mat4f(&cam_pos, &cam_dir, &cam_up, &cam_right);
+		mat4 view = viewmat4f(&cam_pos, &cam_dir, &cam_up, &cam_right);
 		mat4 view_model = mult_m4(&view, &m);
 		mat4 proj_view_model = mult_m4(&proj, &view_model);
 		
