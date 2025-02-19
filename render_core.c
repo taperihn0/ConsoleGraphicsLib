@@ -1,4 +1,5 @@
 #include "render_core.h"
+#include "render.h"
 #include <math.h>
 
 #define _UNICODE_SOLID /*0x00002588*/'*'
@@ -6,7 +7,8 @@
 // TEMPORARY
 #define TEMP_LINE_DEPTH 0.
 
-#define _plot(x, y, c) set(&_terminal.buff, (x), (y), TEMP_LINE_DEPTH, (c))
+#define _plot(x, y, c) \
+set(_get_current_buffer(&_dbl_buff), (x), (y), TEMP_LINE_DEPTH, (c))
 
 
 // YouTube video by NoBS Code explaining the magics behind 

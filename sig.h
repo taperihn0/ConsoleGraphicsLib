@@ -23,7 +23,7 @@ static int _setup_killers_signal(handler_t handler) {
 
 		if (sigaction(sig, &sa, NULL) == -1) {
 			fprintf(stderr, "Could not register signal %d: %s\n", sig, strerror(errno));
-			r = -1;
+			r++;
 		}
 	}
 	
@@ -31,7 +31,7 @@ static int _setup_killers_signal(handler_t handler) {
 	for (int sig = SIGRTMIN; sig <= SIGRTMAX; sig++) {
 		if (sigaction(sig, &sa, NULL) == -1) {
 			fprintf(stderr, "Could not register signal %d: %s\n", sig, strerror(errno));
-			r = -1;
+			r++;
 		}
 	}
 	

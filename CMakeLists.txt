@@ -24,13 +24,5 @@ find_package(Curses REQUIRED)
 
 target_link_libraries(ConsoleGraphicsLib X11::X11 ${LIBTERMCAP} ncursesw m)
 
-set(CFLAGS -DDEBUG -Wall -O2)
+set(CFLAGS -DDEBUG -Wall -Ofast)
 target_compile_options(ConsoleGraphicsLib PRIVATE ${CFLAGS})
-
-# hhpc background program
-project(hhpc C)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "../hhpc/")
-add_executable(hhpc hhpc/hhpc.c)
-
-target_link_libraries(hhpc X11::X11)
-target_compile_options(hhpc PRIVATE -Wall -O3)

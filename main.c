@@ -227,7 +227,7 @@ int main() {
 		if (get_key(kbd, KEY_Q) == KEY_PRESSED)
 			break;
 
-	    flush_terminal();
+	    swap_terminal_buffers();
 	}
 	
 	delete_mem_buff(id);

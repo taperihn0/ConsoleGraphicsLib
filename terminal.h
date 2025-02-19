@@ -13,7 +13,6 @@ typedef struct _main_terminal {
 	bool 		 is_focus;
 	bool 		 over;
 	long		 microsec_delay;
-	_core_buffer buff;
 } _main_terminal;
 
 extern _main_terminal _terminal;

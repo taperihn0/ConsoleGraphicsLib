@@ -2,23 +2,42 @@
 #include "terminal.h"
 #include "timeman.h"
 #include "render_core.h"
+#include <pthread.h>
 
 #define _TERMINAL_WIDTH  	  get_terminal_width()
 #define _TERMINAL_HEIGHT 	  get_terminal_height()
 #define _HALF_TERMINAL_WIDTH  (_TERMINAL_WIDTH / 2)
 #define _HALF_TERMINAL_HEIGHT (_TERMINAL_HEIGHT / 2)
 
+struct _double_buffer _dbl_buff;
+
 void clear_terminal(CHAR_T c) {
-	clear_buffer_with(&_terminal.buff, c);
+	clear_buffer_with(_get_current_buffer(&_dbl_buff), c);
 }
 
-void flush_terminal() {
-	flush_buffer(&_terminal.buff);
+// TODO: IMPLEMENT MORE EFFICIENT MULTITHREADING FOR FLUSHING BUFFER
+pthread_t _thread_flush;
+bool _is_thread_valid = false;
+
+void swap_terminal_buffers() {
+	if (_is_thread_valid) {
+		pthread_join(_thread_flush, NULL);
+	} 
+
+	pthread_attr_t _attrs;
+	pthread_attr_init(&_attrs);
+	pthread_attr_setdetachstate(&_attrs, PTHREAD_CREATE_JOINABLE);
+
+	pthread_create(&_thread_flush, &_attrs, flush_buffer, (void*)_get_current_buffer(&_dbl_buff));
+	_is_thread_valid = true;
+	
+	//flush_buffer((void*)_get_current_buffer(&_dbl_buff));
+	_flip_buffer_index(&_dbl_buff);
 	_sync_with_next_frame();
 }
 
 int set_elem(int x, int y, CHAR_T c, PREC_T d) {
-	set(&_terminal.buff, x, y, d, c);
+	set(_get_current_buffer(&_dbl_buff), x, y, d, c);
 	return 0;
 }
 

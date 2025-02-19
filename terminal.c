@@ -1,11 +1,12 @@
 #include "terminal.h"
 #include "cursor.h"
 #include "timeman.h"
+#include "sig.h"
+#include "render.h"
 #include <termios.h>
 #include <fcntl.h>
 #include <sys/ioctl.h>
 #include <termcap.h>
-#include "sig.h"
 
 #define _MAX_FRAMES (UINT)(-1)
 
@@ -48,7 +49,7 @@ void init_terminal_state() {
 }
 
 void close_terminal_state() {
-	close_buffer(&_terminal.buff);
+	close_buffer(_get_current_buffer(&_dbl_buff));
 	endwin();
 }
 
@@ -118,7 +119,7 @@ void _update_terminal_size() {
 	_terminal.height = tgetnum("li");
 	_terminal.width = tgetnum("co");
 	
-	resize_buffer(&_terminal.buff, _terminal.width, _terminal.height);
+	_resize_buffers(&_dbl_buff, _terminal.width, _terminal.height);
 	resizeterm(_terminal.height, _terminal.width);
 }
 
