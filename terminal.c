@@ -5,7 +5,7 @@
 #include <fcntl.h>
 #include <sys/ioctl.h>
 #include <termcap.h>
-#include <signal.h>
+#include "sig.h"
 
 #define _MAX_FRAMES (UINT)(-1)
 
@@ -34,34 +34,6 @@ void _terminate() {
 	close_terminal_state();
 }
 
-void _setup_signals() {
-	struct sigaction sa;
-	sa.sa_flags = 0;
-	sa.sa_handler = _update_terminal_size;
-
-	if (sigaction(SIGWINCH, &sa, NULL) == -1) {
-		fprintf(stderr, "Could not register SIGWINCH: %s", strerror(errno));
-		return;
-	}
-
-	sa.sa_handler = _terminate;
-
-	if (sigaction(SIGINT, &sa, NULL) == -1) {
-		fprintf(stderr, "Could not register SIGINT: %s", strerror(errno));
-		return;
-	}
-
-	if (sigaction(SIGSEGV, &sa, NULL) == -1) {
-		fprintf(stderr, "Could not register SIGSEGV: %s", strerror(errno));
-		return;
-	}
-
-	if (sigaction(SIGTERM, &sa, NULL) == -1) {
-		fprintf(stderr, "Could not register SIGTERM: %s", strerror(errno));
-		return;
-	}
-}
-
 void init_terminal_state() {
 	memset(&_terminal, 0, sizeof(_main_terminal));
 	_update_terminal_size();
@@ -69,7 +41,8 @@ void init_terminal_state() {
 	_terminal.is_focus = true;
 	_terminal.console_cursor = true;
 
-	_setup_signals();
+	_setup_killers_signal(_terminate);
+	_setup_resize_signal(_update_terminal_size);
 
 	initscr();
 }
