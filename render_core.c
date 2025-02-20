@@ -2,7 +2,7 @@
 #include "render.h"
 #include <math.h>
 
-#define _UNICODE_SOLID /*0x00002588*/'*'
+#define _UNICODE_SOLID /*0x00002588*/'.'
 
 // TEMPORARY
 #define TEMP_LINE_DEPTH 0.

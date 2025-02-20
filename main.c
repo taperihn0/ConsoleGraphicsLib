@@ -136,7 +136,7 @@ int main() {
 
 	set_framerate_limit(60);
 
-	float pos[] = {
+	float cube[] = {
 		10.f, -10.f, 10.f,
 		10.f, 10.f, 10.f,
 		10.f, 10.f, -10.f,
@@ -180,8 +180,15 @@ int main() {
 		-10.f, -10.f, 10.f
 	};
 
+	vec3 cube_pos[5];
+	cube_pos[0] = vec3f(0.f, 0.f, 0.f);
+	cube_pos[1] = vec3f(25.f, 20.f, -30.f);
+	cube_pos[2] = vec3f(40.f, -20.f, -40.f);
+	cube_pos[3] = vec3f(-60.f, 10.f, -20.f);
+	cube_pos[4] = vec3f(60.f, 0.f, -25.f);
+
 	buff_idx_t id;
-	if (gen_mem_buff(pos, sizeof(pos), &id) == -1) {
+	if (gen_mem_buff(cube, sizeof(cube), &id) == -1) {
 		fprintf(stderr, "Failed to create buffer\n");
 		return -1;
 	}
@@ -201,31 +208,42 @@ int main() {
 		
 		clear_terminal((CHAR_T)' ');
 
-		mat4 m = diagmat4f(1);
+		mat4 rot = diagmat4f(1);
 		utime_t time = gettime_mls(CLOCK_MONOTONIC_RAW);
 		utime_t delta_time = time - prev_time;
 		prev_time = time;
 		angle += 0.001f * delta_time;
-		m.rc[0][0] =  cos(angle);
-		m.rc[0][1] =  sin(angle);
-		m.rc[1][0] = -sin(angle);
-		m.rc[1][1] =  cos(angle);
+		rot.rc[0][0] =  cos(angle);
+		rot.rc[0][1] =  sin(angle);
+		rot.rc[1][0] = -sin(angle);
+		rot.rc[1][1] =  cos(angle);
 
 		mat4 view = viewmat4f(&cam_pos, &cam_dir, &cam_up, &cam_right);
-		mat4 view_model = mult_m4(&view, &m);
-		mat4 proj_view_model = mult_m4(&proj, &view_model);
-		
+
+		for (UINT i = 0; i < 5; i++) {
+			mat4 transl = diagmat4f(1);
+
+			transl.rc[0][3] = cube_pos[i].x;
+			transl.rc[1][3] = cube_pos[i].y;
+			transl.rc[2][3] = cube_pos[i].z;
+
+			mat4 m = mult_m4(&transl, &rot);
+
+			mat4 view_model = mult_m4(&view, &m);
+			mat4 proj_view_model = mult_m4(&proj, &view_model);
+
+			draw_buffer(id, &proj_view_model);
+		}
+
+		if (get_key(kbd, KEY_Q) == KEY_PRESSED)
+			break;
+
 		sprintf(msg, "POS: %f %f %f", cam_pos.x, cam_pos.y, cam_pos.z);
 		log_msg(0, 0, msg);
 		sprintf(msg, "DIR: %f %f %f", cam_dir.x, cam_dir.y, cam_dir.z);
 		log_msg(0, 1, msg);
 		sprintf(msg, "RIGHT: %f %f %f", cam_right.x, cam_right.y, cam_right.z);
 		log_msg(0, 2, msg);
-
-		draw_buffer(id, &proj_view_model);
-
-		if (get_key(kbd, KEY_Q) == KEY_PRESSED)
-			break;
 
 	    swap_terminal_buffers();
 	}

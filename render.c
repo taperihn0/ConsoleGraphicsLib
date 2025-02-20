@@ -17,21 +17,38 @@ void clear_terminal(CHAR_T c) {
 
 // TODO: IMPLEMENT MORE EFFICIENT MULTITHREADING FOR FLUSHING BUFFER
 pthread_t _thread_flush;
-bool _is_thread_valid = false;
+volatile bool _to_flush = false;
+volatile bool _is_valid_thread = false;
+volatile bool _can_flip = false;
+
+void* _flusher_loop(void* args) {
+	while (true) {
+		if (_to_flush) {
+			_core_buffer* buff = _get_current_buffer(&_dbl_buff);
+			_can_flip = true;
+			flush_buffer(buff);
+			_to_flush = false;
+		}
+	}
+
+	return NULL;
+}
 
 void swap_terminal_buffers() {
-	if (_is_thread_valid) {
-		pthread_join(_thread_flush, NULL);
-	} 
-
-	pthread_attr_t _attrs;
-	pthread_attr_init(&_attrs);
-	pthread_attr_setdetachstate(&_attrs, PTHREAD_CREATE_JOINABLE);
-
-	pthread_create(&_thread_flush, &_attrs, flush_buffer, (void*)_get_current_buffer(&_dbl_buff));
-	_is_thread_valid = true;
+	if (!_is_valid_thread) {
+		_to_flush = false;
+		pthread_create(&_thread_flush, NULL, _flusher_loop, NULL);
+		_is_valid_thread = true;
+		_can_flip = false;
+	}
 	
-	//flush_buffer((void*)_get_current_buffer(&_dbl_buff));
+	while (_to_flush);
+
+	_can_flip = false;
+	_to_flush = true;
+	
+	while (!_can_flip);
+
 	_flip_buffer_index(&_dbl_buff);
 	_sync_with_next_frame();
 }
