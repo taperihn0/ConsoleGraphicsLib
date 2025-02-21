@@ -5,6 +5,7 @@
 #include "render_core.h"
 #include "mem.h"
 #include "timeman.h"
+#include "ctx.h"
 
 static vec3 cam_pos = {
 	.x = 0.f, 
@@ -117,7 +118,7 @@ void log_msg(int x, int y, char* msg) {
 }
 
 int main() {
-	init_terminal_state();
+	init_mode();
 	enable_raw_mode();
 	enable_focus_events();
 
@@ -261,7 +262,7 @@ int main() {
 	show_cursor();
 	enable_console_cursor();
 
-	close_terminal_state();
+	close_mode();
 
 	fflush(stdout);
 	return 0;

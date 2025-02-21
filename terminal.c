@@ -1,7 +1,5 @@
 #include "terminal.h"
-#include "cursor.h"
 #include "timeman.h"
-#include "sig.h"
 #include "render.h"
 #include <termios.h>
 #include <fcntl.h>
@@ -14,41 +12,17 @@
 
 _main_terminal _terminal;
 
-void _terminate() {
-	_terminal.over = true;
-
-	if (_terminal.fullscreen)
-		unmake_terminal_fullscreen();
-	
-	if (_terminal.raw_mode)
-		disable_raw_mode();
-
-	if (_terminal.focus_events)
-		disable_focus_events();
-
-	if (!_terminal.console_cursor)
-		enable_console_cursor();
-
-	if (!_cursor.visible)
-		show_cursor();
-
-	close_terminal_state();
-}
-
-void init_terminal_state() {
+void _init_terminal_state() {
 	memset(&_terminal, 0, sizeof(_main_terminal));
 	_update_terminal_size();
 
 	_terminal.is_focus = true;
 	_terminal.console_cursor = true;
 
-	_setup_killers_signal(_terminate);
-	_setup_resize_signal(_update_terminal_size);
-
 	initscr();
 }
 
-void close_terminal_state() {
+void _close_terminal_state() {
 	_close_buffers(&_dbl_buff);
 	endwin();
 }

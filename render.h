@@ -15,6 +15,9 @@ void _close_buffers(_double_buffer* dbl);
 
 extern _double_buffer _dbl_buff;
 
+void _init_flush_ctx();
+void _close_flush_ctx();
+
 void clear_terminal(CHAR_T c);
 void swap_terminal_buffers();
 

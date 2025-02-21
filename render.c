@@ -33,53 +33,64 @@ void clear_terminal(CHAR_T c) {
 	clear_buffer_with(_get_current_buffer(&_dbl_buff), c);
 }
 
-// TODO: IMPLEMENT PROPER CLEANUP AFTER TERMINATING
-pthread_t _thread_flush;
-_mutex_t _to_flush;
-_mutex_t _can_flip;
+typedef struct _flush_thread_ctx {
+	pthread_t* thread;
+	_mutex_t to_flush;
+	_mutex_t swap;
+} _flush_thread_ctx;
+
+_flush_thread_ctx _flush_ctx = {
+	.thread = NULL
+};
 
 bool byte_false = false;
 bool byte_true = true;
 
-void* _flusher_thread_loop(void* args) {
-	bool flush_msg = false;
+void* _flush_thread_loop(void* args) {
+	bool ready = false;
 
 	while (true) {
-		_read_mutex_data(&_to_flush, &flush_msg, sizeof(bool));
+		_read_mutex_data(&_flush_ctx.to_flush, &ready);
 		
-		if (flush_msg) {
+		if (ready) {
+			_write_mutex_data(&_flush_ctx.swap, &byte_false);
 			_core_buffer* buff = _get_current_buffer(&_dbl_buff);
-			_write_mutex_data(&_can_flip, &byte_true, sizeof(bool));
+			_write_mutex_data(&_flush_ctx.swap, &byte_true);
+
 			flush_buffer(buff);
-			_write_mutex_data(&_to_flush, &byte_false, sizeof(bool));
+			_write_mutex_data(&_flush_ctx.to_flush, &byte_false);
 		}
 	}
 
 	return NULL;
 }
 
-void swap_terminal_buffers() {
-	static bool is_valid_thread = false;
+void _init_flush_ctx() {
+	_init_mutex(&_flush_ctx.to_flush, &byte_false, sizeof(bool));
+	_init_mutex(&_flush_ctx.swap, &byte_false, sizeof(bool));
+	_flush_ctx.thread = _get_thread();
+	pthread_create(_flush_ctx.thread, NULL, _flush_thread_loop, NULL);
+}
 
-	if (!is_valid_thread) {
-		_init_mutex(&_to_flush, &byte_false, sizeof(bool));
-		_init_mutex(&_can_flip, &byte_false, sizeof(bool));
-		pthread_create(&_thread_flush, NULL, _flusher_thread_loop, NULL);
-		is_valid_thread = true;
-	}
-	
+void _close_flush_ctx() {
+	_close_mutex(&_flush_ctx.to_flush);
+	_close_mutex(&_flush_ctx.swap);
+}
+
+void swap_terminal_buffers() {
 	bool flushing;
+
 	do {
-		_read_mutex_data(&_to_flush, &flushing, sizeof(bool));
+		_read_mutex_data(&_flush_ctx.to_flush, &flushing);
 	} while (flushing);
 
-	_write_mutex_data(&_can_flip, &byte_false, sizeof(bool));
-	_write_mutex_data(&_to_flush, &byte_true, sizeof(bool));
+	_write_mutex_data(&_flush_ctx.to_flush, &byte_true);
 	
-	bool canflip;
+	bool ready2swap;
+
 	do {
-		_read_mutex_data(&_to_flush, &canflip, sizeof(bool));
-	} while (canflip);
+		_read_mutex_data(&_flush_ctx.swap, &ready2swap);
+	} while (!ready2swap);
 
 	_flip_buffer_index(&_dbl_buff);
 	_sync_with_next_frame();

@@ -17,8 +17,8 @@ typedef struct _main_terminal {
 
 extern _main_terminal _terminal;
 
-void init_terminal_state();
-void close_terminal_state();
+void _init_terminal_state();
+void _close_terminal_state();
 
 // wmctrl command wrappers.
 void make_terminal_fullscreen();
@@ -45,7 +45,7 @@ void disable_console_cursor();
 // returns true if console window has focus, else false.
 bool _check_focus();
 
-// updates size of this terminal using ioctl. For internal usage.
+// updates size of this terminal. For internal usage.
 void _update_terminal_size();
 
 // sets rate of flush_terminal calls per second.
