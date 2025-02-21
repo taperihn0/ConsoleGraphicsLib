@@ -1,7 +1,7 @@
 #include "render.h"
 #include "terminal.h"
 #include "timeman.h"
-#include "render_core.h"
+#include "render_utils.h"
 #include "thread.h"
 
 #define _TERMINAL_WIDTH  	  get_terminal_width()
@@ -27,6 +27,13 @@ void _resize_buffers(_double_buffer* dbl, size_t width, size_t height) {
 void _close_buffers(_double_buffer* dbl) {
 	close_buffer(&dbl->buff[0]);
 	close_buffer(&dbl->buff[1]);
+}
+
+render_mode_t _mode;
+
+void set_render_mode(render_mode_t mode) {
+	ASSERT(_RENDER_MODE_MIN <= mode && mode <= _RENDER_MODE_MAX, "Invalid render mode");
+	_mode = mode;
 }
 
 void clear_terminal(CHAR_T c) {
@@ -123,6 +130,7 @@ int draw_buffer(buff_idx_t id, mat4* vt) {
 
 extern void _stage_vertex_triangle(vec4* v1, vec4* v2, vec4* v3, mat4* vt);
 extern void _stage_rasterization_triangle(vec4* v1, vec4* v2, vec4* v3);
+extern void _stage_assembly_triangle(vec4* v1, vec4* v2, vec4* v3);
 
 _FORCE_INLINE void _triangle_pipeline(vec3* mem, mat4* vt) {
 	vec4 v1 = vec4f(mem[0].x, mem[0].y, mem[0].z, 1.f), 
@@ -130,7 +138,11 @@ _FORCE_INLINE void _triangle_pipeline(vec3* mem, mat4* vt) {
 		 v3 = vec4f(mem[2].x, mem[2].y, mem[2].z, 1.f);
 
 	_stage_vertex_triangle(&v1, &v2, &v3, vt);
-	_stage_rasterization_triangle(&v1, &v2, &v3);
+
+	if (_mode == RENDER_MODE_SOLID)
+		_stage_rasterization_triangle(&v1, &v2, &v3);
+	else if (_mode == RENDER_MODE_EDGES)
+		_stage_assembly_triangle(&v1, &v2, &v3);
 }
 
 _FORCE_INLINE void _stage_vertex_triangle(vec4* v1, vec4* v2, vec4* v3, mat4* vt) {
@@ -151,7 +163,10 @@ _FORCE_INLINE void _stage_vertex_triangle(vec4* v1, vec4* v2, vec4* v3, mat4* vt
 	v3->z = (v3->z / v3->w);
 }
 
-// TODO: implement complete rasterizer, so far only edges are drawn
 _FORCE_INLINE void _stage_rasterization_triangle(vec4* v1, vec4* v2, vec4* v3) {
+	_draw_triangle_solid(v1->x, v1->y, v2->x, v2->y, v3->x, v3->y);
+}
+
+_FORCE_INLINE void _stage_assembly_triangle(vec4* v1, vec4* v2, vec4* v3) {
 	_draw_triangle_edges(v1->x, v1->y, v2->x, v2->y, v3->x, v3->y);
 }

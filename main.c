@@ -2,7 +2,6 @@
 #include "cursor.h"
 #include "terminal.h"
 #include "render.h"
-#include "render_core.h"
 #include "mem.h"
 #include "timeman.h"
 #include "ctx.h"
@@ -30,6 +29,8 @@ static vec3 cam_up = {
 	.y = 1.f,
 	.z = 0.f
 };
+
+render_mode_t mode = RENDER_MODE_SOLID;
 
 void mouse_callback(int dx, int dy) {
 	static float yaw = -90.f;
@@ -105,6 +106,12 @@ void process_kbd_events(keyboard* kbd) {
 		cam_pos.y -= 0.01 * delta_time;
 	}
 
+	if (get_key(kbd, KEY_M) == KEY_PRESSED) {
+		mode++;
+		mode %= _RENDER_MODE_CNT;
+		set_render_mode(mode);
+	}
+
 	prev_time = curr_time;
 }
 
@@ -135,7 +142,9 @@ int main() {
 	disable_console_cursor();
 	hide_cursor();
 
-	set_framerate_limit(60);
+	set_framerate_limit(40);
+
+	set_render_mode(mode);
 
 	float cube[] = {
 		10.f, -10.f, 10.f,

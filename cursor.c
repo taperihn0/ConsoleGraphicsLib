@@ -7,7 +7,7 @@
 Display* dpy;
 Cursor empty_cursor;
 
-_INLINE Cursor nullCursor(Display* dpy, Drawable dw) {
+_STATIC _INLINE Cursor nullCursor(Display* dpy, Drawable dw) {
     XColor color  = { 0 };
     const char data[] = { 0 };
 

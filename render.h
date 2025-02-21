@@ -18,6 +18,16 @@ extern _double_buffer _dbl_buff;
 void _init_flush_ctx();
 void _close_flush_ctx();
 
+#define RENDER_MODE_SOLID 0
+#define RENDER_MODE_EDGES 1
+#define _RENDER_MODE_MIN 0
+#define _RENDER_MODE_MAX 1
+#define _RENDER_MODE_CNT _RENDER_MODE_MAX + 1
+
+typedef UINT render_mode_t;
+
+void set_render_mode(render_mode_t mode);
+
 void clear_terminal(CHAR_T c);
 void swap_terminal_buffers();
 

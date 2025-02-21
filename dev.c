@@ -19,7 +19,7 @@ typedef int _device_info_t;
 #define _char_to_int_16(c) 		 (isdigit(c) ? c - '0' : 10 + c - 'a')
 #define _is_bit_set(mask, shift) (mask & (1 << shift))
 
-_INLINE long _get_value_of(char* line, char* str, size_t n) {
+_STATIC _INLINE long _get_value_of(char* line, char* str, size_t n) {
 	char* b = strstr(line, str) + strlen(str) + strlen("=");
 	char* e = b;
 
@@ -32,7 +32,7 @@ _INLINE long _get_value_of(char* line, char* str, size_t n) {
 	return strtol(b, &e, 16);
 }
 
-_INLINE int _get_str_of(char* line, char* str, char** beg, size_t* strsize, size_t n) {
+_STATIC _INLINE int _get_str_of(char* line, char* str, char** beg, size_t* strsize, size_t n) {
 	char* b = strstr(line, str) + strlen(str) + strlen("=");
 	
 	if (*b == '\"') b++;
@@ -65,7 +65,7 @@ _INLINE int _input_num(char* b, size_t n) {
 	return _PRIMARY_INPUT_NUM + (*b - '0');
 }
 
-_INLINE int _store_hex_keys(char* dest, char* b, size_t n) {
+_STATIC _INLINE int _store_hex_keys(char* dest, char* b, size_t n) {
 	char* e = b + n - 1;
 	
 	size_t field_size = 0;
@@ -93,7 +93,7 @@ _INLINE int _store_hex_keys(char* dest, char* b, size_t n) {
 	return 0;
 }
 
-_INLINE int _spec_dev_bitmap_info(const char* line, size_t n) {
+_STATIC _INLINE int _spec_dev_bitmap_info(const char* line, size_t n) {
 	bool is_ev_info = (strstr(line, "EV") != NULL);
 	bool is_key_info = (strstr(line, "KEY") != NULL);
 
@@ -102,7 +102,7 @@ _INLINE int _spec_dev_bitmap_info(const char* line, size_t n) {
 		   			     _DEVICE_INFO_REDUNDANT;
 }
 
-_INLINE int _get_dev_info_from(const char* line, size_t n) {
+_STATIC _INLINE int _get_dev_info_from(const char* line, size_t n) {
 	switch (line[0]) {
 	case 'I': return _DEVICE_INFO_ID;
 	case 'N': return _DEVICE_INFO_NAME;

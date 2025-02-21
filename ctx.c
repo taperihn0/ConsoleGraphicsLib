@@ -34,6 +34,8 @@ void init_mode() {
 	_init_flush_ctx();
 	_close_flush_ctx();
 
+	set_render_mode(RENDER_MODE_SOLID);
+
 	_setup_killers_signal(_terminate);
 	_setup_resize_signal(_update_terminal_size);
 }

@@ -8,21 +8,31 @@
 #include <string.h>
 #include <errno.h>
 #include <locale.h>
+#include <signal.h>
+
 #define NCURSES_WIDECHAR 1
 #include <ncurses.h>
-#include <signal.h>
 
 #ifndef _FORCE_INLINE
 #	define _FORCE_INLINE inline __attribute__((always_inline))
 #endif
-
 #define _INLINE inline
+
+// Got problems with static functions while trying to compile the code under 
+// different optimization flags with GCC.
+// For instance, -Og requires every function defined here needs to be explicitly
+// static, while, say, -Ofast do not care.
+#ifdef DEBUG
+#	define _STATIC static
+#else
+#	define _STATIC
+#endif
 
 #ifndef UINT
 #	define UINT unsigned int
 #endif
 
-_INLINE bool _assert_error_terminate(const char* err, const char* file, UINT line) {
+_STATIC _INLINE bool _assert_error_terminate(const char* err, const char* file, UINT line) {
 	if (stdscr)
 		endwin();
 
@@ -38,15 +48,10 @@ _INLINE bool _assert_error_terminate(const char* err, const char* file, UINT lin
 
 #define ASSERT(val, err) (void)((val) || _assert_error_terminate((err), __FILE__, __LINE__))
 
-_FORCE_INLINE int min(int a, int b) {
-	return a < b ? a : b;
-}
+#define min(a, b) ((a < b) ? a : b)
+#define max(a, b) ((a < b) ? b : a)
 
-_FORCE_INLINE int max(int a, int b) {
-	return a < b ? b : a;
-}
-
-_FORCE_INLINE void swap(int* a, int* b) {
+_STATIC _FORCE_INLINE void swap(int* a, int* b) {
 	int tmp = *a;
 	*a = *b;
 	*b = tmp;

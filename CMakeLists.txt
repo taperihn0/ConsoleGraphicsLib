@@ -10,7 +10,7 @@ set(
 	terminal.c
 	buffer.c
 	render.c
-	render_core.c
+	render_utils.c
 	mem.c
 	coremath.c
 	dev.c
@@ -26,5 +26,5 @@ find_package(Curses REQUIRED)
 
 target_link_libraries(ConsoleGraphicsLib X11::X11 ${LIBTERMCAP} ncursesw m)
 
-set(CFLAGS -DDEBUG -Wall -Ofast)
+set(CFLAGS -Wall -Ofast)
 target_compile_options(ConsoleGraphicsLib PRIVATE ${CFLAGS})
