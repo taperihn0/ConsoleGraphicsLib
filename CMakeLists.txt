@@ -14,6 +14,7 @@ set(
 	mem.c
 	coremath.c
 	dev.c
+	thread.c
 )
 
 add_executable(ConsoleGraphicsLib ${SOURCES})

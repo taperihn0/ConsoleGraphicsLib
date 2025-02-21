@@ -2,32 +2,56 @@
 #include "terminal.h"
 #include "timeman.h"
 #include "render_core.h"
-#include <pthread.h>
+#include "thread.h"
 
 #define _TERMINAL_WIDTH  	  get_terminal_width()
 #define _TERMINAL_HEIGHT 	  get_terminal_height()
 #define _HALF_TERMINAL_WIDTH  (_TERMINAL_WIDTH / 2)
 #define _HALF_TERMINAL_HEIGHT (_TERMINAL_HEIGHT / 2)
 
-struct _double_buffer _dbl_buff;
+_double_buffer _dbl_buff;
+
+_FORCE_INLINE _core_buffer* _get_current_buffer(_double_buffer* dbl) {
+	return &dbl->buff[dbl->curr_buff];
+}
+
+_FORCE_INLINE void _flip_buffer_index(_double_buffer* dbl) {
+	dbl->curr_buff ^= 1;
+}
+
+void _resize_buffers(_double_buffer* dbl, size_t width, size_t height) {
+	resize_buffer(&dbl->buff[0], width, height);
+	resize_buffer(&dbl->buff[1], width, height);
+}
+
+void _close_buffers(_double_buffer* dbl) {
+	close_buffer(&dbl->buff[0]);
+	close_buffer(&dbl->buff[1]);
+}
 
 void clear_terminal(CHAR_T c) {
 	clear_buffer_with(_get_current_buffer(&_dbl_buff), c);
 }
 
-// TODO: IMPLEMENT MORE EFFICIENT MULTITHREADING FOR FLUSHING BUFFER
+// TODO: IMPLEMENT PROPER CLEANUP AFTER TERMINATING
 pthread_t _thread_flush;
-volatile bool _to_flush = false;
-volatile bool _is_valid_thread = false;
-volatile bool _can_flip = false;
+_mutex_t _to_flush;
+_mutex_t _can_flip;
 
-void* _flusher_loop(void* args) {
+bool byte_false = false;
+bool byte_true = true;
+
+void* _flusher_thread_loop(void* args) {
+	bool flush_msg = false;
+
 	while (true) {
-		if (_to_flush) {
+		_read_mutex_data(&_to_flush, &flush_msg, sizeof(bool));
+		
+		if (flush_msg) {
 			_core_buffer* buff = _get_current_buffer(&_dbl_buff);
-			_can_flip = true;
+			_write_mutex_data(&_can_flip, &byte_true, sizeof(bool));
 			flush_buffer(buff);
-			_to_flush = false;
+			_write_mutex_data(&_to_flush, &byte_false, sizeof(bool));
 		}
 	}
 
@@ -35,19 +59,27 @@ void* _flusher_loop(void* args) {
 }
 
 void swap_terminal_buffers() {
-	if (!_is_valid_thread) {
-		_to_flush = false;
-		pthread_create(&_thread_flush, NULL, _flusher_loop, NULL);
-		_is_valid_thread = true;
-		_can_flip = false;
+	static bool is_valid_thread = false;
+
+	if (!is_valid_thread) {
+		_init_mutex(&_to_flush, &byte_false, sizeof(bool));
+		_init_mutex(&_can_flip, &byte_false, sizeof(bool));
+		pthread_create(&_thread_flush, NULL, _flusher_thread_loop, NULL);
+		is_valid_thread = true;
 	}
 	
-	while (_to_flush);
+	bool flushing;
+	do {
+		_read_mutex_data(&_to_flush, &flushing, sizeof(bool));
+	} while (flushing);
 
-	_can_flip = false;
-	_to_flush = true;
+	_write_mutex_data(&_can_flip, &byte_false, sizeof(bool));
+	_write_mutex_data(&_to_flush, &byte_true, sizeof(bool));
 	
-	while (!_can_flip);
+	bool canflip;
+	do {
+		_read_mutex_data(&_to_flush, &canflip, sizeof(bool));
+	} while (canflip);
 
 	_flip_buffer_index(&_dbl_buff);
 	_sync_with_next_frame();

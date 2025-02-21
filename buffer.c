@@ -71,10 +71,8 @@ void set(_core_buffer* buff, int x, int y, _BUFF_DEPTH_PREC_TYPE d, _BUFF_ELEM_T
 	buff->mem[idx] = buff->depth[idx] > d ? c : buff->mem[idx];
 }
 
-void* flush_buffer(void* buff_ptr) {
-	_core_buffer* buff = (_core_buffer*)buff_ptr;
+void flush_buffer(_core_buffer* buff) {
 	ASSERT(buff->mem != NULL, "Operation flush on null buffer");
 	mvaddwstr(0, 0, buff->mem);
 	refresh(); 
-	return NULL;
 }

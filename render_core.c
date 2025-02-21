@@ -8,7 +8,7 @@
 #define TEMP_LINE_DEPTH 0.
 
 #define _plot(x, y, c) \
-set(_get_current_buffer(&_dbl_buff), (x), (y), TEMP_LINE_DEPTH, (c))
+set_elem((x), (y), (c), 0.f);
 
 
 // YouTube video by NoBS Code explaining the magics behind 

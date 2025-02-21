@@ -49,7 +49,7 @@ void init_terminal_state() {
 }
 
 void close_terminal_state() {
-	close_buffer(_get_current_buffer(&_dbl_buff));
+	_close_buffers(&_dbl_buff);
 	endwin();
 }
 
