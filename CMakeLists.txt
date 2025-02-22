@@ -16,6 +16,7 @@ set(
 	dev.c
 	thread.c
 	ctx.c
+	charmap.c
 )
 
 add_executable(ConsoleGraphicsLib ${SOURCES})
@@ -23,8 +24,10 @@ add_executable(ConsoleGraphicsLib ${SOURCES})
 find_package(X11 REQUIRED)
 find_library(LIBTERMCAP termcap REQUIRED)
 find_package(Curses REQUIRED)
+find_package(Freetype REQUIRED)
 
-target_link_libraries(ConsoleGraphicsLib X11::X11 ${LIBTERMCAP} ncursesw m)
+target_link_libraries(ConsoleGraphicsLib X11::X11 ${LIBTERMCAP} ncursesw m ${FREETYPE_LIBRARIES})
+target_include_directories(ConsoleGraphicsLib PRIVATE ${FREETYPE_INCLUDE_DIRS})
 
-set(CFLAGS -Wall -Ofast)
+set(CFLAGS -DDEBUG -Wall -O2)
 target_compile_options(ConsoleGraphicsLib PRIVATE ${CFLAGS})

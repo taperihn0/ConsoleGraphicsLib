@@ -1,5 +1,13 @@
 #include "coremath.h"
 
+vec2_i vec2i(MATH_INT_T x, MATH_INT_T y) {
+	vec2_i v = {
+		.x = x,
+		.y = y
+	};
+	return v;
+}
+
 vec2 vec2f(MATH_PREC_T x, MATH_PREC_T y) {
 	vec2 v;
 	v.x = x, v.y = y;

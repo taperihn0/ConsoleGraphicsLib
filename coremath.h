@@ -15,6 +15,10 @@ typedef long double _prec2_t;
 #	define MATH_PREC_T _prec0_t
 #endif
 
+#ifndef MATH_INT_T
+#	define MATH_INT_T int
+#endif
+
 #define PI 3.14159265358979
 
 #define RADIANS(deg) deg / 180. * PI
@@ -22,6 +26,10 @@ typedef long double _prec2_t;
 typedef struct vec_2fl {
 	MATH_PREC_T x, y;
 } vec2;
+
+typedef struct vec_2i {
+	MATH_INT_T x, y;
+} vec2_i;
 
 typedef struct vec_3fl {
 	MATH_PREC_T x, y, z;
@@ -42,6 +50,8 @@ typedef struct mat_3fl {
 typedef struct mat_4fl {
 	MATH_PREC_T rc[4][4];
 } mat4;
+
+vec2_i vec2i(MATH_INT_T x, MATH_INT_T y);
 
 vec2 vec2f(MATH_PREC_T x, MATH_PREC_T y);
 vec3 vec3f(MATH_PREC_T x, MATH_PREC_T y, MATH_PREC_T z);

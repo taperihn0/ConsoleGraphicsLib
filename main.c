@@ -203,7 +203,7 @@ int main() {
 		return -1;
 	}
 	
-	mat4 proj = projmat4f(60.f, 16 / 9.f, 0.1f, 100.f);
+	mat4 proj = projmat4f(60.f, 16 / 9.f, 0.1f, 300.f);
 
 	float angle = 0.f;
 	utime_t prev_time = gettime_mls(CLOCK_MONOTONIC_RAW);
@@ -223,10 +223,10 @@ int main() {
 		utime_t delta_time = time - prev_time;
 		prev_time = time;
 		angle += 0.001f * delta_time;
-		rot.rc[0][0] =  cos(angle);
-		rot.rc[0][1] =  sin(angle);
-		rot.rc[1][0] = -sin(angle);
-		rot.rc[1][1] =  cos(angle);
+		rot.rc[0][0] =  cos(0);
+		rot.rc[0][1] =  sin(0);
+		rot.rc[1][0] = -sin(0);
+		rot.rc[1][1] =  cos(0);
 
 		mat4 view = viewmat4f(&cam_pos, &cam_dir, &cam_up, &cam_right);
 
