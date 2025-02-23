@@ -31,7 +31,7 @@ void _terminate() {
 
 void init_mode() {
 	_init_terminal_state();
-	
+
 	_init_char_map();
 
 	_init_flush_ctx();

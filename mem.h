@@ -32,8 +32,8 @@ _FORCE_INLINE _entry_t _get_entry(void* mem, size_t entry_size) {
 
 typedef UINT buff_idx_t;
 
-int gen_mem_buff(void* mem, size_t size, size_t entry_size, buff_idx_t* idx);
+int gen_mem_buff(void* mem, size_t mem_size, size_t entry_size, buff_idx_t* idx);
 int delete_mem_buff(buff_idx_t idx);
 
-int   set_mem_buff(void* mem, size_t size, buff_idx_t idx);
-void* get_mem_buff(size_t* size, size_t* entry_size, buff_idx_t idx);
+int   set_mem_buff(void* mem, size_t mem_size, buff_idx_t idx);
+void* get_mem_buff(size_t* mem_size, size_t* entry_size, buff_idx_t idx);
