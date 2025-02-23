@@ -6,29 +6,18 @@
 #define DEFAULT_MEM_ENTRY_PREC_T float
 
 typedef struct _entry_t {
+	// w component for matrix transformation, not 
+	// included in memory buffer entry
 	float pos_x, pos_y, pos_z, pos_w;
-	float brightness;
+	float col_r, col_g, col_b;
 	float norm_x, norm_y, norm_z;
 } _entry_t;
 
 #define _POS_ENTRY(entry) (vec4*)(&entry)
-#define _BRIGHTNESS_ENTRY(entry) (float*)((float*)&entry + 4)
-#define _NORM_ENTRY(entry) (vec3*)((float*)&entry + 5)
+#define _COLOR_ENTRY(entry) (vec3*)((float*)&entry + 4)
+#define _NORM_ENTRY(entry) (vec3*)((float*)&entry + 7)
 
-// TODO: fix this
-_FORCE_INLINE _entry_t _get_entry(void* mem, size_t entry_size) {
-	_entry_t r;
-	memset(&r, 0, sizeof(r));
-	
-	_entry_t* entry = (_entry_t*)mem;
-
-	r.pos_x = entry->pos_x;
-	r.pos_y = entry->pos_y;
-	r.pos_z = entry->pos_z;
-	r.pos_w = 1.f;
-
-	return r;
-}
+_entry_t _get_entry(void* mem, size_t entry_size);
 
 typedef UINT buff_idx_t;
 

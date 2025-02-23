@@ -3,6 +3,26 @@
 #define _BUFFER_LIMIT 		   8u
 #define _INVALID_BUFFER_INDEX -1
 
+_entry_t _get_entry(void* mem, size_t entry_size) {
+	_entry_t r;
+	memset(&r, 0, sizeof(r));
+
+	size_t float_num = entry_size / sizeof(float);
+	float* p = (float*)&r;
+
+	for (UINT i = 0; i < 3 && i < float_num; i++) {
+		*(p + i) = *((float*)mem + i);
+	}
+
+	r.pos_w = 1.f;
+
+	for (UINT i = 3; i < float_num; i++) {
+		*(p + i + 1) = *((float*)mem + i);
+	}
+
+	return r;
+}
+
 typedef struct _mem_buff {
 	void*  mem;
 	size_t mem_size;
