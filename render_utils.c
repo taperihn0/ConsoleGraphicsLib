@@ -16,7 +16,7 @@ set_elem((x), (y), (c), 0.f);
 // Also Wikipedia pages helped a little bit:
 // https://en.wikipedia.org/wiki/Line_drawing_algorithm
 
-_FORCE_INLINE void _draw_line_horizontal(int x1, int y1, int x2, int y2) {
+_STATIC _FORCE_INLINE void _draw_line_horizontal(int x1, int y1, int x2, int y2) {
 	if (x2 < x1) {
 		swap(&x2, &x1);
 		swap(&y2, &y1);
@@ -41,7 +41,7 @@ _FORCE_INLINE void _draw_line_horizontal(int x1, int y1, int x2, int y2) {
 	}
 }
 
-_FORCE_INLINE void _draw_line_vertical(int x1, int y1, int x2, int y2) {
+_STATIC _FORCE_INLINE void _draw_line_vertical(int x1, int y1, int x2, int y2) {
 	if (y2 < y1) {
 		swap(&x2, &x1);
 		swap(&y2, &y1);

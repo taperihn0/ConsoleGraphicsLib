@@ -108,41 +108,41 @@ int set_elem(int x, int y, CHAR_T c, PREC_T d) {
 	return 0;
 }
 
-extern void _triangle_pipeline(vec3* mem, mat4* vt);
+extern void _triangle_pipeline(byte* mem, size_t entry_size, mat4* vt);
+extern void _stage_vertex_triangle(vec4* v1, vec4* v2, vec4* v3, mat4* vt);
+extern void _stage_rasterization_triangle(vec4* v1, vec4* v2, vec4* v3);
+extern void _stage_assembly_triangle(vec4* v1, vec4* v2, vec4* v3);
 
 int draw_buffer(buff_idx_t id, mat4* vt) {
 	size_t size;
-	vec3* mem = (vec3*)get_mem_buff(&size, id);
+	size_t entry_size;
+	byte* mem = (byte*)get_mem_buff(&size, &entry_size, id);
 
 	if (mem == NULL) {
 		fprintf(stderr, "Invalid buffer index (null buffer)\n");
 		return -1;
 	}
-	
-	size_t cnt = size / sizeof(vec3);
 
-	for (UINT i = 0; i < cnt; i += 3) {
-		_triangle_pipeline(&mem[i], vt);
+	for (UINT i = 0; i < size; i += 3 * entry_size) {
+		_triangle_pipeline(&mem[i], entry_size, vt);
 	}
 	
 	return 0;
 }
 
-extern void _stage_vertex_triangle(vec4* v1, vec4* v2, vec4* v3, mat4* vt);
-extern void _stage_rasterization_triangle(vec4* v1, vec4* v2, vec4* v3);
-extern void _stage_assembly_triangle(vec4* v1, vec4* v2, vec4* v3);
+_FORCE_INLINE void _triangle_pipeline(byte* mem, size_t entry_size, mat4* vt) {
+	_entry_t entry0 = _get_entry(mem, entry_size);
+	_entry_t entry1 = _get_entry(mem + entry_size, entry_size);
+	_entry_t entry2 = _get_entry(mem + 2 * entry_size, entry_size);
 
-_FORCE_INLINE void _triangle_pipeline(vec3* mem, mat4* vt) {
-	vec4 v1 = vec4f(mem[0].x, mem[0].y, mem[0].z, 1.f), 
-		 v2 = vec4f(mem[1].x, mem[1].y, mem[1].z, 1.f), 
-		 v3 = vec4f(mem[2].x, mem[2].y, mem[2].z, 1.f);
+	_stage_vertex_triangle(_POS_ENTRY(entry0), _POS_ENTRY(entry1), _POS_ENTRY(entry2), vt);
 
-	_stage_vertex_triangle(&v1, &v2, &v3, vt);
+	if (_mode == RENDER_MODE_EDGES) {
+		_stage_assembly_triangle(_POS_ENTRY(entry0), _POS_ENTRY(entry1), _POS_ENTRY(entry2));
+		return;
+	}
 
-	if (_mode == RENDER_MODE_SOLID)
-		_stage_rasterization_triangle(&v1, &v2, &v3);
-	else if (_mode == RENDER_MODE_EDGES)
-		_stage_assembly_triangle(&v1, &v2, &v3);
+	_stage_rasterization_triangle(_POS_ENTRY(entry0), _POS_ENTRY(entry1), _POS_ENTRY(entry2));
 }
 
 _FORCE_INLINE void _stage_vertex_triangle(vec4* v1, vec4* v2, vec4* v3, mat4* vt) {

@@ -5,7 +5,8 @@
 
 typedef struct _mem_buff {
 	void*  mem;
-	size_t size;
+	size_t mem_size;
+	size_t entry_size;
 } _mem_buff;
 
 typedef struct _buff_array_t {
@@ -14,7 +15,7 @@ typedef struct _buff_array_t {
 
 _buff_array_t* _buff_array = NULL;
 
-void _init_buff_array(_buff_array_t* ba) {
+_STATIC _FORCE_INLINE void _init_buff_array(_buff_array_t* ba) {
 	memset(ba->arr, 0, sizeof(ba->arr));
 }
 
@@ -36,7 +37,7 @@ bool _is_empty(_buff_array_t* ba) {
 	return true;
 } 
 
-int gen_mem_buff(void* mem, size_t size, buff_idx_t* idx) {
+int gen_mem_buff(void* mem, size_t mem_size, size_t entry_size, buff_idx_t* idx) {
 	if (_buff_array == NULL) {
 		_buff_array = malloc(sizeof(_buff_array_t));
 
@@ -46,7 +47,7 @@ int gen_mem_buff(void* mem, size_t size, buff_idx_t* idx) {
 		}
 
 		_init_buff_array(_buff_array);
-	} else if (size == 0) {
+	} else if (mem_size == 0) {
 		fprintf(stderr, "Invalid zero size");
 		return -1;
 	}
@@ -59,15 +60,16 @@ int gen_mem_buff(void* mem, size_t size, buff_idx_t* idx) {
 	}
 
 	_mem_buff* entry = &_buff_array->arr[next];
-	entry->mem = malloc(size);
+	entry->mem = malloc(mem_size);
 
 	if (entry->mem == NULL) {
-		fprintf(stderr, "Cannot malloc %lu bytes\n", size);
+		fprintf(stderr, "Cannot malloc %lu bytes\n", mem_size);
 		return -1;
 	}
 
-	memcpy(entry->mem, mem, size);
-	entry->size = size;
+	memcpy(entry->mem, mem, mem_size);
+	entry->mem_size = mem_size;
+	entry->entry_size = entry_size;
 
 	*idx = next; 
 	return 0;
@@ -85,7 +87,7 @@ int delete_mem_buff(buff_idx_t idx) {
 
 	free(entry->mem);
 	entry->mem = NULL;
-	entry->size = 0;
+	entry->entry_size = 0;
 
 	if (_is_empty(_buff_array)) {
 		free(_buff_array);
@@ -95,37 +97,38 @@ int delete_mem_buff(buff_idx_t idx) {
 	return 0;
 }
 
-int set_mem_buff(void* mem, size_t size, buff_idx_t idx) {
+int set_mem_buff(void* mem, size_t mem_size, buff_idx_t idx) {
 	if (idx >= _BUFFER_LIMIT || _buff_array == NULL) {
 		fprintf(stderr, "Invalid buffer index\n");
 		return -1;
-	} else if (size == 0) {
+	} else if (mem_size == 0) {
 		fprintf(stderr, "Invalid zero size");
 		return -1;
 	}
 
 	_mem_buff* entry = &_buff_array->arr[idx];
 
-	entry->mem = realloc(entry->mem, size);
+	entry->mem = realloc(entry->mem, mem_size);
 
 	if (entry->mem == NULL) {
-		fprintf(stderr, "Cannot realloc %lu bytes\n", size);
+		fprintf(stderr, "Cannot realloc %lu bytes\n", mem_size);
 		return -1;
 	}
 	
-	memcpy(entry->mem, mem, size);
-	entry->size = size;
+	memcpy(entry->mem, mem, mem_size);
+	entry->mem_size = mem_size;
 	
 	return 0;
 }
 
-void* get_mem_buff(size_t* size, buff_idx_t idx) {
+void* get_mem_buff(size_t* mem_size, size_t* entry_size, buff_idx_t idx) {
 	if (idx >= _BUFFER_LIMIT) {
 		fprintf(stderr, "Invalid buffer index\n");
 		return NULL;
 	}
 
 	_mem_buff* entry = &_buff_array->arr[idx];
-	*size = entry->size;
+	*mem_size = entry->mem_size;
+	*entry_size = entry->entry_size;
 	return entry->mem;
 }
