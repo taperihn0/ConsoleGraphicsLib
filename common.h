@@ -53,6 +53,9 @@ _STATIC _INLINE bool _assert_error_terminate(const char* err, const char* file, 
 #define min(a, b) ((a < b) ? a : b)
 #define max(a, b) ((a < b) ? b : a)
 
+#define minof3(a1, a2, a3) min(min(a1, a2), a3)
+#define maxof3(a1, a2, a3) max(max(a1, a2), a3)
+
 _STATIC _FORCE_INLINE void swap(int* a, int* b) {
 	int tmp = *a;
 	*a = *b;

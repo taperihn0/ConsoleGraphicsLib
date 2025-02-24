@@ -90,7 +90,6 @@ int _init_char_map() {
 }
 
 CHAR_T _char_by_brightness(float brightness) {
-	//ASSERT(0.f <= brightness && brightness <= 1.f , "Brightness do not normalized");
 	ASSERT(_chtab.idx > 0, "Character map uninitialized");
 	size_t entry = (size_t)roundl(brightness * (_chtab.idx - 1));
 	ASSERT(entry <= _chtab.idx, "Invalid brightness");

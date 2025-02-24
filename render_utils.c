@@ -3,18 +3,19 @@
 #include "charmap.h"
 #include <math.h>
 
-// TEMPORARY
-#define _UNICODE_POINT '.'
-#define TEMP_LINE_DEPTH 0.
+#define _LINE_POINT '.'
+#define _LINE_DEPTH 0.
+
 #define _plot(x, y, c, d) \
 set_elem((x), (y), (c), (d));
 
-// YouTube video by NoBS Code explaining the magics behind 
-// Bresenham's algorithm:
-// https://youtu.be/CceepU1vIKo?si=amC_5dnMf-8AiGcM
-//
-// Also Wikipedia pages helped a little bit:
-// https://en.wikipedia.org/wiki/Line_drawing_algorithm
+/*
+	YouTube video by NoBS Code explaining the magics behind 
+	Bresenham's algorithm:
+	https://youtu.be/CceepU1vIKo?si=amC_5dnMf-8AiGcM
+	Also Wikipedia pages helped a little bit:
+	https://en.wikipedia.org/wiki/Line_drawing_algorithm
+*/
 
 _STATIC _FORCE_INLINE void _draw_line_horizontal(int x1, int y1, int x2, int y2) {
 	if (x2 < x1) {
@@ -31,7 +32,7 @@ _STATIC _FORCE_INLINE void _draw_line_horizontal(int x1, int y1, int x2, int y2)
 
 	int y = y1;
 	for (int i = x1; i <= x2; i++) {
-		_plot(i, y, _UNICODE_POINT, TEMP_LINE_DEPTH);
+		_plot(i, y, _LINE_POINT, _LINE_DEPTH);
 		
 		if (d > 0) {
 			y += iy;
@@ -56,7 +57,7 @@ _STATIC _FORCE_INLINE void _draw_line_vertical(int x1, int y1, int x2, int y2) {
 
 	int x = x1;
 	for (int i = y1; i <= y2; i++) {
-		_plot(x, i, _UNICODE_POINT, TEMP_LINE_DEPTH);
+		_plot(x, i, _LINE_POINT, _LINE_DEPTH);
 		
 		if (d > 0) {
 			x += ix;
@@ -79,39 +80,66 @@ void _draw_triangle_edges(int x1, int y1, int x2, int y2, int x3, int y3) {
 	_draw_line(x3, y3, x1, y1);
 }
 
-// expands into an expression representing a sinus of an angle between
-// given vectors in 2D space
-#define _VECTOR_MATRIX_DET(v1, v2) (v1->x * v2->y - v1->y * v2->x)
+/*
+	The code below is responsible for rasterizing a triangle.
+	Read an article for general knowledge about razterizing an image:
+	https://lisyarus.github.io/blog/posts/implementing-a-tiny-cpu-rasterizer.html
+*/
 
-_FORCE_INLINE bool _is_inside_triangle(vec2_i* a1a2, vec2_i* a2a3, vec2_i* a3a1, 
-	vec2_i* a1p, vec2_i* a2p, vec2_i* a3p) 
+/*
+	Triangle consists of 3 points: A1, A2, A3.
+	Vectors included here are base information
+	about triangle as they are used for calculations
+	(rasterization and interpolation)
+*/
+
+typedef struct _triangle_data {
+	vec2
+		a1a2, 
+		a1a3,
+		a2a3,
+		a2a1,
+		a3a1,
+		a3a2;
+} _triangle_data;
+
+/*
+	Article: 
+	https://lisyarus.github.io/blog/posts/implementing-a-tiny-cpu-rasterizer-part-2.html
+	Read for further explanations.
+*/
+
+_FORCE_INLINE bool _is_inside_triangle(
+	vec2* a1p, vec2* a2p, vec2* a3p, 
+	_triangle_data*  triangle) 
 {
-	int det1 = _VECTOR_MATRIX_DET(a1p, a1a2);
-	int det2 = _VECTOR_MATRIX_DET(a2p, a2a3);
-	int det3 = _VECTOR_MATRIX_DET(a3p, a3a1);
+	float det1 = CROSSPROD_2D(*a1p, triangle->a1a2);
+	float det2 = CROSSPROD_2D(*a2p, triangle->a2a3);
+	float det3 = CROSSPROD_2D(*a3p, triangle->a3a1);
 	
-	return (det1 >= 0 && det2 >= 0 && det3 >= 0) || 
-		(det1 <= 0 && det2 <= 0 && det3 <= 0);
+	return (det1 >= 0.f && det2 >= 0.f && det3 >= 0.f) || 
+		(det1 <= 0.f && det2 <= 0.f && det3 <= 0.f);
 }
 
-#define _MIN3(a1, a2, a3) min(min(a1, a2), a3)
-#define _MAX3(a1, a2, a3) max(max(a1, a2), a3)
+/*
+	Another article, covering interpolation policy:
+	https://lisyarus.github.io/blog/posts/implementing-a-tiny-cpu-rasterizer-part-3.html
+*/
 
-void _interpolate(vec2_i* a2a1, vec2_i* a2a3, vec2_i* a2p, 
-	vec2_i* a3a1, vec2_i* a3a2, vec2_i* a3p,
-	vec2_i* a1a2, vec2_i* a1a3, vec2_i* a1p, 
-	float b1, float b2, float b3,
-	float d1, float d2, float d3,
-	CHAR_T* col, _BUFF_DEPTH_PREC_TYPE* depth) 
+void _interpolate_data(
+	vec2* a1p, vec2* a2p, vec2* a3p,
+	_triangle_data* triangle, 
+	float b1, float b2, float b3, CHAR_T* col,
+	float d1, float d2, float d3, float* depth) 
 {
-	int det1 = _VECTOR_MATRIX_DET(a2a1, a2a3);
-	int det2 = _VECTOR_MATRIX_DET(a3a1, a3a2);
-	int det3 = _VECTOR_MATRIX_DET(a1a2, a1a3);
+	float det1 = CROSSPROD_2D(triangle->a2a1, triangle->a2a3);
+	float det2 = CROSSPROD_2D(triangle->a3a1, triangle->a3a2);
+	float det3 = CROSSPROD_2D(triangle->a1a2, triangle->a1a3);
 
-	float fac1 = det1 == 0.f ? 0.f : (float)_VECTOR_MATRIX_DET(a2p, a2a3) / det1;
-	float fac2 = det2 == 0.f ? 0.f : (float)_VECTOR_MATRIX_DET(a3a1, a3p) / det2;
-	float fac3 = det3 == 0.f ? 0.f : (float)_VECTOR_MATRIX_DET(a1a2, a1p) / det3;
-
+	float fac1 = det1 == 0.f ? 0.f : CROSSPROD_2D(*a2p, triangle->a2a3) / det1;
+	float fac2 = det2 == 0.f ? 0.f : CROSSPROD_2D(triangle->a3a1, *a3p) / det2;
+	float fac3 = det3 == 0.f ? 0.f : CROSSPROD_2D(triangle->a1a2, *a1p) / det3;
+	
 	float interp_b = fac1 * b1 + fac2 * b2 + fac3 * b3;
 	*col = _char_by_brightness(interp_b);
 	
@@ -119,41 +147,43 @@ void _interpolate(vec2_i* a2a1, vec2_i* a2a3, vec2_i* a2p,
 	*depth = interp_d;
 }
 
-void _draw_triangle_solid(int x1, int y1, int x2, int y2, int x3, int y3, 
-	float b1, float b2, float b3,
-	float d1, float d2, float d3) 
+void _draw_triangle_solid(
+	float x1, float y1, float z1, 
+	float x2, float y2, float z2, 
+	float x3, float y3, float z3,
+	float b1, float b2, float b3) 
 {
-	vec2_i a1a2 = vec2i(x2 - x1, y2 - y1);
-	vec2_i a2a3 = vec2i(x3 - x2, y3 - y2);
-	vec2_i a3a1 = vec2i(x1 - x3, y1 - y3);
-	vec2_i a2a1 = vec2i(x1 - x2, y1 - y2);
-	vec2_i a3a2 = vec2i(x2 - x3, y2 - y3);
-	vec2_i a1a3 = vec2i(x3 - x1, y3 - y1);
+	_triangle_data triangle;
 
-	vec2_i a1p, a2p, a3p;
+	triangle.a1a2 = vec2f(x2 - x1, y2 - y1);
+	triangle.a2a3 = vec2f(x3 - x2, y3 - y2);
+	triangle.a3a1 = vec2f(x1 - x3, y1 - y3);
+	triangle.a2a1 = vec2f(x1 - x2, y1 - y2);
+	triangle.a3a2 = vec2f(x2 - x3, y2 - y3);
+	triangle.a1a3 = vec2f(x3 - x1, y3 - y1);
 	
-	int l = _MIN3(x1, x2, x3);
-	int u = _MIN3(y1, y2, y3);
-	int r = _MAX3(x1, x2, x3);
-	int d = _MAX3(y1, y2, y3);
+	int l = minof3(x1, x2, x3);
+	int u = minof3(y1, y2, y3);
+	int r = maxof3(x1, x2, x3);
+	int d = maxof3(y1, y2, y3);
+	
+	vec2 a1p, a2p, a3p;
 
 	for (int x = l; x <= r; x++) {
 		for (int y = u; y <= d; y++) {
-			a1p = vec2i(x - x1, y - y1);
-			a2p = vec2i(x - x2, y - y2);
-			a3p = vec2i(x - x3, y - y3);
+			a1p = vec2f(x - x1, y - y1);
+			a2p = vec2f(x - x2, y - y2);
+			a3p = vec2f(x - x3, y - y3);
 
-			if (_is_inside_triangle(&a1a2, &a2a3, &a3a1, &a1p, &a2p, &a3p)) {
+			if (_is_inside_triangle(&a1p, &a2p, &a3p, &triangle)) {
 				CHAR_T col;
-				_BUFF_DEPTH_PREC_TYPE depth;
+				float depth;
 
-				_interpolate(
-					&a2a1, &a2a3, &a2p, 
-					&a3a1, &a3a2, &a3p,
-					&a1a2, &a1a3, &a1p,
-					b1, b2, b3,
-					d1, d2, d3,
-					&col, &depth);
+				_interpolate_data(
+					&a1p, &a2p, &a3p,
+					&triangle,
+					b1, b2, b3, &col,
+					z1, z2, z3, &depth);
 
 				_plot(x, y, col, depth);
 			}
