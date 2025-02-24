@@ -110,7 +110,7 @@ int set_elem(int x, int y, CHAR_T c, PREC_T d) {
 
 extern void _triangle_pipeline(byte* mem, size_t entry_size, mat4* vt);
 extern void _stage_vertex_triangle(vec4* v1, vec4* v2, vec4* v3, mat4* vt);
-extern void _stage_rasterization_triangle(vec4* v1, vec4* v2, vec4* v3);
+extern void _stage_rasterization_triangle(_entry_t* entry0, _entry_t* entry1, _entry_t* entry2);
 extern void _stage_assembly_triangle(vec4* v1, vec4* v2, vec4* v3);
 
 int draw_buffer(buff_idx_t id, mat4* vt) {
@@ -142,7 +142,7 @@ _FORCE_INLINE void _triangle_pipeline(byte* mem, size_t entry_size, mat4* vt) {
 		return;
 	}
 
-	_stage_rasterization_triangle(_POS_ENTRY(entry0), _POS_ENTRY(entry1), _POS_ENTRY(entry2));
+	_stage_rasterization_triangle(&entry0, &entry1, &entry2);
 }
 
 _FORCE_INLINE void _stage_vertex_triangle(vec4* v1, vec4* v2, vec4* v3, mat4* vt) {
@@ -161,10 +161,15 @@ _FORCE_INLINE void _stage_vertex_triangle(vec4* v1, vec4* v2, vec4* v3, mat4* vt
 	v3->x = (v3->x / v3->w) * _HALF_TERMINAL_WIDTH;
 	v3->y = (v3->y / v3->w) * _HALF_TERMINAL_HEIGHT;
 	v3->z = (v3->z / v3->w);
-}
+}	
 
-_FORCE_INLINE void _stage_rasterization_triangle(vec4* v1, vec4* v2, vec4* v3) {
-	_draw_triangle_solid(v1->x, v1->y, v2->x, v2->y, v3->x, v3->y);
+// TODO: IMPLEMENT PROPER DEPTH AND COLOR INTERPOLATION
+_FORCE_INLINE void _stage_rasterization_triangle(_entry_t* entry0, _entry_t* entry1, _entry_t* entry2) {
+	_draw_triangle_solid(
+		entry0->pos_x, entry0->pos_y,
+		entry1->pos_x, entry1->pos_y,
+		entry2->pos_x, entry2->pos_y, 
+		entry0->col_r, entry1->col_r, entry2->col_r);
 }
 
 _FORCE_INLINE void _stage_assembly_triangle(vec4* v1, vec4* v2, vec4* v3) {

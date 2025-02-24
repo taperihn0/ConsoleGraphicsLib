@@ -1,5 +1,6 @@
 #include "render_utils.h"
 #include "render.h"
+#include "charmap.h"
 #include <math.h>
 
 // TEMPORARY
@@ -97,10 +98,39 @@ _FORCE_INLINE bool _is_inside_triangle(vec2_i* a1a2, vec2_i* a2a3, vec2_i* a3a1,
 #define _MIN3(a1, a2, a3) min(min(a1, a2), a3)
 #define _MAX3(a1, a2, a3) max(max(a1, a2), a3)
 
-void _draw_triangle_solid(int x1, int y1, int x2, int y2, int x3, int y3) {
+CHAR_T _interpolated_color(vec2_i* a2a1, vec2_i* a2a3, vec2_i* a2p, 
+	vec2_i* a3a1, vec2_i* a3a2, vec2_i* a3p,
+	vec2_i* a1a2, vec2_i* a1a3, vec2_i* a1p, 
+	float b1, float b2, float b3) 
+{
+	int det1 = _VECTOR_MATRIX_DET(a2a1, a2a3);
+	int det2 = _VECTOR_MATRIX_DET(a3a1, a3a2);
+	int det3 = _VECTOR_MATRIX_DET(a1a2, a1a3);
+
+	float fac1 = det1 == 0.f ? 0.f : (float)_VECTOR_MATRIX_DET(a2p, a2a3) / det1;
+	float fac2 = det2 == 0.f ? 0.f : (float)_VECTOR_MATRIX_DET(a3a1, a3p) / det2;
+	float fac3 = det3 == 0.f ? 0.f : (float)_VECTOR_MATRIX_DET(a1a2, a1p) / det3;
+
+	float interp = fac1 * b1 + fac2 * b2 + fac3 * b3;
+	/*
+	if (!(0.f <= interp && interp <= 1.f)) {
+		mvprintw(10, 0, "%.7f %.7f %.7f %.7f", interp, fac1+ fac2 +fac3);
+		refresh();
+		usleep(10000000);
+	}
+*/
+	return _char_by_brightness(interp);
+}
+
+void _draw_triangle_solid(int x1, int y1, int x2, int y2, int x3, int y3, 
+	float b1, float b2, float b3) 
+{
 	vec2_i a1a2 = vec2i(x2 - x1, y2 - y1);
 	vec2_i a2a3 = vec2i(x3 - x2, y3 - y2);
 	vec2_i a3a1 = vec2i(x1 - x3, y1 - y3);
+	vec2_i a2a1 = vec2i(x1 - x2, y1 - y2);
+	vec2_i a3a2 = vec2i(x2 - x3, y2 - y3);
+	vec2_i a1a3 = vec2i(x3 - x1, y3 - y1);
 
 	vec2_i a1p, a2p, a3p;
 	
@@ -116,7 +146,10 @@ void _draw_triangle_solid(int x1, int y1, int x2, int y2, int x3, int y3) {
 			a3p = vec2i(x - x3, y - y3);
 
 			if (_is_inside_triangle(&a1a2, &a2a3, &a3a1, &a1p, &a2p, &a3p)) {
-				_plot(x, y, _UNICODE_SOLID);
+				_plot(x, y, _interpolated_color(&a2a1, &a2a3, &a2p, 
+					&a3a1, &a3a2, &a3p,
+					&a1a2, &a1a3, &a1p,
+					b1, b2, b3));
 			}
 		}
 	}

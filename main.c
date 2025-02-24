@@ -124,8 +124,11 @@ void log_msg(int x, int y, char* msg) {
 	}
 }
 
+#include "charmap.h"
+
 int main() {
 	init_mode();
+
 	enable_raw_mode();
 	enable_focus_events();
 
@@ -147,13 +150,13 @@ int main() {
 	set_render_mode(mode);
 
 	float cube[] = {
-		10.f, -10.f, 10.f, 1.f, 1.f, 1.f,
-		10.f, 10.f, 10.f, 1.f, 1.f, 1.f,
-		10.f, 10.f, -10.f, 1.f, 1.f, 1.f,
-		10.f, -10.f, 10.f, 1.f, 1.f, 1.f,
+		10.f, -10.f, 10.f, 0.f, 0.01f, 0.01f,
+		10.f, 10.f, 10.f, 1.f, 0.01f, 0.01f,
+		10.f, 10.f, -10.f, 1.f, 0.01f, 0.01f,
+		10.f, -10.f, 10.f, 0.f, 1.f, 1.f,
 		10.f, -10.f, -10.f, 1.f, 1.f, 1.f,
 		10.f, 10.f, -10.f, 1.f, 1.f, 1.f,
-
+/*
 		-10.f, -10.f, 10.f, 1.f, 1.f, 1.f,
 		-10.f, 10.f, 10.f, 1.f, 1.f, 1.f,
 		10.f, 10.f, 10.f, 1.f, 1.f, 1.f,
@@ -187,7 +190,7 @@ int main() {
 		10.f, -10.f, -10.f, 1.f, 1.f, 1.f,
 		10.f, -10.f, -10.f, 1.f, 1.f, 1.f,
 		10.f, -10.f, 10.f, 1.f, 1.f, 1.f,
-		-10.f, -10.f, 10.f, 1.f, 1.f, 1.f
+		-10.f, -10.f, 10.f, 1.f, 1.f, 1.f*/
 	};
 
 	vec3 cube_pos[5];
@@ -230,7 +233,7 @@ int main() {
 
 		mat4 view = viewmat4f(&cam_pos, &cam_dir, &cam_up, &cam_right);
 
-		for (UINT i = 0; i < 5; i++) {
+		for (UINT i = 0; i < 1; i++) {
 			mat4 transl = diagmat4f(1);
 
 			transl.rc[0][3] = cube_pos[i].x;

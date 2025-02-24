@@ -13,7 +13,7 @@ typedef struct _entry_t {
 	float norm_x, norm_y, norm_z;
 } _entry_t;
 
-#define _POS_ENTRY(entry) (vec4*)(&entry)
+#define _POS_ENTRY(entry) (vec4*)&entry
 #define _COLOR_ENTRY(entry) (vec3*)((float*)&entry + 4)
 #define _NORM_ENTRY(entry) (vec3*)((float*)&entry + 7)
 
