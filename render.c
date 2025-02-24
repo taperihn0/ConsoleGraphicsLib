@@ -163,13 +163,14 @@ _FORCE_INLINE void _stage_vertex_triangle(vec4* v1, vec4* v2, vec4* v3, mat4* vt
 	v3->z = (v3->z / v3->w);
 }	
 
-// TODO: IMPLEMENT PROPER DEPTH AND COLOR INTERPOLATION
+// TODO: IMPLEMENT PROPER COLOR INTERPRETATION, NOT ONLY "BRIGHTNESS"
 _FORCE_INLINE void _stage_rasterization_triangle(_entry_t* entry0, _entry_t* entry1, _entry_t* entry2) {
 	_draw_triangle_solid(
 		entry0->pos_x, entry0->pos_y,
 		entry1->pos_x, entry1->pos_y,
 		entry2->pos_x, entry2->pos_y, 
-		entry0->col_r, entry1->col_r, entry2->col_r);
+		entry0->col_r, entry1->col_r, entry2->col_r,
+		entry0->pos_z, entry1->pos_z, entry2->pos_z);
 }
 
 _FORCE_INLINE void _stage_assembly_triangle(vec4* v1, vec4* v2, vec4* v3) {

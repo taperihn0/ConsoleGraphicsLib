@@ -68,7 +68,10 @@ void set(_core_buffer* buff, int x, int y, _BUFF_DEPTH_PREC_TYPE d, _BUFF_ELEM_T
 		return;
 
 	UINT idx = buff->width * y + x;
-	buff->mem[idx] = buff->depth[idx] > d ? c : buff->mem[idx];
+	if (buff->depth[idx] > d) {
+		buff->depth[idx] = d;
+		buff->mem[idx] = c;
+	}
 }
 
 void flush_buffer(_core_buffer* buff) {

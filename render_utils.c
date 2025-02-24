@@ -5,10 +5,9 @@
 
 // TEMPORARY
 #define _UNICODE_POINT '.'
-#define _UNICODE_SOLID 0x00002588
 #define TEMP_LINE_DEPTH 0.
-#define _plot(x, y, c) \
-set_elem((x), (y), (c), 0.f);
+#define _plot(x, y, c, d) \
+set_elem((x), (y), (c), (d));
 
 // YouTube video by NoBS Code explaining the magics behind 
 // Bresenham's algorithm:
@@ -32,7 +31,7 @@ _STATIC _FORCE_INLINE void _draw_line_horizontal(int x1, int y1, int x2, int y2)
 
 	int y = y1;
 	for (int i = x1; i <= x2; i++) {
-		_plot(i, y, _UNICODE_POINT);
+		_plot(i, y, _UNICODE_POINT, TEMP_LINE_DEPTH);
 		
 		if (d > 0) {
 			y += iy;
@@ -57,7 +56,7 @@ _STATIC _FORCE_INLINE void _draw_line_vertical(int x1, int y1, int x2, int y2) {
 
 	int x = x1;
 	for (int i = y1; i <= y2; i++) {
-		_plot(x, i, _UNICODE_POINT);
+		_plot(x, i, _UNICODE_POINT, TEMP_LINE_DEPTH);
 		
 		if (d > 0) {
 			x += ix;
@@ -98,10 +97,12 @@ _FORCE_INLINE bool _is_inside_triangle(vec2_i* a1a2, vec2_i* a2a3, vec2_i* a3a1,
 #define _MIN3(a1, a2, a3) min(min(a1, a2), a3)
 #define _MAX3(a1, a2, a3) max(max(a1, a2), a3)
 
-CHAR_T _interpolated_color(vec2_i* a2a1, vec2_i* a2a3, vec2_i* a2p, 
+void _interpolate(vec2_i* a2a1, vec2_i* a2a3, vec2_i* a2p, 
 	vec2_i* a3a1, vec2_i* a3a2, vec2_i* a3p,
 	vec2_i* a1a2, vec2_i* a1a3, vec2_i* a1p, 
-	float b1, float b2, float b3) 
+	float b1, float b2, float b3,
+	float d1, float d2, float d3,
+	CHAR_T* col, _BUFF_DEPTH_PREC_TYPE* depth) 
 {
 	int det1 = _VECTOR_MATRIX_DET(a2a1, a2a3);
 	int det2 = _VECTOR_MATRIX_DET(a3a1, a3a2);
@@ -111,19 +112,16 @@ CHAR_T _interpolated_color(vec2_i* a2a1, vec2_i* a2a3, vec2_i* a2p,
 	float fac2 = det2 == 0.f ? 0.f : (float)_VECTOR_MATRIX_DET(a3a1, a3p) / det2;
 	float fac3 = det3 == 0.f ? 0.f : (float)_VECTOR_MATRIX_DET(a1a2, a1p) / det3;
 
-	float interp = fac1 * b1 + fac2 * b2 + fac3 * b3;
-	/*
-	if (!(0.f <= interp && interp <= 1.f)) {
-		mvprintw(10, 0, "%.7f %.7f %.7f %.7f", interp, fac1+ fac2 +fac3);
-		refresh();
-		usleep(10000000);
-	}
-*/
-	return _char_by_brightness(interp);
+	float interp_b = fac1 * b1 + fac2 * b2 + fac3 * b3;
+	*col = _char_by_brightness(interp_b);
+	
+	float interp_d = fac1 * d1 + fac2 * d2 + fac3 * d3;
+	*depth = interp_d;
 }
 
 void _draw_triangle_solid(int x1, int y1, int x2, int y2, int x3, int y3, 
-	float b1, float b2, float b3) 
+	float b1, float b2, float b3,
+	float d1, float d2, float d3) 
 {
 	vec2_i a1a2 = vec2i(x2 - x1, y2 - y1);
 	vec2_i a2a3 = vec2i(x3 - x2, y3 - y2);
@@ -146,10 +144,18 @@ void _draw_triangle_solid(int x1, int y1, int x2, int y2, int x3, int y3,
 			a3p = vec2i(x - x3, y - y3);
 
 			if (_is_inside_triangle(&a1a2, &a2a3, &a3a1, &a1p, &a2p, &a3p)) {
-				_plot(x, y, _interpolated_color(&a2a1, &a2a3, &a2p, 
+				CHAR_T col;
+				_BUFF_DEPTH_PREC_TYPE depth;
+
+				_interpolate(
+					&a2a1, &a2a3, &a2p, 
 					&a3a1, &a3a2, &a3p,
 					&a1a2, &a1a3, &a1p,
-					b1, b2, b3));
+					b1, b2, b3,
+					d1, d2, d3,
+					&col, &depth);
+
+				_plot(x, y, col, depth);
 			}
 		}
 	}
