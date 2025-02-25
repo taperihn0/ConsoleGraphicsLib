@@ -196,6 +196,36 @@ mat4 viewmat4f(vec3* pos, vec3* dir, vec3* up, vec3* right) {
 	return final;
 }
 
+mat3 m3_from_m4(mat4* a) {
+	mat3 r;
+
+	for (UINT i = 0; i < 3; i++) {
+		for (UINT j = 0; j < 3; j++) {
+			r.rc[i][j] = a->rc[i][j];
+		}
+	}
+
+	return r;
+}
+
+mat3 transpose_m3(mat3* a) {
+	mat3 r;
+
+	for (UINT i = 0; i < 3; i++) {
+		for (UINT j = 0; j < 3; j++) {
+			r.rc[i][j] = a->rc[j][i];
+		}
+	}
+
+	return r;
+}
+
+/*
+mat4 inverse_m4(mat4* a) {
+
+}
+*/
+
 mat2 mult_m2(mat2* a, mat2* b) {
 	mat2 m = mat2f(NULL);
 

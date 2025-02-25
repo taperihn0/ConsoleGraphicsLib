@@ -4,6 +4,7 @@
 #include "mem.h"
 #include "coremath.h"
 #include "buffer.h"
+#include "light.h"
 
 typedef struct _double_buffer {
 	_core_buffer buff[2];
@@ -32,4 +33,4 @@ void clear_terminal(CHAR_T c);
 void swap_terminal_buffers();
 
 int set_elem(int x, int y, CHAR_T c, PREC_T d);
-int draw_buffer(buff_idx_t id, mat4* vt); 
+int draw_buffer(buff_idx_t id, mat4* vt, mat3* nt); 

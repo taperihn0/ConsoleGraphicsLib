@@ -93,6 +93,12 @@ mat4 diagmat4f(MATH_PREC_T a);
 mat4 projmat4f(float fov, float aspect_ratio, float n, float f);
 mat4 viewmat4f(vec3* pos, vec3* dir, vec3* up, vec3* right);
 
+mat3 m3_from_m4(mat4* a);
+
+mat3 transpose_m3(mat3* a);
+
+//mat4 inverse_m4(mat4* a);
+
 mat2 mult_m2(mat2* a, mat2* b);
 mat3 mult_m3(mat3* a, mat3* b);
 mat4 mult_m4(mat4* a, mat4* b);

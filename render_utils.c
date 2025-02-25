@@ -1,6 +1,7 @@
 #include "render_utils.h"
 #include "render.h"
 #include "charmap.h"
+#include "terminal.h"
 #include <math.h>
 
 #define _LINE_POINT '.'
@@ -109,7 +110,7 @@ typedef struct _triangle_data {
 	Read for further explanations.
 */
 
-_FORCE_INLINE bool _is_inside_triangle(
+_STATIC _FORCE_INLINE bool _is_inside_triangle(
 	vec2* a1p, vec2* a2p, vec2* a3p, 
 	_triangle_data*  triangle) 
 {
@@ -126,64 +127,86 @@ _FORCE_INLINE bool _is_inside_triangle(
 	https://lisyarus.github.io/blog/posts/implementing-a-tiny-cpu-rasterizer-part-3.html
 */
 
-void _interpolate_data(
+_STATIC _FORCE_INLINE void _barycentric_coords(
 	vec2* a1p, vec2* a2p, vec2* a3p,
 	_triangle_data* triangle, 
-	float b1, float b2, float b3, CHAR_T* col,
-	float d1, float d2, float d3, float* depth) 
+	vec3* cords) 
 {
 	float det1 = CROSSPROD_2D(triangle->a2a1, triangle->a2a3);
 	float det2 = CROSSPROD_2D(triangle->a3a1, triangle->a3a2);
 	float det3 = CROSSPROD_2D(triangle->a1a2, triangle->a1a3);
 
-	float fac1 = det1 == 0.f ? 0.f : CROSSPROD_2D(*a2p, triangle->a2a3) / det1;
-	float fac2 = det2 == 0.f ? 0.f : CROSSPROD_2D(triangle->a3a1, *a3p) / det2;
-	float fac3 = det3 == 0.f ? 0.f : CROSSPROD_2D(triangle->a1a2, *a1p) / det3;
-	
-	float interp_b = fac1 * b1 + fac2 * b2 + fac3 * b3;
-	*col = _char_by_brightness(interp_b);
-	
-	float interp_d = fac1 * d1 + fac2 * d2 + fac3 * d3;
-	*depth = interp_d;
+	cords->x = det1 == 0.f ? 0.f : CROSSPROD_2D(*a2p, triangle->a2a3) / det1;
+	cords->y = det2 == 0.f ? 0.f : CROSSPROD_2D(triangle->a3a1, *a3p) / det2;
+	cords->z = det3 == 0.f ? 0.f : CROSSPROD_2D(triangle->a1a2, *a1p) / det3;	
 }
 
+#define _COL_BRIGHTNESS(col) (((col)->x + (col)->y + (col)->z) / 3.f)
+
 void _draw_triangle_solid(
-	float x1, float y1, float z1, 
-	float x2, float y2, float z2, 
-	float x3, float y3, float z3,
-	float b1, float b2, float b3) 
+	vec3* v1, vec3* v2, vec3* v3,
+	vec3* col1, vec3* col2, vec3* col3,
+	vec3* norm1, vec3* norm2, vec3* norm3)
 {
 	_triangle_data triangle;
 
-	triangle.a1a2 = vec2f(x2 - x1, y2 - y1);
-	triangle.a2a3 = vec2f(x3 - x2, y3 - y2);
-	triangle.a3a1 = vec2f(x1 - x3, y1 - y3);
-	triangle.a2a1 = vec2f(x1 - x2, y1 - y2);
-	triangle.a3a2 = vec2f(x2 - x3, y2 - y3);
-	triangle.a1a3 = vec2f(x3 - x1, y3 - y1);
-	
-	int l = minof3(x1, x2, x3);
-	int u = minof3(y1, y2, y3);
-	int r = maxof3(x1, x2, x3);
-	int d = maxof3(y1, y2, y3);
+	triangle.a1a2 = vec2f(v2->x - v1->x, v2->y - v1->y);
+	triangle.a2a3 = vec2f(v3->x - v2->x, v3->y - v2->y);
+	triangle.a3a1 = vec2f(v1->x - v3->x, v1->y - v3->y);
+	triangle.a2a1 = vec2f(v1->x - v2->x, v1->y - v2->y);
+	triangle.a3a2 = vec2f(v2->x - v3->x, v2->y - v3->y);
+	triangle.a1a3 = vec2f(v3->x - v1->x, v3->y - v1->y);
+
+	int half_width = get_terminal_width() / 2;
+	int half_height = get_terminal_height() / 2;
+
+	int l = max(minof3(v1->x, v2->x, v3->x), -half_width);
+	int u = max(minof3(v1->y, v2->y, v3->y), -half_height);
+	int r = min(maxof3(v1->x, v2->x, v3->x), half_width);
+	int d = max(maxof3(v1->y, v2->y, v3->y), half_height);
 	
 	vec2 a1p, a2p, a3p;
+	CHAR_T col;
+	float depth;
+	vec3 cords;
+	vec3 norm;
+
+	// NOTE:
+	// TEMPORARY CODE STRUCTURE.
+	// ASSUMING THRERE IS EXACTLY ONE DIRECTIONAL LIGHT
+	// INSIDE LIGHT REGISTER BUFFER
+	light_id_t* light_ids;
+	size_t light_cnt;
+	register_light_get(&light_ids, &light_cnt);
+
+	light_directional* light_dir;
+
+	get_light_source(*light_ids, (void**)&light_dir, NULL);
 
 	for (int x = l; x <= r; x++) {
 		for (int y = u; y <= d; y++) {
-			a1p = vec2f(x - x1, y - y1);
-			a2p = vec2f(x - x2, y - y2);
-			a3p = vec2f(x - x3, y - y3);
+			a1p = vec2f(x - v1->x, y - v1->y);
+			a2p = vec2f(x - v2->x, y - v2->y);
+			a3p = vec2f(x - v3->x, y - v3->y);
 
 			if (_is_inside_triangle(&a1p, &a2p, &a3p, &triangle)) {
-				CHAR_T col;
-				float depth;
+				_barycentric_coords(&a1p, &a2p, &a3p, &triangle, &cords);
 
-				_interpolate_data(
-					&a1p, &a2p, &a3p,
-					&triangle,
-					b1, b2, b3, &col,
-					z1, z2, z3, &depth);
+				float brightness = _COL_BRIGHTNESS(col1) * cords.x 
+					+ _COL_BRIGHTNESS(col2) * cords.y 
+					+ _COL_BRIGHTNESS(col3) * cords.z;
+
+				depth =  v1->z * cords.x + v2->z * cords.y + v3->z * cords.z;
+
+				norm = vec3f(
+					cords.x * norm1->x + cords.y * norm2->x + cords.z * norm3->x,
+					cords.x * norm1->y + cords.y * norm2->y + cords.z * norm3->y,
+					cords.x * norm1->z + cords.y * norm2->z + cords.z * norm3->z);
+				
+				// DEMO TEST WITH SIMPLE DIFFUSE LIGHTNING
+				float diffuse = max(0.1f, -dot3f(&light_dir->dir, &norm));
+				brightness *= diffuse;
+				col = _char_by_brightness(brightness);
 
 				_plot(x, y, col, depth);
 			}

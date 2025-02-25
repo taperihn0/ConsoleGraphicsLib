@@ -5,6 +5,7 @@
 #include "mem.h"
 #include "timeman.h"
 #include "ctx.h"
+#include "light.h"
 
 static vec3 cam_pos = {
 	.x = 0.f, 
@@ -30,7 +31,8 @@ static vec3 cam_up = {
 	.z = 0.f
 };
 
-render_mode_t mode = RENDER_MODE_SOLID;
+static render_mode_t mode = RENDER_MODE_SOLID;
+static bool run = true;
 
 void mouse_callback(int dx, int dy) {
 	static float yaw = -90.f;
@@ -111,6 +113,9 @@ void process_kbd_events(keyboard* kbd) {
 		mode %= _RENDER_MODE_CNT;
 		set_render_mode(mode);
 	}
+	
+	if (get_key(kbd, KEY_Q) == KEY_PRESSED)
+		run = false;
 
 	prev_time = curr_time;
 }
@@ -123,8 +128,6 @@ void log_msg(int x, int y, char* msg) {
 		set_elem(-half_width + x + i, half_height - y, msg[i], 1.f);
 	}
 }
-
-#include "charmap.h"
 
 int main() {
 	init_mode();
@@ -145,52 +148,52 @@ int main() {
 	disable_console_cursor();
 	hide_cursor();
 
-	set_framerate_limit(40);
+	set_framerate_limit(30);
 
 	set_render_mode(mode);
 
 	float cube[] = {
-		10.f, -10.f, 10.f, 0.f, 0.01f, 0.01f,
-		10.f, 10.f, 10.f, 1.f, 0.01f, 0.01f,
-		10.f, 10.f, -10.f, 1.f, 0.01f, 0.01f,
-		10.f, -10.f, 10.f, 0.f, 1.f, 1.f,
-		10.f, -10.f, -10.f, 1.f, 1.f, 1.f,
-		10.f, 10.f, -10.f, 1.f, 1.f, 1.f,
+		10.f, -10.f, 10.f, 0.f, 0.01f, 0.01f, 1.f, 0.f, 0.f,
+		10.f, 10.f, 10.f, 1.f, 0.01f, 0.01f, 1.f, 0.f, 0.f,
+		10.f, 10.f, -10.f, 1.f, 0.01f, 0.01f, 1.f, 0.f, 0.f,
+		10.f, -10.f, 10.f, 0.f, 1.f, 1.f, 1.f, 0.f, 0.f,
+		10.f, -10.f, -10.f, 1.f, 1.f, 1.f, 1.f, 0.f, 0.f,
+		10.f, 10.f, -10.f, 1.f, 1.f, 1.f, 1.f, 0.f, 0.f,
 
-		-10.f, -10.f, 10.f, 1.f, 1.f, 1.f,
-		-10.f, 10.f, 10.f, 1.f, 1.f, 1.f,
-		10.f, 10.f, 10.f, 1.f, 1.f, 1.f,
-		10.f, 10.f, 10.f,  1.f, 1.f, 1.f,
-		10.f, -10.f, 10.f, 0.f, 1.f, 1.f,
-		-10.f, -10.f, 10.f, 1.f, 1.f, 1.f,
+		-10.f, -10.f, 10.f, 1.f, 1.f, 1.f, 0.f, 0.f, 1.f,
+		-10.f, 10.f, 10.f, 1.f, 1.f, 1.f, 0.f, 0.f, 1.f,
+		10.f, 10.f, 10.f, 1.f, 1.f, 1.f, 0.f, 0.f, 1.f,
+		10.f, 10.f, 10.f,  1.f, 1.f, 1.f, 0.f, 0.f, 1.f,
+		10.f, -10.f, 10.f, 0.f, 1.f, 1.f, 0.f, 0.f, 1.f,
+		-10.f, -10.f, 10.f, 1.f, 1.f, 1.f, 0.f, 0.f, 1.f,
 
-		-10.f, -10.f, -10.f, 1.f, 1.f, 1.f,
-		-10.f, 10.f, -10.f, 0.1f, 1.f, 1.f,
-		10.f, 10.f, -10.f, 0.6f, 1.f, 1.f,
-		10.f, 10.f, -10.f,  1.f, 1.f, 1.f,
-		10.f, -10.f, -10.f, 1.f, 1.f, 1.f,
-		-10.f, -10.f, -10.f, 0.1f, 1.f, 1.f,
+		-10.f, -10.f, -10.f, 1.f, 1.f, 1.f, 0.f, 0.f, -1.f,
+		-10.f, 10.f, -10.f, 0.1f, 1.f, 1.f, 0.f, 0.f, -1.f,
+		10.f, 10.f, -10.f, 0.6f, 1.f, 1.f, 0.f, 0.f, -1.f,
+		10.f, 10.f, -10.f,  1.f, 1.f, 1.f, 0.f, 0.f, -1.f,
+		10.f, -10.f, -10.f, 1.f, 1.f, 1.f, 0.f, 0.f, -1.f,
+		-10.f, -10.f, -10.f, 0.1f, 1.f, 1.f, 0.f, 0.f, -1.f,
 
-		-10.f, -10.f, 10.f, 1.f, 1.f, 1.f,
-		-10.f, 10.f, 10.f, 1.f, 1.f, 1.f,
-		-10.f, 10.f, -10.f, 0.9f, 1.f, 1.f,
-		-10.f, -10.f, 10.f, 1.f, 1.f, 1.f,
-		-10.f, -10.f, -10.f, 1.f, 1.f, 1.f,
-		-10.f, 10.f, -10.f, 0.f, 1.f, 1.f,
+		-10.f, -10.f, 10.f, 1.f, 1.f, 1.f, -1.f, 0.f, 0.f,
+		-10.f, 10.f, 10.f, 1.f, 1.f, 1.f, -1.f, 0.f, 0.f,
+		-10.f, 10.f, -10.f, 0.9f, 1.f, 1.f, -1.f, 0.f, 0.f,
+		-10.f, -10.f, 10.f, 1.f, 1.f, 1.f, -1.f, 0.f, 0.f,
+		-10.f, -10.f, -10.f, 1.f, 1.f, 1.f, -1.f, 0.f, 0.f,
+		-10.f, 10.f, -10.f, 0.f, 1.f, 1.f, -1.f, 0.f, 0.f,
 
-		-10.f, 10.f, 10.f, 0.4f, 1.f, 1.f,
-		-10.f, 10.f, -10.f, 1.f, 1.f, 1.f,
-		10.f, 10.f, -10.f, 1.f, 1.f, 1.f,
-		10.f, 10.f, -10.f, 0.2f, 1.f, 1.f,
-		10.f, 10.f, 10.f, 1.f, 1.f, 1.f,
-		-10.f, 10.f, 10.f, 1.f, 1.f, 1.f,
+		-10.f, 10.f, 10.f, 0.4f, 1.f, 1.f, 0.f, 1.f, 0.f,
+		-10.f, 10.f, -10.f, 1.f, 1.f, 1.f, 0.f, 1.f, 0.f,
+		10.f, 10.f, -10.f, 1.f, 1.f, 1.f, 0.f, 1.f, 0.f,
+		10.f, 10.f, -10.f, 0.2f, 1.f, 1.f, 0.f, 1.f, 0.f,
+		10.f, 10.f, 10.f, 1.f, 1.f, 1.f, 0.f, 1.f, 0.f,
+		-10.f, 10.f, 10.f, 1.f, 1.f, 1.f, 0.f, 1.f, 0.f,
 
-		-10.f, -10.f, 10.f, 1.f, 1.f, 1.f,
-		-10.f, -10.f, -10.f, 1.f, 1.f, 1.f,
-		10.f, -10.f, -10.f, 0.f, 1.f, 1.f,
-		10.f, -10.f, -10.f, 1.f, 1.f, 1.f,
-		10.f, -10.f, 10.f, 1.f, 1.f, 1.f,
-		-10.f, -10.f, 10.f, 0.5f, 1.f, 1.f
+		-10.f, -10.f, 10.f, 1.f, 1.f, 1.f, 0.f, -1.f, 0.f,
+		-10.f, -10.f, -10.f, 1.f, 1.f, 1.f, 0.f, -1.f, 0.f,
+		10.f, -10.f, -10.f, 0.f, 1.f, 1.f, 0.f, -1.f, 0.f,
+		10.f, -10.f, -10.f, 1.f, 1.f, 1.f, 0.f, -1.f, 0.f,
+		10.f, -10.f, 10.f, 1.f, 1.f, 1.f, 0.f, -1.f, 0.f,
+		-10.f, -10.f, 10.f, 0.5f, 1.f, 1.f, 0.f, -1.f, 0.f
 	};
 
 	vec3 cube_pos[5];
@@ -201,7 +204,7 @@ int main() {
 	cube_pos[4] = vec3f(60.f, 0.f, -25.f);
 
 	buff_idx_t id;
-	if (gen_mem_buff(cube, sizeof(cube), 3 * sizeof(float) + 3 * sizeof(float), &id) == -1) {
+	if (gen_mem_buff(cube, sizeof(cube), 9 * sizeof(float), &id) == -1) {
 		fprintf(stderr, "Failed to create buffer\n");
 		return -1;
 	}
@@ -212,28 +215,39 @@ int main() {
 	utime_t prev_time = gettime_mls(CLOCK_MONOTONIC_RAW);
 	
 	char msg[512];
+	
+	light_id_t light_id;
+	add_light_source(&light_id, LIGHT_DIRECTIONAL);
+	
+	light_directional* light;
+	get_light_source(light_id, (void**)&light, NULL);
 
-	while (!should_quit()) {
-		poll_events_keyboard(kbd);
-		poll_events_mouse(mice);
+	light->dir = (vec3){
+		.x = -1.f,
+		.y = 0.f,
+		.z = 0.f,
+	};
+
+	register_light_source(&light_id, 1);
+
+	while (run && !should_quit()) {
+		clear_terminal((CHAR_T)' ');
 
 		process_kbd_events(kbd);
-		
-		clear_terminal((CHAR_T)' ');
 
 		mat4 rot = diagmat4f(1);
 		utime_t time = gettime_mls(CLOCK_MONOTONIC_RAW);
 		utime_t delta_time = time - prev_time;
 		prev_time = time;
 		angle += 0.001f * delta_time;
-		rot.rc[0][0] =  cos(0);
-		rot.rc[0][1] =  sin(0);
-		rot.rc[1][0] = -sin(0);
-		rot.rc[1][1] =  cos(0);
+		rot.rc[0][0] =  cos(angle);
+		rot.rc[0][1] =  sin(angle);
+		rot.rc[1][0] = -sin(angle);
+		rot.rc[1][1] =  cos(angle);
 
 		mat4 view = viewmat4f(&cam_pos, &cam_dir, &cam_up, &cam_right);
 
-		for (UINT i = 0; i < 5; i++) {
+		for (UINT i = 0; i < 1; i++) {
 			mat4 transl = diagmat4f(1);
 
 			transl.rc[0][3] = cube_pos[i].x;
@@ -245,11 +259,26 @@ int main() {
 			mat4 view_model = mult_m4(&view, &m);
 			mat4 proj_view_model = mult_m4(&proj, &view_model);
 
-			draw_buffer(id, &proj_view_model);
-		}
+			mat3 normal_model = m3_from_m4(&m);
 
-		if (get_key(kbd, KEY_Q) == KEY_PRESSED)
-			break;
+			draw_buffer(id, &proj_view_model, &normal_model);
+			
+			/*
+			vec4 tmp1 = vec4f(cube[0], cube[1], cube[2], 1.f);
+			vec4 tmp2 = vec4f(cube[6], cube[7], cube[8], 1.f);
+			vec4 tmp3 = vec4f(cube[12], cube[13], cube[14], 1.f);
+			
+			tmp1 = mult_mv4(&proj_view_model, &tmp1);
+			tmp2 = mult_mv4(&proj_view_model, &tmp2);
+			tmp3 = mult_mv4(&proj_view_model, &tmp3);
+
+			sprintf(msg, "V1: %f %f %f", tmp1.x / tmp1.w, tmp1.y / tmp1.w, tmp1.z / tmp1.w);
+			log_msg(0, 3, msg);
+			sprintf(msg, "V2: %f %f %f", tmp2.x / tmp2.w, tmp2.y / tmp2.w, tmp2.z / tmp2.w);
+			log_msg(0, 4, msg);
+			sprintf(msg, "V3: %f %f %f", tmp3.x / tmp3.w, tmp3.y / tmp3.w, tmp3.z  / tmp3.w);
+			log_msg(0, 5, msg);*/
+		}
 
 		sprintf(msg, "POS: %f %f %f", cam_pos.x, cam_pos.y, cam_pos.z);
 		log_msg(0, 0, msg);
@@ -257,10 +286,15 @@ int main() {
 		log_msg(0, 1, msg);
 		sprintf(msg, "RIGHT: %f %f %f", cam_right.x, cam_right.y, cam_right.z);
 		log_msg(0, 2, msg);
+		
+		poll_events_keyboard(kbd);
+		poll_events_mouse(mice);
 
 	    swap_terminal_buffers();
 	}
-	
+		
+	register_light_clear();
+
 	delete_mem_buff(id);
 
 	close_keyboard(kbd);

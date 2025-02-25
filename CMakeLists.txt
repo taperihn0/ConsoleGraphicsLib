@@ -17,6 +17,7 @@ set(
 	thread.c
 	ctx.c
 	charmap.c
+	light.c
 )
 
 add_executable(ConsoleGraphicsLib ${SOURCES})

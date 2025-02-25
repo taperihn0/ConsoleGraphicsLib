@@ -1,6 +1,7 @@
 #pragma once
 
 #include "common.h"
+#include <stddef.h>
 
 #define DEFAULT_MEM_ENTRY_PREC
 #define DEFAULT_MEM_ENTRY_PREC_T float
@@ -13,9 +14,13 @@ typedef struct _entry_t {
 	float norm_x, norm_y, norm_z;
 } _entry_t;
 
-#define _POS_ENTRY(entry) (vec4*)&entry
-#define _COLOR_ENTRY(entry) (vec3*)((float*)&entry + 4)
-#define _NORM_ENTRY(entry) (vec3*)((float*)&entry + 7)
+_UNUSED static size_t _entry_col_offset = offsetof(_entry_t, col_r);
+_UNUSED static size_t _entry_norm_offset = offsetof(_entry_t, norm_x);
+
+#define _ENTRY_POS3(entry) (vec3*)entry
+#define _ENTRY_POS4(entry) (vec4*)entry
+#define _ENTRY_COL(entry) (vec3*)((byte*)entry + _entry_col_offset)
+#define _ENTRY_NORM(entry) (vec3*)((byte*)entry + _entry_norm_offset)
 
 _entry_t _get_entry(void* mem, size_t entry_size);
 

@@ -18,6 +18,10 @@
 #endif
 #define _INLINE inline
 
+#ifndef _UNUSED
+#	define _UNUSED __attribute__((unused))
+#endif
+
 // Got problems with static functions while trying to compile the code under 
 // different optimization flags with GCC.
 // For instance, -Og requires every function defined here needs to be explicitly
