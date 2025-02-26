@@ -107,6 +107,27 @@ vec4 add4f(vec4* a, vec4* b) {
 	return r;
 }
 
+vec2 mult_av2(float alpha, vec2* a) {
+	a->x *= alpha;
+	a->y *= alpha;
+	return *a;
+}
+
+vec3 mult_av3(float alpha, vec3* a) {
+	a->x *= alpha;
+	a->y *= alpha;
+	a->z *= alpha;
+	return *a;
+}
+
+vec4 mult_av4(float alpha, vec4* a) {
+	a->x *= alpha;
+	a->y *= alpha;
+	a->z *= alpha;
+	a->w *= alpha;
+	return *a;
+}
+
 MATH_PREC_T dot2f(vec2* a, vec2* b) {
 	return a->x * b->x + a->y * b->y;
 }

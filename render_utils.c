@@ -1,5 +1,4 @@
 #include "render_utils.h"
-#include "render.h"
 #include "charmap.h"
 #include "terminal.h"
 #include <math.h>
@@ -146,7 +145,9 @@ _STATIC _FORCE_INLINE void _barycentric_coords(
 void _draw_triangle_solid(
 	vec3* v1, vec3* v2, vec3* v3,
 	vec3* col1, vec3* col2, vec3* col3,
-	vec3* norm1, vec3* norm2, vec3* norm3)
+	vec3* norm1, vec3* norm2, vec3* norm3,
+	func_stage_fragment stage_fragment,
+	void* attrib)
 {
 	_triangle_data triangle;
 
@@ -166,22 +167,14 @@ void _draw_triangle_solid(
 	int d = max(maxof3(v1->y, v2->y, v3->y), half_height);
 	
 	vec2 a1p, a2p, a3p;
-	CHAR_T col;
-	float depth;
+
+	float z;
+	CHAR_T ch;
+	vec3 norm, rgb;
+
 	vec3 cords;
-	vec3 norm;
 
-	// NOTE:
-	// TEMPORARY CODE STRUCTURE.
-	// ASSUMING THRERE IS EXACTLY ONE DIRECTIONAL LIGHT
-	// INSIDE LIGHT REGISTER BUFFER
-	light_id_t* light_ids;
-	size_t light_cnt;
-	register_light_get(&light_ids, &light_cnt);
-
-	light_directional* light_dir;
-
-	get_light_source(*light_ids, (void**)&light_dir, NULL);
+	_entry_t normalized;
 
 	for (int x = l; x <= r; x++) {
 		for (int y = u; y <= d; y++) {
@@ -190,25 +183,28 @@ void _draw_triangle_solid(
 			a3p = vec2f(x - v3->x, y - v3->y);
 
 			if (_is_inside_triangle(&a1p, &a2p, &a3p, &triangle)) {
+				// get barycentric coordinates for interpolation
 				_barycentric_coords(&a1p, &a2p, &a3p, &triangle, &cords);
-
-				float brightness = _COL_BRIGHTNESS(col1) * cords.x 
-					+ _COL_BRIGHTNESS(col2) * cords.y 
-					+ _COL_BRIGHTNESS(col3) * cords.z;
-
-				depth =  v1->z * cords.x + v2->z * cords.y + v3->z * cords.z;
+				
+				// interpolating depth (z coordinate), RGB color and normal vector			
+				z =  v1->z * cords.x + v2->z * cords.y + v3->z * cords.z;
+				
+				rgb = vec3f(
+					cords.x * col1->x + cords.y * col2->x + cords.z * col3->x,
+					cords.x * col1->y + cords.y * col2->y + cords.z * col3->y,
+					cords.x * col1->z + cords.y * col2->z + cords.z * col3->z);
 
 				norm = vec3f(
 					cords.x * norm1->x + cords.y * norm2->x + cords.z * norm3->x,
 					cords.x * norm1->y + cords.y * norm2->y + cords.z * norm3->y,
 					cords.x * norm1->z + cords.y * norm2->z + cords.z * norm3->z);
 				
-				// DEMO TEST WITH SIMPLE DIFFUSE LIGHTNING
-				float diffuse = max(0.1f, -dot3f(&light_dir->dir, &norm));
-				brightness *= diffuse;
-				col = _char_by_brightness(brightness);
+				// passing interpolated data in a form of entry
+				normalized = _entry_from(x, y, z, &rgb, &norm);
+				stage_fragment(&normalized, attrib);
 
-				_plot(x, y, col, depth);
+				ch = _char_by_brightness(_COL_BRIGHTNESS(_ENTRY_COL(&normalized)));
+				_plot(x, y, ch, z);
 			}
 		}
 	}

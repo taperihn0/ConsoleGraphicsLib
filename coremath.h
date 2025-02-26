@@ -76,12 +76,16 @@ vec2 add2f(vec2* a, vec2* b);
 vec3 add3f(vec3* a, vec3* b);
 vec4 add4f(vec4* a, vec4* b);
 
+vec2 mult_av2(float alpha, vec2* a);
+vec3 mult_av3(float alpha, vec3* a);
+vec4 mult_av4(float alpha, vec4* a);
+
 MATH_PREC_T dot2f(vec2* a, vec2* b);
 MATH_PREC_T dot3f(vec3* a, vec3* b);
 MATH_PREC_T dot4f(vec4* a, vec4* b);
 
 // frequent use of this expansion make it necessary 
-// to make it a macro, which is *ALWAYS* inline
+// to make it a macro, which is *ALWAYS* inlined
 #define CROSSPROD_2D(v1, v2) ((v1).x * (v2).y - (v1).y * (v2).x)
 
 vec3 cross3f(vec3* a, vec3* b);

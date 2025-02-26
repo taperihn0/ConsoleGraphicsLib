@@ -31,6 +31,17 @@ void set_render_mode(render_mode_t mode);
 
 void clear_terminal(CHAR_T c);
 void swap_terminal_buffers();
-
 int set_elem(int x, int y, CHAR_T c, PREC_T d);
-int draw_buffer(buff_idx_t id, mat4* vt, mat3* nt); 
+
+typedef void (*func_stage_vertex)(
+	_entry_t* entry0, _entry_t* entry1, _entry_t* entry2, void* attrib);
+
+typedef void (*func_stage_fragment)(
+	_entry_t* normalized, void* attrib);
+
+typedef struct shader_t {
+	func_stage_vertex stage_vertex;
+	func_stage_fragment stage_fragment;
+} shader_t;
+
+int draw_buffer(shader_t* shader, buff_idx_t id, void* attrib); 

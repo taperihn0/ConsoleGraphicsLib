@@ -3,6 +3,20 @@
 #define _BUFFER_LIMIT 		   8u
 #define _INVALID_BUFFER_INDEX -1
 
+_entry_t _entry_from(float x, float y, float z, vec3* rgb, vec3* norm) {
+	return (_entry_t){
+		.pos_x = x,
+		.pos_y = y,
+		.pos_z = z,
+		.col_r = rgb->x,
+		.col_g = rgb->y,
+		.col_b = rgb->z,
+		.norm_x = norm->x,
+		.norm_y = norm->y,
+		.norm_z = norm->z
+	};
+}
+
 _entry_t _get_entry(void* mem, size_t entry_size) {
 	_entry_t r;
 	memset(&r, 0, sizeof(r));

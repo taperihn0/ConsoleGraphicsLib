@@ -129,6 +129,37 @@ void log_msg(int x, int y, char* msg) {
 	}
 }
 
+void stage_vertex(
+	_entry_t* entry0, _entry_t* entry1, _entry_t* entry2, void* attrib) 
+{
+	mat4* vt = (mat4*)(attrib);
+	mat3* nt = (mat3*)((byte*)attrib + sizeof(mat4));
+
+	*_ENTRY_POS4(entry0) = mult_mv4(vt, _ENTRY_POS4(entry0));
+	*_ENTRY_POS4(entry1) = mult_mv4(vt, _ENTRY_POS4(entry1));
+	*_ENTRY_POS4(entry2) = mult_mv4(vt, _ENTRY_POS4(entry2));
+
+	*_ENTRY_NORM(entry0) = mult_mv3(nt, _ENTRY_NORM(entry0));
+	*_ENTRY_NORM(entry1) = mult_mv3(nt, _ENTRY_NORM(entry1));
+	*_ENTRY_NORM(entry2) = mult_mv3(nt, _ENTRY_NORM(entry2));
+}	
+
+void stage_fragment(_entry_t* normalized, void* attrib) {	
+	// NOTE:
+	// ASSUMING THRERE IS EXACTLY ONE DIRECTIONAL LIGHT
+	// INSIDE LIGHT REGISTER BUFFER.
+	// LIGHT ID CAN BE ALSO PASSED VIA EXTRA ATTRIBUTES BUFFER.
+	light_id_t* light_ids;
+	size_t light_cnt;
+	register_light_get(&light_ids, &light_cnt);
+
+	light_directional* light_dir;
+	get_light_source(*light_ids, (void**)&light_dir, NULL);
+
+	float diffuse = max(0.1f, -dot3f(&light_dir->dir, _ENTRY_NORM(normalized)));
+	*_ENTRY_COL(normalized) = mult_av3(diffuse, _ENTRY_COL(normalized));
+}
+
 int main() {
 	init_mode();
 
@@ -230,6 +261,10 @@ int main() {
 
 	register_light_source(&light_id, 1);
 
+	shader_t shader;
+	shader.stage_vertex = stage_vertex;
+	shader.stage_fragment = stage_fragment;
+
 	while (run && !should_quit()) {
 		clear_terminal((CHAR_T)' ');
 
@@ -258,10 +293,13 @@ int main() {
 
 			mat4 view_model = mult_m4(&view, &m);
 			mat4 proj_view_model = mult_m4(&proj, &view_model);
-
 			mat3 normal_model = m3_from_m4(&m);
+			
+			byte mat_attrib_buff[128];
+			memcpy(mat_attrib_buff, &proj_view_model, sizeof(mat4));
+			memcpy(mat_attrib_buff + sizeof(mat4), &normal_model, sizeof(mat3));
 
-			draw_buffer(id, &proj_view_model, &normal_model);
+			draw_buffer(&shader, id, mat_attrib_buff);
 			
 			/*
 			vec4 tmp1 = vec4f(cube[0], cube[1], cube[2], 1.f);

@@ -108,14 +108,14 @@ int set_elem(int x, int y, CHAR_T c, PREC_T d) {
 	return 0;
 }
 
-extern void _triangle_pipeline(byte* mem, size_t entry_size, mat4* vt, mat3* nt);
-extern void _stage_vertex_triangle(
-	vec4* v1, vec4* v2, vec4* v3, mat4* vt, 
-	vec3* n1, vec3* n2, vec3* n3, mat3* nt);
-extern void _stage_rasterization_triangle(_entry_t* entry0, _entry_t* entry1, _entry_t* entry2);
+extern void _triangle_pipeline(
+	shader_t* shader, byte* mem, size_t entry_size, void* attrib);
+extern void _stage_rasterization_triangle(
+	shader_t* shader, _entry_t* entry0, _entry_t* entry1, _entry_t* entry2, void* attrib);
 extern void _stage_assembly_triangle(vec4* v1, vec4* v2, vec4* v3);
 
-int draw_buffer(buff_idx_t id, mat4* vt, mat3* nt) {
+int draw_buffer(shader_t* shader, buff_idx_t id, void* attrib) {
+	// ISVALIDSHADER() ...
 	size_t size;
 	size_t entry_size;
 	byte* mem = (byte*)get_mem_buff(&size, &entry_size, id);
@@ -126,71 +126,55 @@ int draw_buffer(buff_idx_t id, mat4* vt, mat3* nt) {
 	}
 
 	for (UINT i = 0; i < size; i += 3 * entry_size) {
-		_triangle_pipeline(&mem[i], entry_size, vt, nt);
+		_triangle_pipeline(shader, &mem[i], entry_size, attrib);
 	}
 	
 	return 0;
 }
 
-_FORCE_INLINE void _triangle_pipeline(byte* mem, size_t entry_size, mat4* vt, mat3* nt) {
+_FORCE_INLINE void _triangle_pipeline(
+	shader_t* shader, byte* mem, size_t entry_size, void* attrib) 
+{
 	_entry_t entry0 = _get_entry(mem, entry_size);
 	_entry_t entry1 = _get_entry(mem + entry_size, entry_size);
 	_entry_t entry2 = _get_entry(mem + 2 * entry_size, entry_size);
 
-	_stage_vertex_triangle(
-		_ENTRY_POS4(&entry0), 
-		_ENTRY_POS4(&entry1), 
-		_ENTRY_POS4(&entry2), vt,
-		_ENTRY_NORM(&entry0),
-		_ENTRY_NORM(&entry1),
-		_ENTRY_NORM(&entry2), nt);
+	vec4* v0 = _ENTRY_POS4(&entry0);
+	vec4* v1 = _ENTRY_POS4(&entry1);
+	vec4* v2 = _ENTRY_POS4(&entry2);
+
+	shader->stage_vertex(&entry0, &entry1, &entry2, attrib);
+
+	v0->x = v0->x / v0->w * _HALF_TERMINAL_WIDTH;
+	v0->y = v0->y / v0->w * _HALF_TERMINAL_HEIGHT;
+	v0->z = v0->z / v0->w;
+
+	v1->x = v1->x / v1->w * _HALF_TERMINAL_WIDTH;
+	v1->y = v1->y / v1->w * _HALF_TERMINAL_HEIGHT;
+	v1->z = v1->z / v1->w;
+	
+	v2->x = v2->x / v2->w * _HALF_TERMINAL_WIDTH;
+	v2->y = v2->y / v2->w * _HALF_TERMINAL_HEIGHT;
+	v2->z = v2->z / v2->w;
 
 	if (_mode == RENDER_MODE_EDGES) {
-		_stage_assembly_triangle(
-			_ENTRY_POS4(&entry0), 
-			_ENTRY_POS4(&entry1), 
-			_ENTRY_POS4(&entry2));
+		_stage_assembly_triangle(v0, v1, v2);
 		return;
 	}
 
-	_stage_rasterization_triangle(&entry0, &entry1, &entry2);
+	_stage_rasterization_triangle(shader, &entry0, &entry1, &entry2, attrib);
 }
-
-_FORCE_INLINE void _stage_vertex_triangle(
-	vec4* v1, vec4* v2, vec4* v3, mat4* vt,
-	vec3* n1, vec3* n2, vec3* n3, mat3* nt) 
-{
-	*v1 = mult_mv4(vt, v1);
-	*v2 = mult_mv4(vt, v2);
-	*v3 = mult_mv4(vt, v3);
-
-	v1->x = (v1->x / v1->w) * _HALF_TERMINAL_WIDTH;
-	v1->y = (v1->y / v1->w) * _HALF_TERMINAL_HEIGHT;
-	v1->z = (v1->z / v1->w);
-
-	v2->x = (v2->x / v2->w) * _HALF_TERMINAL_WIDTH;
-	v2->y = (v2->y / v2->w) * _HALF_TERMINAL_HEIGHT;
-	v2->z = (v2->z / v2->w);
-	
-	v3->x = (v3->x / v3->w) * _HALF_TERMINAL_WIDTH;
-	v3->y = (v3->y / v3->w) * _HALF_TERMINAL_HEIGHT;
-	v3->z = (v3->z / v3->w);
-
-	if (!nt) return;
-
-	*n1 = mult_mv3(nt, n1);
-	*n2 = mult_mv3(nt, n2);
-	*n3 = mult_mv3(nt, n3);
-}	
 
 // TODO: IMPLEMENT PROPER COLOR INTERPRETATION, NOT ONLY "BRIGHTNESS"
 _FORCE_INLINE void _stage_rasterization_triangle(
-	_entry_t* entry0, _entry_t* entry1, _entry_t* entry2) 
+	shader_t* shader, _entry_t* entry0, _entry_t* entry1, _entry_t* entry2, void* attrib) 
 {
 	_draw_triangle_solid(
 		_ENTRY_POS3(entry0), _ENTRY_POS3(entry1), _ENTRY_POS3(entry2),
 		_ENTRY_COL(entry0), _ENTRY_COL(entry1), _ENTRY_COL(entry2),
-		_ENTRY_NORM(entry0), _ENTRY_NORM(entry1), _ENTRY_NORM(entry2));
+		_ENTRY_NORM(entry0), _ENTRY_NORM(entry1), _ENTRY_NORM(entry2),
+		shader->stage_fragment,
+		attrib);
 }
 
 _FORCE_INLINE void _stage_assembly_triangle(vec4* v1, vec4* v2, vec4* v3) {
