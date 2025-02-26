@@ -80,6 +80,14 @@ vec2 mult_av2(float alpha, vec2* a);
 vec3 mult_av3(float alpha, vec3* a);
 vec4 mult_av4(float alpha, vec4* a);
 
+// Custom multipling.
+// mult_v2(a, b) -> vec2(a->x * b->x, a->y * b->y)
+// mult_v3(a, b) -> vec3(a->x * b->x, a->y * b->y, a->z * b->z)
+// mult_v4(a, b) -> vec4(a->x * b->x, a->y * b->y, a->z * b->z, a->w * b->w)
+vec2 mult_v2(vec2* a, vec2* b);
+vec3 mult_v3(vec3* a, vec3* b);
+vec4 mult_v4(vec4* a, vec4* b);
+
 MATH_PREC_T dot2f(vec2* a, vec2* b);
 MATH_PREC_T dot3f(vec3* a, vec3* b);
 MATH_PREC_T dot4f(vec4* a, vec4* b);

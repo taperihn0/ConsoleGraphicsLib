@@ -203,7 +203,9 @@ void _draw_triangle_solid(
 				normalized = _entry_from(x, y, z, &rgb, &norm);
 				stage_fragment(&normalized, attrib);
 
-				ch = _char_by_brightness(_COL_BRIGHTNESS(_ENTRY_COL(&normalized)));
+				float brightness = min(_COL_BRIGHTNESS(_ENTRY_COL(&normalized)), 1.f);
+
+				ch = _char_by_brightness(brightness);
 				_plot(x, y, ch, z);
 			}
 		}

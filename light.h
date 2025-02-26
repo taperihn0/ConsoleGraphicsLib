@@ -10,9 +10,8 @@ typedef unsigned short light_t;
 
 typedef struct light_directional {
 	vec3 dir;
-	// ...
-	//vec3 ambient;
-	//vec3 diffuse;
+	vec3 ambient;
+	vec3 diffuse;
 } light_directional;
 
 typedef struct light_point {

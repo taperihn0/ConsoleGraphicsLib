@@ -156,8 +156,12 @@ void stage_fragment(_entry_t* normalized, void* attrib) {
 	light_directional* light_dir;
 	get_light_source(*light_ids, (void**)&light_dir, NULL);
 
-	float diffuse = max(0.1f, -dot3f(&light_dir->dir, _ENTRY_NORM(normalized)));
-	*_ENTRY_COL(normalized) = mult_av3(diffuse, _ENTRY_COL(normalized));
+	float diffuse_factor = max(0.f, -dot3f(&light_dir->dir, _ENTRY_NORM(normalized)));
+	
+	vec3 diffuse = mult_av3(diffuse_factor, &light_dir->diffuse);
+	vec3 amb_diff = add3f(&light_dir->ambient, &diffuse);
+
+	*_ENTRY_COL(normalized) = mult_v3(&amb_diff, _ENTRY_COL(normalized));
 }
 
 int main() {
@@ -257,6 +261,16 @@ int main() {
 		.x = -1.f,
 		.y = 0.f,
 		.z = 0.f,
+	};
+	light->ambient = (vec3){
+		.x = 0.1f,
+		.y = 0.1f,
+		.z = 0.1f,
+	};
+	light->diffuse = (vec3){
+		.x = 1.f,
+		.y = 1.f,
+		.z = 1.f,
 	};
 
 	register_light_source(&light_id, 1);

@@ -1,11 +1,10 @@
 #include "coremath.h"
 
 vec2_i vec2i(MATH_INT_T x, MATH_INT_T y) {
-	vec2_i v = {
+	return (vec2_i) {
 		.x = x,
 		.y = y
 	};
-	return v;
 }
 
 vec2 vec2f(MATH_PREC_T x, MATH_PREC_T y) {
@@ -108,24 +107,39 @@ vec4 add4f(vec4* a, vec4* b) {
 }
 
 vec2 mult_av2(float alpha, vec2* a) {
-	a->x *= alpha;
-	a->y *= alpha;
-	return *a;
+	return (vec2){
+		.x = a->x * alpha,
+		.y = a->y * alpha,
+	};
 }
 
 vec3 mult_av3(float alpha, vec3* a) {
-	a->x *= alpha;
-	a->y *= alpha;
-	a->z *= alpha;
-	return *a;
+	return (vec3){
+		.x = a->x * alpha,
+		.y = a->y * alpha,
+		.z = a->z * alpha,
+	};
 }
 
 vec4 mult_av4(float alpha, vec4* a) {
-	a->x *= alpha;
-	a->y *= alpha;
-	a->z *= alpha;
-	a->w *= alpha;
-	return *a;
+	return (vec4){
+		.x = a->x * alpha,
+		.y = a->y * alpha,
+		.z = a->z * alpha,
+		.w = a->w * alpha,
+	};
+}
+
+vec2 mult_v2(vec2* a, vec2* b) {
+	return vec2f(a->x * b->x, a->y * b->y);
+}
+
+vec3 mult_v3(vec3* a, vec3* b) {
+	return vec3f(a->x * b->x, a->y * b->y, a->z * b->z);
+}
+
+vec4 mult_v4(vec4* a, vec4* b) {
+	return vec4f(a->x * b->x, a->y * b->y, a->z * b->z, a->w * b->w);
 }
 
 MATH_PREC_T dot2f(vec2* a, vec2* b) {
