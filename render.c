@@ -215,26 +215,25 @@ void _clip_against(
 			vec4 intersect = sub4f(&tmp_mult1, &tmp_mult2);
 			intersect = mult_av4(1.f / (dist0 - dist1), &intersect);
 			
-			/*
 			// TODO: INTERPOLATION
 			vec3 p0_v3 = vec3f(p0->x, p0->y, p0->z);
 			vec3 p1_v3 = vec3f(p1->x, p1->y, p1->z);
 			vec3 intersect_v3 = vec3f(intersect.x, intersect.y, intersect.z);
 
 			vec3 diff = sub3f(&p0_v3, &intersect_v3);
-			float dist_ip0 = LENGTHSQ3F(&diff);
+			float dist_ip0 = LENGTH3F(&diff);
 			diff = sub3f(&p1_v3, &intersect_v3);
-			float dist_ip1 = LENGTHSQ3F(&diff);
+			float dist_ip1 = LENGTH3F(&diff);
 
 			vec3 tmp_mult3 = mult_av3(dist_ip0, _ENTRY_COL(entries[i - 1]));
 			vec3 tmp_mult4 = mult_av3(dist_ip1, _ENTRY_COL(entries[i]));
 
 			vec3 rgb = add3f(&tmp_mult3, &tmp_mult4);
 			rgb = mult_av3(1.f / (dist_ip0 + dist_ip1), &rgb);
-			*/
+
 			// INTERPOLATE COLOR AND NORMAL
+			// TODO: NORMAL
 			vec3 tmp_norm = vec3f(1.f, 0.f, 0.f);
-			vec3 rgb = vec3f(1.f, 1.f, 1.f);
 
 			_entry_t new_entry = _entry_from_vec4(&intersect, &rgb, &tmp_norm);
 			edges[edge_cnt++] = new_entry;
@@ -260,9 +259,9 @@ void _clip_planes(
 	clip[1] = *entry1;
 	clip[2] = *entry2 ;
 	
-	for (UINT against = _PLANE_LEFT; against <= _PLANE_BEHIND; against++) {
+	for (UINT against = _PLANE_LEFT; against <= _PLANE_UP; against++) {
 		new_total_cnt = 0;
-		_entry_t new_entries[16];
+		_entry_t new_entries[64];
 
 		for (UINT j = 0; j < 3 * clip_cnt; j += 3) {
 			size_t new_cnt = 0;
@@ -272,7 +271,7 @@ void _clip_planes(
 
 			new_total_cnt += new_cnt;
 		}
-
+		
 		for (UINT k = 0; k < 3 * new_total_cnt; k++) {
 			clip[k] = new_entries[k];
 		}
@@ -292,7 +291,7 @@ _FORCE_INLINE void _triangle_pipeline(
 
 	shader->stage_vertex(&entry0, &entry1, &entry2, attrib);
 	
-	_entry_t entries[16];
+	_entry_t entries[64];
 	size_t triangles_cnt = 0;
 	_clip_planes(&entry0, &entry1, &entry2, entries, &triangles_cnt);
 
