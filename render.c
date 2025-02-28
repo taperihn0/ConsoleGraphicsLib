@@ -138,9 +138,16 @@ int draw_buffer(shader_t* shader, buff_idx_t id, void* attrib) {
 	https://cs418.cs.illinois.edu/website/text/clipping.html
 */
 
-void _clip_left_plane(
+#define _PLANE_LEFT 0
+#define _PLANE_RIGHT 1
+#define _PLANE_DOWN 2
+#define _PLANE_UP 3
+#define _PLANE_FRONT 4
+#define _PLANE_BEHIND 5
+
+void _clip_against(
 	_entry_t* entry0, _entry_t* entry1, _entry_t* entry2, 
-	_entry_t* triangles, size_t* cnt) 
+	_entry_t* triangles, size_t* cnt, UINT plane) 
 {
 	_entry_t* entries[4] = { entry0, entry1, entry2, entry0 };
 	_entry_t edges[4];
@@ -149,63 +156,67 @@ void _clip_left_plane(
 	for (UINT i = 1; i <= 3; i++) {
 		vec4* p0 = _ENTRY_POS4(entries[i]);
 		vec4* p1 = _ENTRY_POS4(entries[i - 1]);
-		float dist0 = p0->x + p0->w;
-		float dist1 = p1->x + p1->w;
+		float dist0;
+		float dist1;
 		
-		if (p1->x > -p1->w) {
-			edges[edge_cnt++] = *entries[i - 1];
-		}
+		switch (plane) {
+		case _PLANE_LEFT:
+ 			dist0 = p0->x + p0->w;
+ 			dist1 = p1->x + p1->w;
+
+ 			if (p1->x > -p1->w)
+ 				edges[edge_cnt++] = *entries[i - 1];
+ 			break;
+ 		case _PLANE_RIGHT:
+ 	 		dist0 = p0->x - p0->w;
+ 			dist1 = p1->x - p1->w;
+
+ 			 if (p1->x < p1->w)
+ 				edges[edge_cnt++] = *entries[i - 1];
+ 			break;
+ 		case _PLANE_DOWN:
+ 			dist0 = p0->y + p0->w;
+			dist1 = p1->y + p1->w;
+			
+			if (p1->y > -p1->w)
+				edges[edge_cnt++] = *entries[i - 1];
+			break;
+		case _PLANE_UP:
+			dist0 = p0->y - p0->w;
+			dist1 = p1->y - p1->w;
+			
+			if (p1->y < p1->w)
+				edges[edge_cnt++] = *entries[i - 1];
+			break;
+		case _PLANE_FRONT:
+			dist0 = p0->z + p0->w;
+			dist1 = p1->z + p1->w;
+			
+			if (p1->z > -p1->w)
+				edges[edge_cnt++] = *entries[i - 1];
+			break;
+		case _PLANE_BEHIND:
+			dist0 = p0->z - p0->w;
+			dist1 = p1->z - p1->w;
+			
+			if (p1->z < p1->w)
+				edges[edge_cnt++] = *entries[i - 1];
+			break;
+ 		default: 
+			dist0 = 0.f;
+			dist1 = 0.f;
+ 			break;
+ 		}
+
 		if ((dist0 < 0.f && dist1 > 0.f) || (dist0 > 0.f && dist1 < 0.f)) {
 			vec4 tmp_mult1 = mult_av4(dist0, p1);
 			vec4 tmp_mult2 = mult_av4(dist1, p0);
 
 			vec4 intersect = sub4f(&tmp_mult1, &tmp_mult2);
 			intersect = mult_av4(1.f / (dist0 - dist1), &intersect);
-
-			// INTERPOLATE COLOR AND NORMAL
-			vec3 tmp_norm = vec3f(1.f, 0.f, 0.f);
-			vec3 rgb = vec3f(1.f, 1.f, 1.f);
-
-			_entry_t new_entry = _entry_from_vec4(&intersect, &rgb, &tmp_norm);
-			edges[edge_cnt++] = new_entry;
-		}
-	}
-	
-	//*cnt = 0;
-	for (int i = 0; i < edge_cnt - 1; i += 2) {
-		triangles[*cnt * 3] = edges[i];
-		triangles[*cnt * 3 + 1] = edges[(i + 1) % edge_cnt];
-		triangles[*cnt * 3 + 2] = edges[(i + 2) % edge_cnt];
-		*cnt += 1;
-	}
-}
-
-void _clip_right_plane(
-	_entry_t* entry0, _entry_t* entry1, _entry_t* entry2, 
-	_entry_t* triangles, size_t* cnt) 
-{
-	_entry_t* entries[4] = { entry0, entry1, entry2, entry0 };
-	_entry_t edges[4];
-	int edge_cnt = 0;
-
-	for (UINT i = 1; i <= 3; i++) {
-		vec4* p0 = _ENTRY_POS4(entries[i]);
-		vec4* p1 = _ENTRY_POS4(entries[i - 1]);
-		float dist0 = p0->x - p0->w;
-		float dist1 = p1->x - p1->w;
-		
-		if (p1->x < p1->w) {
-			edges[edge_cnt++] = *entries[i - 1];
-		}
-		if ((dist0 < 0.f && dist1 > 0.f) || (dist0 > 0.f && dist1 < 0.f)) {
-			vec4 tmp_mult1 = mult_av4(dist0, p1);
-			vec4 tmp_mult2 = mult_av4(dist1, p0);
-
-			vec4 intersect = sub4f(&tmp_mult1, &tmp_mult2);
-			intersect = mult_av4(1.f / (dist0 - dist1), &intersect);
-
-			// TODO: INTERPOLATION
+			
 			/*
+			// TODO: INTERPOLATION
 			vec3 p0_v3 = vec3f(p0->x, p0->y, p0->z);
 			vec3 p1_v3 = vec3f(p1->x, p1->y, p1->z);
 			vec3 intersect_v3 = vec3f(intersect.x, intersect.y, intersect.z);
@@ -229,7 +240,7 @@ void _clip_right_plane(
 			edges[edge_cnt++] = new_entry;
 		}
 	}
-	
+
 	for (int i = 0; i < edge_cnt - 1; i += 2) {
 		triangles[*cnt * 3] = edges[i];
 		triangles[*cnt * 3 + 1] = edges[(i + 1) % edge_cnt];
@@ -238,36 +249,26 @@ void _clip_right_plane(
 	}
 }
 
-#define _PLANE_LEFT 0
-#define _PLANE_RIGHT 1
-
 void _clip_planes(	
 	_entry_t* entry0, _entry_t* entry1, _entry_t* entry2, 
 	_entry_t* clip, size_t* cnt) 
 {
 	size_t clip_cnt = 1;
 	size_t new_total_cnt = 0;
+
 	clip[0] = *entry0;
 	clip[1] = *entry1;
 	clip[2] = *entry2 ;
 	
-	for (UINT against = _PLANE_LEFT; against <= _PLANE_RIGHT; against++) {
+	for (UINT against = _PLANE_LEFT; against <= _PLANE_BEHIND; against++) {
 		new_total_cnt = 0;
 		_entry_t new_entries[16];
 
 		for (UINT j = 0; j < 3 * clip_cnt; j += 3) {
 			size_t new_cnt = 0;
 
-			switch (against) {
-			case _PLANE_LEFT:
-				_clip_left_plane(&clip[j], &clip[j + 1], &clip[j + 2], 
-					new_entries + 3 * new_total_cnt, &new_cnt);
-				break;
-			case _PLANE_RIGHT:
-				_clip_right_plane(&clip[j], &clip[j + 1], &clip[j + 2], 
-					new_entries + 3 * new_total_cnt, &new_cnt);
-				break;
-			}
+			_clip_against(&clip[j], &clip[j + 1], &clip[j + 2], 
+				new_entries + 3 * new_total_cnt, &new_cnt, against);
 
 			new_total_cnt += new_cnt;
 		}
@@ -278,7 +279,7 @@ void _clip_planes(
 
 		clip_cnt = new_total_cnt;
 	}
-	
+
 	*cnt = clip_cnt;
 }
 
@@ -291,9 +292,7 @@ _FORCE_INLINE void _triangle_pipeline(
 
 	shader->stage_vertex(&entry0, &entry1, &entry2, attrib);
 	
-	_entry_t entries[32];
-
-	// SO FAR, CLIPPING AGAINST UP PLANE ONLY
+	_entry_t entries[16];
 	size_t triangles_cnt = 0;
 	_clip_planes(&entry0, &entry1, &entry2, entries, &triangles_cnt);
 
