@@ -10,7 +10,7 @@
 static vec3 cam_pos = {
 	.x = 0.f, 
 	.y = 0.f, 
-	.z = 0.f,
+	.z = 40.f,
 };
 
 static vec3 cam_dir = {
@@ -149,6 +149,7 @@ void stage_fragment(_entry_t* normalized, void* attrib) {
 	// ASSUMING THRERE IS EXACTLY ONE DIRECTIONAL LIGHT
 	// INSIDE LIGHT REGISTER BUFFER.
 	// LIGHT ID CAN BE ALSO PASSED VIA EXTRA ATTRIBUTES BUFFER.
+	return;
 	light_id_t* light_ids;
 	size_t light_cnt;
 	register_light_get(&light_ids, &light_cnt);
@@ -157,7 +158,7 @@ void stage_fragment(_entry_t* normalized, void* attrib) {
 	get_light_source(*light_ids, (void**)&light_dir, NULL);
 
 	float diffuse_factor = max(0.f, -dot3f(&light_dir->dir, _ENTRY_NORM(normalized)));
-	
+
 	vec3 diffuse = mult_av3(diffuse_factor, &light_dir->diffuse);
 	vec3 amb_diff = add3f(&light_dir->ambient, &diffuse);
 
@@ -191,6 +192,7 @@ int main() {
 		10.f, -10.f, 10.f, 0.f, 0.01f, 0.01f, 1.f, 0.f, 0.f,
 		10.f, 10.f, 10.f, 1.f, 0.01f, 0.01f, 1.f, 0.f, 0.f,
 		10.f, 10.f, -10.f, 1.f, 0.01f, 0.01f, 1.f, 0.f, 0.f,
+		/*
 		10.f, -10.f, 10.f, 0.f, 1.f, 1.f, 1.f, 0.f, 0.f,
 		10.f, -10.f, -10.f, 1.f, 1.f, 1.f, 1.f, 0.f, 0.f,
 		10.f, 10.f, -10.f, 1.f, 1.f, 1.f, 1.f, 0.f, 0.f,
@@ -228,7 +230,7 @@ int main() {
 		10.f, -10.f, -10.f, 0.f, 1.f, 1.f, 0.f, -1.f, 0.f,
 		10.f, -10.f, -10.f, 1.f, 1.f, 1.f, 0.f, -1.f, 0.f,
 		10.f, -10.f, 10.f, 1.f, 1.f, 1.f, 0.f, -1.f, 0.f,
-		-10.f, -10.f, 10.f, 0.5f, 1.f, 1.f, 0.f, -1.f, 0.f
+		-10.f, -10.f, 10.f, 0.5f, 1.f, 1.f, 0.f, -1.f, 0.f*/
 	};
 
 	vec3 cube_pos[5];
@@ -244,7 +246,7 @@ int main() {
 		return -1;
 	}
 	
-	mat4 proj = projmat4f(60.f, 16 / 9.f, 0.1f, 300.f);
+	mat4 proj = projmat4f(60.f, 16.f / 9.f, 0.1f, 300.f);
 
 	float angle = 0.f;
 	utime_t prev_time = gettime_mls(CLOCK_MONOTONIC_RAW);
@@ -289,10 +291,10 @@ int main() {
 		utime_t delta_time = time - prev_time;
 		prev_time = time;
 		angle += 0.001f * delta_time;
-		rot.rc[0][0] =  cos(angle);
-		rot.rc[0][1] =  sin(angle);
-		rot.rc[1][0] = -sin(angle);
-		rot.rc[1][1] =  cos(angle);
+		rot.rc[0][0] =  cos(0);
+		rot.rc[0][1] =  sin(0);
+		rot.rc[1][0] = -sin(0);
+		rot.rc[1][1] =  cos(0);
 
 		mat4 view = viewmat4f(&cam_pos, &cam_dir, &cam_up, &cam_right);
 

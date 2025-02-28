@@ -111,11 +111,12 @@ int set_elem(int x, int y, CHAR_T c, PREC_T d) {
 extern void _triangle_pipeline(
 	shader_t* shader, byte* mem, size_t entry_size, void* attrib);
 extern void _stage_rasterization_triangle(
-	shader_t* shader, _entry_t* entry0, _entry_t* entry1, _entry_t* entry2, void* attrib);
+	shader_t* shader, _entry_t* entries, size_t triangles_cnt, void* attrib);
 extern void _stage_assembly_triangle(vec4* v1, vec4* v2, vec4* v3);
 
 int draw_buffer(shader_t* shader, buff_idx_t id, void* attrib) {
-	// ISVALIDSHADER() ...
+	ASSERT(shader->stage_vertex && shader->stage_fragment, "Invalid shader");
+
 	size_t size;
 	size_t entry_size;
 	byte* mem = (byte*)get_mem_buff(&size, &entry_size, id);
@@ -132,6 +133,155 @@ int draw_buffer(shader_t* shader, buff_idx_t id, void* attrib) {
 	return 0;
 }
 
+/*
+	Interesting article diving into culling policy:
+	https://cs418.cs.illinois.edu/website/text/clipping.html
+*/
+
+void _clip_left_plane(
+	_entry_t* entry0, _entry_t* entry1, _entry_t* entry2, 
+	_entry_t* triangles, size_t* cnt) 
+{
+	_entry_t* entries[4] = { entry0, entry1, entry2, entry0 };
+	_entry_t edges[4];
+	int edge_cnt = 0;
+
+	for (UINT i = 1; i <= 3; i++) {
+		vec4* p0 = _ENTRY_POS4(entries[i]);
+		vec4* p1 = _ENTRY_POS4(entries[i - 1]);
+		float dist0 = p0->x + p0->w;
+		float dist1 = p1->x + p1->w;
+		
+		if (p1->x > -p1->w) {
+			edges[edge_cnt++] = *entries[i - 1];
+		}
+		if ((dist0 < 0.f && dist1 > 0.f) || (dist0 > 0.f && dist1 < 0.f)) {
+			vec4 tmp_mult1 = mult_av4(dist0, p1);
+			vec4 tmp_mult2 = mult_av4(dist1, p0);
+
+			vec4 intersect = sub4f(&tmp_mult1, &tmp_mult2);
+			intersect = mult_av4(1.f / (dist0 - dist1), &intersect);
+
+			// INTERPOLATE COLOR AND NORMAL
+			vec3 tmp_norm = vec3f(1.f, 0.f, 0.f);
+			vec3 rgb = vec3f(1.f, 1.f, 1.f);
+
+			_entry_t new_entry = _entry_from_vec4(&intersect, &rgb, &tmp_norm);
+			edges[edge_cnt++] = new_entry;
+		}
+	}
+	
+	//*cnt = 0;
+	for (int i = 0; i < edge_cnt - 1; i += 2) {
+		triangles[*cnt * 3] = edges[i];
+		triangles[*cnt * 3 + 1] = edges[(i + 1) % edge_cnt];
+		triangles[*cnt * 3 + 2] = edges[(i + 2) % edge_cnt];
+		*cnt += 1;
+	}
+}
+
+void _clip_right_plane(
+	_entry_t* entry0, _entry_t* entry1, _entry_t* entry2, 
+	_entry_t* triangles, size_t* cnt) 
+{
+	_entry_t* entries[4] = { entry0, entry1, entry2, entry0 };
+	_entry_t edges[4];
+	int edge_cnt = 0;
+
+	for (UINT i = 1; i <= 3; i++) {
+		vec4* p0 = _ENTRY_POS4(entries[i]);
+		vec4* p1 = _ENTRY_POS4(entries[i - 1]);
+		float dist0 = p0->x - p0->w;
+		float dist1 = p1->x - p1->w;
+		
+		if (p1->x < p1->w) {
+			edges[edge_cnt++] = *entries[i - 1];
+		}
+		if ((dist0 < 0.f && dist1 > 0.f) || (dist0 > 0.f && dist1 < 0.f)) {
+			vec4 tmp_mult1 = mult_av4(dist0, p1);
+			vec4 tmp_mult2 = mult_av4(dist1, p0);
+
+			vec4 intersect = sub4f(&tmp_mult1, &tmp_mult2);
+			intersect = mult_av4(1.f / (dist0 - dist1), &intersect);
+
+			// TODO: INTERPOLATION
+			/*
+			vec3 p0_v3 = vec3f(p0->x, p0->y, p0->z);
+			vec3 p1_v3 = vec3f(p1->x, p1->y, p1->z);
+			vec3 intersect_v3 = vec3f(intersect.x, intersect.y, intersect.z);
+
+			vec3 diff = sub3f(&p0_v3, &intersect_v3);
+			float dist_ip0 = LENGTHSQ3F(&diff);
+			diff = sub3f(&p1_v3, &intersect_v3);
+			float dist_ip1 = LENGTHSQ3F(&diff);
+
+			vec3 tmp_mult3 = mult_av3(dist_ip0, _ENTRY_COL(entries[i - 1]));
+			vec3 tmp_mult4 = mult_av3(dist_ip1, _ENTRY_COL(entries[i]));
+
+			vec3 rgb = add3f(&tmp_mult3, &tmp_mult4);
+			rgb = mult_av3(1.f / (dist_ip0 + dist_ip1), &rgb);
+			*/
+			// INTERPOLATE COLOR AND NORMAL
+			vec3 tmp_norm = vec3f(1.f, 0.f, 0.f);
+			vec3 rgb = vec3f(1.f, 1.f, 1.f);
+
+			_entry_t new_entry = _entry_from_vec4(&intersect, &rgb, &tmp_norm);
+			edges[edge_cnt++] = new_entry;
+		}
+	}
+	
+	for (int i = 0; i < edge_cnt - 1; i += 2) {
+		triangles[*cnt * 3] = edges[i];
+		triangles[*cnt * 3 + 1] = edges[(i + 1) % edge_cnt];
+		triangles[*cnt * 3 + 2] = edges[(i + 2) % edge_cnt];
+		*cnt += 1;
+	}
+}
+
+#define _PLANE_LEFT 0
+#define _PLANE_RIGHT 1
+
+void _clip_planes(	
+	_entry_t* entry0, _entry_t* entry1, _entry_t* entry2, 
+	_entry_t* clip, size_t* cnt) 
+{
+	size_t clip_cnt = 1;
+	size_t new_total_cnt = 0;
+	clip[0] = *entry0;
+	clip[1] = *entry1;
+	clip[2] = *entry2 ;
+	
+	for (UINT against = _PLANE_LEFT; against <= _PLANE_RIGHT; against++) {
+		new_total_cnt = 0;
+		_entry_t new_entries[16];
+
+		for (UINT j = 0; j < 3 * clip_cnt; j += 3) {
+			size_t new_cnt = 0;
+
+			switch (against) {
+			case _PLANE_LEFT:
+				_clip_left_plane(&clip[j], &clip[j + 1], &clip[j + 2], 
+					new_entries + 3 * new_total_cnt, &new_cnt);
+				break;
+			case _PLANE_RIGHT:
+				_clip_right_plane(&clip[j], &clip[j + 1], &clip[j + 2], 
+					new_entries + 3 * new_total_cnt, &new_cnt);
+				break;
+			}
+
+			new_total_cnt += new_cnt;
+		}
+
+		for (UINT k = 0; k < 3 * new_total_cnt; k++) {
+			clip[k] = new_entries[k];
+		}
+
+		clip_cnt = new_total_cnt;
+	}
+	
+	*cnt = clip_cnt;
+}
+
 _FORCE_INLINE void _triangle_pipeline(
 	shader_t* shader, byte* mem, size_t entry_size, void* attrib) 
 {
@@ -139,42 +289,54 @@ _FORCE_INLINE void _triangle_pipeline(
 	_entry_t entry1 = _get_entry(mem + entry_size, entry_size);
 	_entry_t entry2 = _get_entry(mem + 2 * entry_size, entry_size);
 
-	vec4* v0 = _ENTRY_POS4(&entry0);
-	vec4* v1 = _ENTRY_POS4(&entry1);
-	vec4* v2 = _ENTRY_POS4(&entry2);
-
 	shader->stage_vertex(&entry0, &entry1, &entry2, attrib);
-
-	v0->x = v0->x / v0->w * _HALF_TERMINAL_WIDTH;
-	v0->y = v0->y / v0->w * _HALF_TERMINAL_HEIGHT;
-	v0->z = v0->z / v0->w;
-
-	v1->x = v1->x / v1->w * _HALF_TERMINAL_WIDTH;
-	v1->y = v1->y / v1->w * _HALF_TERMINAL_HEIGHT;
-	v1->z = v1->z / v1->w;
 	
-	v2->x = v2->x / v2->w * _HALF_TERMINAL_WIDTH;
-	v2->y = v2->y / v2->w * _HALF_TERMINAL_HEIGHT;
-	v2->z = v2->z / v2->w;
+	_entry_t entries[32];
+
+	// SO FAR, CLIPPING AGAINST UP PLANE ONLY
+	size_t triangles_cnt = 0;
+	_clip_planes(&entry0, &entry1, &entry2, entries, &triangles_cnt);
+
+	// PERSPECTIVE DIVISION
+	for (UINT i = 0; i < triangles_cnt * 3; i += 3) {
+		vec4* v0 = _ENTRY_POS4(&entries[i]);
+		vec4* v1 = _ENTRY_POS4(&entries[i + 1]);
+		vec4* v2 = _ENTRY_POS4(&entries[i + 2]);
+
+		v0->x = v0->x / v0->w * _HALF_TERMINAL_WIDTH;
+		v0->y = v0->y / v0->w * _HALF_TERMINAL_HEIGHT;
+		v0->z = v0->z / v0->w;
+	
+		v1->x = v1->x / v1->w * _HALF_TERMINAL_WIDTH;
+		v1->y = v1->y / v1->w * _HALF_TERMINAL_HEIGHT;
+		v1->z = v1->z / v1->w;
+		
+		v2->x = v2->x / v2->w * _HALF_TERMINAL_WIDTH;
+		v2->y = v2->y / v2->w * _HALF_TERMINAL_HEIGHT;
+		v2->z = v2->z / v2->w;
+	}
 
 	if (_mode == RENDER_MODE_EDGES) {
-		_stage_assembly_triangle(v0, v1, v2);
+		// TODO: COMPATIBILITY WITH CLIPPER FORMAT
+		_stage_assembly_triangle(NULL, NULL, NULL);
 		return;
 	}
 
-	_stage_rasterization_triangle(shader, &entry0, &entry1, &entry2, attrib);
+	_stage_rasterization_triangle(shader, entries, triangles_cnt, attrib);
 }
 
 // TODO: IMPLEMENT PROPER COLOR INTERPRETATION, NOT ONLY "BRIGHTNESS"
 _FORCE_INLINE void _stage_rasterization_triangle(
-	shader_t* shader, _entry_t* entry0, _entry_t* entry1, _entry_t* entry2, void* attrib) 
+	shader_t* shader, _entry_t* entries, size_t triangles_cnt, void* attrib) 
 {
-	_draw_triangle_solid(
-		_ENTRY_POS3(entry0), _ENTRY_POS3(entry1), _ENTRY_POS3(entry2),
-		_ENTRY_COL(entry0), _ENTRY_COL(entry1), _ENTRY_COL(entry2),
-		_ENTRY_NORM(entry0), _ENTRY_NORM(entry1), _ENTRY_NORM(entry2),
-		shader->stage_fragment,
-		attrib);
+	for (UINT i = 0; i < 3 * triangles_cnt; i += 3) {
+		_draw_triangle_solid(
+			_ENTRY_POS3(&entries[i]), _ENTRY_POS3(&entries[i + 1]), _ENTRY_POS3(&entries[i + 2]),
+			_ENTRY_COL(&entries[i]), _ENTRY_COL(&entries[i + 1]), _ENTRY_COL(&entries[i + 2]),
+			_ENTRY_NORM(&entries[i]), _ENTRY_NORM(&entries[i + 1]), _ENTRY_NORM(&entries[i + 2]),
+			shader->stage_fragment,
+			attrib);
+	}
 }
 
 _FORCE_INLINE void _stage_assembly_triangle(vec4* v1, vec4* v2, vec4* v3) {

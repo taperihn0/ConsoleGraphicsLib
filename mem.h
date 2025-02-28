@@ -16,6 +16,7 @@ typedef struct _entry_t {
 } _entry_t;
 
 _entry_t _entry_from(float x, float y, float z, vec3* rgb, vec3* norm);
+_entry_t _entry_from_vec4(vec4* pos, vec3* rgb, vec3* norm);
 
 _UNUSED static size_t _entry_col_offset = offsetof(_entry_t, col_r);
 _UNUSED static size_t _entry_norm_offset = offsetof(_entry_t, norm_x);

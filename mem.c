@@ -17,6 +17,21 @@ _entry_t _entry_from(float x, float y, float z, vec3* rgb, vec3* norm) {
 	};
 }
 
+_entry_t _entry_from_vec4(vec4* pos, vec3* rgb, vec3* norm) {
+	return (_entry_t){
+		.pos_x = pos->x,
+		.pos_y = pos->y,
+		.pos_z = pos->z,
+		.pos_w = pos->w,
+		.col_r = rgb->x,
+		.col_g = rgb->y,
+		.col_b = rgb->z,
+		.norm_x = norm->x,
+		.norm_y = norm->y,
+		.norm_z = norm->z
+	};
+}
+
 _entry_t _get_entry(void* mem, size_t entry_size) {
 	_entry_t r;
 	memset(&r, 0, sizeof(r));

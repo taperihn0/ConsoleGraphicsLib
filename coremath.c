@@ -106,6 +106,30 @@ vec4 add4f(vec4* a, vec4* b) {
 	return r;
 }
 
+vec2 sub2f(vec2* a, vec2* b) {
+	return (vec2) {
+		.x = a->x - b->x,
+		.y = a->y - b->y,
+	};
+}
+
+vec3 sub3f(vec3* a, vec3* b) {
+	return (vec3) {
+		.x = a->x - b->x,
+		.y = a->y - b->y,
+		.z = a->z - b->z,
+	};
+}
+
+vec4 sub4f(vec4* a, vec4* b) {
+	return (vec4) {
+		.x = a->x - b->x,
+		.y = a->y - b->y,
+		.z = a->z - b->z,
+		.w = a->w - b->w,
+	};
+}
+
 vec2 mult_av2(float alpha, vec2* a) {
 	return (vec2){
 		.x = a->x * alpha,

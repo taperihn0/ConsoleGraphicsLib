@@ -76,6 +76,10 @@ vec2 add2f(vec2* a, vec2* b);
 vec3 add3f(vec3* a, vec3* b);
 vec4 add4f(vec4* a, vec4* b);
 
+vec2 sub2f(vec2* a, vec2* b);
+vec3 sub3f(vec3* a, vec3* b);
+vec4 sub4f(vec4* a, vec4* b);
+
 vec2 mult_av2(float alpha, vec2* a);
 vec3 mult_av3(float alpha, vec3* a);
 vec4 mult_av4(float alpha, vec4* a);
