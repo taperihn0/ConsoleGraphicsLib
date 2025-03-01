@@ -171,14 +171,26 @@ void _draw_triangle_solid(
 	CHAR_T ch;
 	vec3 cords, norm, rgb;
 	_entry_t normalized;
+	
+	// Optimization:
+	// while interating through row and getting out of the 
+	// triangle, there is no sense no iterate more, since 
+	// I'm guaranteed to not getting inside the triangle again.
+	bool found, fill;
 
 	for (int y = u; y <= d; y++) {
-		for (int x = l; x <= r; x++) {
+		found =  false;
+		fill = false;
+
+		for (int x = l; x <= r && (!found || fill); x++) {
 			a1p = vec2f(x - v1->x, y - v1->y);
 			a2p = vec2f(x - v2->x, y - v2->y);
 			a3p = vec2f(x - v3->x, y - v3->y);
 
+			fill = false;
 			if (_is_inside_triangle(&a1p, &a2p, &a3p, &triangle)) {
+				found = true;
+				fill = true;
 				_barycentric_coords(&a1p, &a2p, &a3p, &triangle, &cords);
 				
 				// Interpolation done as stated in OpenGL specification, page 427:
@@ -218,70 +230,6 @@ void _draw_triangle_solid(
 			}
 		}
 	}
-	
-	/*
-	// SCAN LINE RASTERIZATION
-	for (int y = u; y <= d; y++) {
-		int s = 0, f = -1;
-		vec3 s_cords;
-		vec3 f_cords;
-		
-		for (int x = l; x <= r; x++) {
-			a1p = vec2f(x - v1->x, y - v1->y);
-			a2p = vec2f(x - v2->x, y - v2->y);
-			a3p = vec2f(x - v3->x, y - v3->y);
-			
-			if (_is_inside_triangle(&a1p, &a2p, &a3p, &triangle)) {
-				_barycentric_coords(&a1p, &a2p, &a3p, &triangle, &s_cords);
-				s = x;
-
-				for (;; x++) {
-					a1p = vec2f(x - v1->x, y - v1->y);
-					a2p = vec2f(x - v2->x, y - v2->y);
-					a3p = vec2f(x - v3->x, y - v3->y);
-
-					if (!_is_inside_triangle(&a1p, &a2p, &a3p, &triangle)) {
-						_barycentric_coords(&a1p, &a2p, &a3p, &triangle, &f_cords);
-						f = x - 1;
-						goto found_horizontal_dist;
-					}
-				}
-			}
-		}
-
-found_horizontal_dist:
-		int dist = f - s;
-
-		for (int x = s; x <= min(r, f); x++) {
-			vec3 tmp1 = mult_av3(x - s, &f_cords);
-			vec3 tmp2 = mult_av3(f - x, &s_cords);
-
-			cords = add3f(&tmp1, &tmp2);
-			cords = mult_av3(1.f / dist, &cords);
-
-			// interpolating depth (z coordinate), RGB color and normal vector			
-			z =  v1->z * cords.x + v2->z * cords.y + v3->z * cords.z;
-			
-			rgb = vec3f(
-				cords.x * col1->x + cords.y * col2->x + cords.z * col3->x,
-				cords.x * col1->y + cords.y * col2->y + cords.z * col3->y,
-				cords.x * col1->z + cords.y * col2->z + cords.z * col3->z);
-
-			norm = vec3f(
-				cords.x * norm1->x + cords.y * norm2->x + cords.z * norm3->x,
-				cords.x * norm1->y + cords.y * norm2->y + cords.z * norm3->y,
-				cords.x * norm1->z + cords.y * norm2->z + cords.z * norm3->z);
-
-			// passing interpolated data in a form of entry
-			normalized = _entry_from(x, y, z, &rgb, &norm);
-			stage_fragment(&normalized, attrib);
-
-			float brightness = min(_COL_BRIGHTNESS(_ENTRY_COL(&normalized)), 1.f);
-
-			ch = _char_by_brightness(brightness);
-			_plot(x, y, ch, z);
-		}
-	}*/
 }
 
 
