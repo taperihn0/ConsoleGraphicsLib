@@ -149,7 +149,6 @@ void stage_fragment(_entry_t* normalized, void* attrib) {
 	// ASSUMING THRERE IS EXACTLY ONE DIRECTIONAL LIGHT
 	// INSIDE LIGHT REGISTER BUFFER.
 	// LIGHT ID CAN BE ALSO PASSED VIA EXTRA ATTRIBUTES BUFFER.
-	return;
 	light_id_t* light_ids;
 	size_t light_cnt;
 	register_light_get(&light_ids, &light_cnt);
@@ -192,7 +191,6 @@ int main() {
 		10.f, -10.f, 10.f, 0.f, 0.01f, 0.01f, 1.f, 0.f, 0.f,
 		10.f, 10.f, 10.f, 1.f, 0.01f, 0.01f, 1.f, 0.f, 0.f,
 		10.f, 10.f, -10.f, 1.f, 0.01f, 0.01f, 1.f, 0.f, 0.f,
-		/*
 		10.f, -10.f, 10.f, 0.f, 1.f, 1.f, 1.f, 0.f, 0.f,
 		10.f, -10.f, -10.f, 1.f, 1.f, 1.f, 1.f, 0.f, 0.f,
 		10.f, 10.f, -10.f, 1.f, 1.f, 1.f, 1.f, 0.f, 0.f,
@@ -230,7 +228,7 @@ int main() {
 		10.f, -10.f, -10.f, 0.f, 1.f, 1.f, 0.f, -1.f, 0.f,
 		10.f, -10.f, -10.f, 1.f, 1.f, 1.f, 0.f, -1.f, 0.f,
 		10.f, -10.f, 10.f, 1.f, 1.f, 1.f, 0.f, -1.f, 0.f,
-		-10.f, -10.f, 10.f, 0.5f, 1.f, 1.f, 0.f, -1.f, 0.f*/
+		-10.f, -10.f, 10.f, 0.5f, 1.f, 1.f, 0.f, -1.f, 0.f
 	};
 
 	vec3 cube_pos[5];
@@ -291,10 +289,10 @@ int main() {
 		utime_t delta_time = time - prev_time;
 		prev_time = time;
 		angle += 0.001f * delta_time;
-		rot.rc[0][0] =  cos(0);
-		rot.rc[0][1] =  sin(0);
-		rot.rc[1][0] = -sin(0);
-		rot.rc[1][1] =  cos(0);
+		rot.rc[0][0] =  cos(angle);
+		rot.rc[0][1] =  sin(angle);
+		rot.rc[1][0] = -sin(angle);
+		rot.rc[1][1] =  cos(angle);
 
 		mat4 view = viewmat4f(&cam_pos, &cam_dir, &cam_up, &cam_right);
 

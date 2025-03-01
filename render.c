@@ -215,27 +215,20 @@ void _clip_against(
 			vec4 intersect = sub4f(&tmp_mult1, &tmp_mult2);
 			intersect = mult_av4(1.f / (dist0 - dist1), &intersect);
 			
-			// TODO: INTERPOLATION
-			vec3 p0_v3 = vec3f(p0->x, p0->y, p0->z);
-			vec3 p1_v3 = vec3f(p1->x, p1->y, p1->z);
-			vec3 intersect_v3 = vec3f(intersect.x, intersect.y, intersect.z);
+			vec3 tmp_mult3 = mult_av3(dist0, _ENTRY_COL(entries[i - 1]));
+			vec3 tmp_mult4 = mult_av3(dist1, _ENTRY_COL(entries[i]));
 
-			vec3 diff = sub3f(&p0_v3, &intersect_v3);
-			float dist_ip0 = LENGTH3F(&diff);
-			diff = sub3f(&p1_v3, &intersect_v3);
-			float dist_ip1 = LENGTH3F(&diff);
+			vec3 rgb = sub3f(&tmp_mult3, &tmp_mult4);
+			rgb = mult_av3(1.f / (dist0 - dist1), &rgb);
 
-			vec3 tmp_mult3 = mult_av3(dist_ip0, _ENTRY_COL(entries[i - 1]));
-			vec3 tmp_mult4 = mult_av3(dist_ip1, _ENTRY_COL(entries[i]));
+			// So far, only predefined colors and normals are interpolated
+			tmp_mult3 = mult_av3(dist0, _ENTRY_NORM(entries[i - 1]));
+			tmp_mult4 = mult_av3(dist1, _ENTRY_NORM(entries[i]));
 
-			vec3 rgb = add3f(&tmp_mult3, &tmp_mult4);
-			rgb = mult_av3(1.f / (dist_ip0 + dist_ip1), &rgb);
+			vec3 norm = sub3f(&tmp_mult3, &tmp_mult4);
+			norm = mult_av3(1.f / (dist0 - dist1), &norm);
 
-			// INTERPOLATE COLOR AND NORMAL
-			// TODO: NORMAL
-			vec3 tmp_norm = vec3f(1.f, 0.f, 0.f);
-
-			_entry_t new_entry = _entry_from_vec4(&intersect, &rgb, &tmp_norm);
+			_entry_t new_entry = _entry_from_vec4(&intersect, &rgb, &norm);
 			edges[edge_cnt++] = new_entry;
 		}
 	}
@@ -329,7 +322,7 @@ _FORCE_INLINE void _stage_rasterization_triangle(
 {
 	for (UINT i = 0; i < 3 * triangles_cnt; i += 3) {
 		_draw_triangle_solid(
-			_ENTRY_POS3(&entries[i]), _ENTRY_POS3(&entries[i + 1]), _ENTRY_POS3(&entries[i + 2]),
+			_ENTRY_POS4(&entries[i]), _ENTRY_POS4(&entries[i + 1]), _ENTRY_POS4(&entries[i + 2]),
 			_ENTRY_COL(&entries[i]), _ENTRY_COL(&entries[i + 1]), _ENTRY_COL(&entries[i + 2]),
 			_ENTRY_NORM(&entries[i]), _ENTRY_NORM(&entries[i + 1]), _ENTRY_NORM(&entries[i + 2]),
 			shader->stage_fragment,

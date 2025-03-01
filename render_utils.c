@@ -139,28 +139,10 @@ _STATIC _FORCE_INLINE void _barycentric_coords(
 	cords->z = det3 == 0.f ? 0.f : CROSSPROD_2D(triangle->a1a2, *a1p) / det3;	
 }
 
-_STATIC _FORCE_INLINE bool _is_inside_triangle_2(
-	vec2* a1p, vec2* a2p, vec2* a3p, _triangle_data*  triangle, vec2** edge) 
-{
-	float det1 = CROSSPROD_2D(*a1p, triangle->a1a2);
-	float det2 = CROSSPROD_2D(*a2p, triangle->a2a3);
-	float det3 = CROSSPROD_2D(*a3p, triangle->a3a1);
-	
-	bool r = (det1 >= 0.f && det2 >= 0.f && det3 >= 0.f) || 
-		(det1 <= 0.f && det2 <= 0.f && det3 <= 0.f);
-
-	float m = minof3(det1, det2, det3);
-	if (m == det1) *edge = &triangle->a1a2;
-	else if (m == det2) *edge = &triangle->a2a3;
-	else *edge = &triangle->a3a1;
-
-	return r;
-}
-
 #define _COL_BRIGHTNESS(col) (((col)->x + (col)->y + (col)->z) / 3.f)
 
 void _draw_triangle_solid(
-	vec3* v1, vec3* v2, vec3* v3,
+	vec4* v1, vec4* v2, vec4* v3,
 	vec3* col1, vec3* col2, vec3* col3,
 	vec3* norm1, vec3* norm2, vec3* norm3,
 	func_stage_fragment stage_fragment,
@@ -185,14 +167,11 @@ void _draw_triangle_solid(
 	
 	vec2 a1p, a2p, a3p;
 
-	float z;
+	float z, divisor;
 	CHAR_T ch;
-	vec3 norm, rgb;
-	
-	vec3 cords;
-
+	vec3 cords, norm, rgb;
 	_entry_t normalized;
-	
+
 	for (int y = u; y <= d; y++) {
 		for (int x = l; x <= r; x++) {
 			a1p = vec2f(x - v1->x, y - v1->y);
@@ -200,21 +179,33 @@ void _draw_triangle_solid(
 			a3p = vec2f(x - v3->x, y - v3->y);
 
 			if (_is_inside_triangle(&a1p, &a2p, &a3p, &triangle)) {
-				// get barycentric coordinates for interpolation
 				_barycentric_coords(&a1p, &a2p, &a3p, &triangle, &cords);
 				
-				// interpolating depth (z coordinate), RGB color and normal vector			
+				// Interpolation done as stated in OpenGL specification, page 427:
+				// https://registry.khronos.org/OpenGL/specs/gl/glspec44.core.pdf
+
+				// interpolating depth without w division
 				z =  v1->z * cords.x + v2->z * cords.y + v3->z * cords.z;
+
+				// Division by homogeneus coordinate, as stated on page 427
+				cords.x /= v1->w;
+				cords.y /= v2->w;
+				cords.z /= v3->w;
+				divisor = 1.f / (cords.x + cords.y + cords.z);
 				
 				rgb = vec3f(
 					cords.x * col1->x + cords.y * col2->x + cords.z * col3->x,
 					cords.x * col1->y + cords.y * col2->y + cords.z * col3->y,
 					cords.x * col1->z + cords.y * col2->z + cords.z * col3->z);
+				
+				rgb = mult_av3(divisor, &rgb);
 
 				norm = vec3f(
 					cords.x * norm1->x + cords.y * norm2->x + cords.z * norm3->x,
 					cords.x * norm1->y + cords.y * norm2->y + cords.z * norm3->y,
 					cords.x * norm1->z + cords.y * norm2->z + cords.z * norm3->z);
+
+				norm = mult_av3(divisor, &norm);
 				
 				// passing interpolated data in a form of entry
 				normalized = _entry_from(x, y, z, &rgb, &norm);
@@ -228,8 +219,9 @@ void _draw_triangle_solid(
 		}
 	}
 	
+	/*
 	// SCAN LINE RASTERIZATION
-	/*for (int y = u; y <= d; y++) {
+	for (int y = u; y <= d; y++) {
 		int s = 0, f = -1;
 		vec3 s_cords;
 		vec3 f_cords;
@@ -239,8 +231,7 @@ void _draw_triangle_solid(
 			a2p = vec2f(x - v2->x, y - v2->y);
 			a3p = vec2f(x - v3->x, y - v3->y);
 			
-			vec2* edge;
-			if (_is_inside_triangle_2(&a1p, &a2p, &a3p, &triangle, &edge)) {
+			if (_is_inside_triangle(&a1p, &a2p, &a3p, &triangle)) {
 				_barycentric_coords(&a1p, &a2p, &a3p, &triangle, &s_cords);
 				s = x;
 
@@ -249,7 +240,7 @@ void _draw_triangle_solid(
 					a2p = vec2f(x - v2->x, y - v2->y);
 					a3p = vec2f(x - v3->x, y - v3->y);
 
-					if (!_is_inside_triangle_2(&a1p, &a2p, &a3p, &triangle, &edge)) {
+					if (!_is_inside_triangle(&a1p, &a2p, &a3p, &triangle)) {
 						_barycentric_coords(&a1p, &a2p, &a3p, &triangle, &f_cords);
 						f = x - 1;
 						goto found_horizontal_dist;
