@@ -44,4 +44,9 @@ typedef struct shader_t {
 	func_stage_fragment stage_fragment;
 } shader_t;
 
-int draw_buffer(shader_t* shader, buff_idx_t id, void* attrib); 
+typedef UINT element_t;
+
+int draw_buffer(shader_t* shader, buff_idx_t id, void* attrib);
+int draw_order_buffer(
+	shader_t* shader, buff_idx_t id, 
+	element_t* elem, void* attrib);

@@ -109,7 +109,8 @@ int set_elem(int x, int y, CHAR_T c, PREC_T d) {
 }
 
 extern void _triangle_pipeline(
-	shader_t* shader, byte* mem, size_t entry_size, void* attrib);
+	shader_t* shader, byte* mem0, byte* mem1, 
+	byte* mem2, size_t entry_size, void* attrib);
 extern void _stage_rasterization_triangle(
 	shader_t* shader, _entry_t* entries, size_t triangles_cnt, void* attrib);
 extern void _stage_assembly_triangle(vec4* v1, vec4* v2, vec4* v3);
@@ -127,7 +128,34 @@ int draw_buffer(shader_t* shader, buff_idx_t id, void* attrib) {
 	}
 
 	for (UINT i = 0; i < size; i += 3 * entry_size) {
-		_triangle_pipeline(shader, &mem[i], entry_size, attrib);
+		_triangle_pipeline(shader, &mem[i], &mem[i + entry_size], 
+			&mem[i + 2 * entry_size], entry_size, attrib);
+	}
+	
+	return 0;
+}
+
+int draw_order_buffer(
+	shader_t* shader, buff_idx_t id, 
+	element_t* elem, void* attrib) 
+{
+	ASSERT(shader->stage_vertex && shader->stage_fragment, "Invalid shader");
+
+	size_t size;
+	size_t entry_size;
+	byte* mem = (byte*)get_mem_buff(&size, &entry_size, id);
+
+	if (mem == NULL) {
+		fprintf(stderr, "Invalid buffer index (null buffer)\n");
+		return -1;
+	}
+
+	for (UINT i = 0; i < size; i += 3) {
+		_triangle_pipeline(shader, 
+			&mem[elem[i] * entry_size], 
+			&mem[elem[i + 1] * entry_size], 
+			&mem[elem[i + 2] * entry_size], 
+			entry_size, attrib);
 	}
 	
 	return 0;
@@ -235,8 +263,8 @@ void _clip_against(
 
 	for (int i = 0; i < edge_cnt - 1; i += 2) {
 		triangles[*cnt * 3] = edges[i];
-		triangles[*cnt * 3 + 1] = edges[(i + 1) % edge_cnt];
-		triangles[*cnt * 3 + 2] = edges[(i + 2) % edge_cnt];
+		triangles[*cnt * 3 + 1] = edges[i + 1];
+		triangles[*cnt * 3 + 2] = edges[(i + 2) & (edge_cnt - 1)];
 		*cnt += 1;
 	}
 }
@@ -276,11 +304,12 @@ void _clip_planes(
 }
 
 _FORCE_INLINE void _triangle_pipeline(
-	shader_t* shader, byte* mem, size_t entry_size, void* attrib) 
+	shader_t* shader, byte* mem0, byte* mem1, byte* mem2, 
+	size_t entry_size, void* attrib) 
 {
-	_entry_t entry0 = _get_entry(mem, entry_size);
-	_entry_t entry1 = _get_entry(mem + entry_size, entry_size);
-	_entry_t entry2 = _get_entry(mem + 2 * entry_size, entry_size);
+	_entry_t entry0 = _get_entry(mem0, entry_size);
+	_entry_t entry1 = _get_entry(mem1, entry_size);
+	_entry_t entry2 = _get_entry(mem2, entry_size);
 
 	shader->stage_vertex(&entry0, &entry1, &entry2, attrib);
 	
