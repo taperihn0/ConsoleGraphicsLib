@@ -1,13 +1,14 @@
 #include "render_utils.h"
 #include "charmap.h"
 #include "terminal.h"
+#include "render.h"
 #include <math.h>
 
 #define _LINE_POINT '.'
 #define _LINE_DEPTH 0.
 
 #define _plot(x, y, c, d) \
-set_elem((x), (y), (c), (d));
+set_elem_force((x), (y), (c), (d));
 
 /*
 	YouTube video by NoBS Code explaining the magics behind 
@@ -167,7 +168,7 @@ void _draw_triangle_solid(
 	
 	vec2 a1p, a2p, a3p;
 
-	float z, divisor;
+	float z, divisor, curr_z;
 	CHAR_T ch;
 	vec3 cords, norm, rgb;
 	_entry_t normalized;
@@ -198,6 +199,11 @@ void _draw_triangle_solid(
 
 				// interpolating depth without w division
 				z =  v1->z * cords.x + v2->z * cords.y + v3->z * cords.z;
+				
+				curr_z = get_depth(_get_current_buffer(&_dbl_buff), x, y);
+
+				if (curr_z < z)
+					continue;
 
 				// Division by homogeneus coordinate, as stated on page 427
 				cords.x /= v1->w;
@@ -231,12 +237,3 @@ void _draw_triangle_solid(
 		}
 	}
 }
-
-
-
-
-
-
-
-
-

@@ -34,4 +34,7 @@ void clear_buffer_with(_core_buffer* buff, _BUFF_ELEM_TYPE c);
 void close_buffer(_core_buffer* buff);
 
 void set(_core_buffer* buff, int x, int y, _BUFF_DEPTH_PREC_TYPE d, _BUFF_ELEM_TYPE c);
+// same as set, but do not perform depth checking
+void set_force(_core_buffer* buff, int x, int y, _BUFF_DEPTH_PREC_TYPE d, _BUFF_ELEM_TYPE c);
+_BUFF_DEPTH_PREC_TYPE get_depth(_core_buffer* buff, int x, int y);
 void flush_buffer(_core_buffer* buff);

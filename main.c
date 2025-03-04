@@ -125,30 +125,22 @@ void log_msg(int x, int y, char* msg) {
 	int half_height = get_terminal_height() / 2;
 
 	for (int i = 0; msg[i] != 0; i++) {
-		set_elem(-half_width + x + i, half_height - y, msg[i], 1.f);
+		set_elem(-half_width + x + i, half_height - y, msg[i], -1.f);
 	}
 }
 
 void stage_vertex(
-	_entry_t* entry0, _entry_t* entry1, _entry_t* entry2, void* attrib) 
+	_entry_t* entry, void* attrib) 
 {
 	mat4* vt = (mat4*)(attrib);
 	mat3* nt = (mat3*)((byte*)attrib + sizeof(mat4));
 
-	*_ENTRY_POS4(entry0) = mult_mv4(vt, _ENTRY_POS4(entry0));
-	*_ENTRY_POS4(entry1) = mult_mv4(vt, _ENTRY_POS4(entry1));
-	*_ENTRY_POS4(entry2) = mult_mv4(vt, _ENTRY_POS4(entry2));
-
-	*_ENTRY_NORM(entry0) = mult_mv3(nt, _ENTRY_NORM(entry0));
-	*_ENTRY_NORM(entry1) = mult_mv3(nt, _ENTRY_NORM(entry1));
-	*_ENTRY_NORM(entry2) = mult_mv3(nt, _ENTRY_NORM(entry2));
+	*_ENTRY_POS4(entry) = mult_mv4(vt, _ENTRY_POS4(entry));
+	*_ENTRY_NORM(entry) = mult_mv3(nt, _ENTRY_NORM(entry));
 }	
 
 void stage_fragment(_entry_t* normalized, void* attrib) {	
-	// NOTE:
-	// ASSUMING THRERE IS EXACTLY ONE DIRECTIONAL LIGHT
-	// INSIDE LIGHT REGISTER BUFFER.
-	// LIGHT ID CAN BE ALSO PASSED VIA EXTRA ATTRIBUTES BUFFER.
+	// NOTE: LIGHT ID CAN BE ALSO PASSED VIA EXTRA ATTRIBUTES BUFFER.
 	light_id_t* light_ids;
 	size_t light_cnt;
 	register_light_get(&light_ids, &light_cnt);
@@ -167,6 +159,9 @@ void stage_fragment(_entry_t* normalized, void* attrib) {
 int main() {
 	init_mode();
 
+	//start_color();
+	//init_pair(1, 225, COLOR_BLACK);
+
 	enable_raw_mode();
 	enable_focus_events();
 
@@ -177,7 +172,17 @@ int main() {
 
 	keyboard* kbd = malloc(sizeof(keyboard));
 	init_keyboard(kbd);
-	
+	/*
+	while(true) {
+		poll_events_keyboard(kbd);
+		poll_events_mouse(mice);
+
+		if (get_key(kbd, KEY_Q) == KEY_PRESSED)
+			break;
+	}
+	raise(SIGTERM);
+	return 0;
+	*/
 	make_terminal_fullscreen();
 	set_terminal_title("ASCIIGRAPHICS");
 	disable_console_cursor();
@@ -296,7 +301,7 @@ int main() {
 
 		mat4 view = viewmat4f(&cam_pos, &cam_dir, &cam_up, &cam_right);
 
-		for (UINT i = 0; i < 1; i++) {
+		for (UINT i = 0; i < 5; i++) {
 			mat4 transl = diagmat4f(1);
 
 			transl.rc[0][3] = cube_pos[i].x;

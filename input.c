@@ -98,7 +98,11 @@ void init_keyboard(keyboard* keyboard) {
 	char path[_HANDLER_PATH_SIZE];
 
 	_get_input_file_of(_FILE_KEYBOARD, path, _HANDLER_PATH_SIZE);
-	_open_device_input_file(&keyboard->device_file, path);
+	if (_open_device_input_file(&keyboard->device_file, path)) {
+		fprintf(stderr, "Cannot open device input file: %s\n", path);
+		return;
+	}
+
 	_clear_keyboard_events(&keyboard->events);
 }
 
@@ -146,11 +150,16 @@ void init_mouse(mouse* mouse) {
 	char path[_HANDLER_PATH_SIZE];
 
 	_get_input_file_of(_FILE_MOUSE, path, _HANDLER_PATH_SIZE);
-	_open_device_input_file(&mouse->device_file, path);
+	if (_open_device_input_file(&mouse->device_file, path)) {
+		fprintf(stderr, "Cannot open device file: %s\n", path);
+		return;
+	}
 
 	mouse->pos_callback_func = NULL;
 	mouse->btn_callback_func = NULL;
 }
+
+#define _TOUCHPAD_CONTINUE_DIST 500
 
 void poll_events_mouse(mouse* mouse) {
 	ssize_t n;
@@ -162,6 +171,13 @@ void poll_events_mouse(mouse* mouse) {
 	ASSERT(mouse->btn_callback_func != NULL, null_pol_err);
 
 	const bool focus = _check_focus();
+	
+	// touchpad specific
+	static int touchpad_px = -_TOUCHPAD_CONTINUE_DIST;
+	static int touchpad_py = -_TOUCHPAD_CONTINUE_DIST;
+	static bool touchpad_first = true;
+	// general for every mouse-like stering device
+	int dx, dy;
 
 	while (true) {
 		n = read(mouse->device_file.fd, &ev, sizeof(ev));
@@ -176,12 +192,33 @@ void poll_events_mouse(mouse* mouse) {
 
 		if (!focus) continue;
 		
-		if (ev.type == EV_REL) 
-		{
-			if (ev.code == REL_X) 
-				(*mouse->pos_callback_func)(ev.value, 0u);
+		if (ev.type == EV_ABS) {
+			dx = 0;
+			dy = 0;
+
+			if (ev.code == ABS_X) {
+				touchpad_first = abs(touchpad_px - ev.value) > _TOUCHPAD_CONTINUE_DIST;
+				dx = touchpad_first ? 0 : ev.value - touchpad_px;
+				touchpad_px = ev.value;
+			}
+			else if (ev.code == ABS_Y) {
+				touchpad_first = abs(touchpad_py - ev.value) > _TOUCHPAD_CONTINUE_DIST;
+				dy = touchpad_first ? 0 : ev.value - touchpad_py;
+				touchpad_py = ev.value;
+			}
+
+			touchpad_first = false;
+			(*mouse->pos_callback_func)(dx, dy);
+		} else if (ev.type == EV_REL) {
+			dx = 0;
+			dy = 0;
+			
+			if (ev.code == REL_X)
+				dx = ev.value;
 			else if (ev.code == REL_Y)
-				(*mouse->pos_callback_func)(0u, ev.value);
+				dy = ev.value;
+
+			(*mouse->pos_callback_func)(dx, dy);
 		} else if (ev.type == EV_KEY) {
 			(*mouse->btn_callback_func)(_get_btn_state(ev.value), ev.code);
 		}

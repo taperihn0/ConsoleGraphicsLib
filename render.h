@@ -11,6 +11,8 @@ typedef struct _double_buffer {
 	short curr_buff;
 } _double_buffer;
 
+#define _get_current_buffer(dbl) &(dbl)->buff[(dbl)->curr_buff]
+
 void _resize_buffers(_double_buffer* dbl, size_t width, size_t height);
 void _close_buffers(_double_buffer* dbl);
 
@@ -31,10 +33,11 @@ void set_render_mode(render_mode_t mode);
 
 void clear_terminal(CHAR_T c);
 void swap_terminal_buffers();
-int set_elem(int x, int y, CHAR_T c, PREC_T d);
+void set_elem(int x, int y, CHAR_T c, PREC_T d);
+void set_elem_force(int x, int y, CHAR_T c, PREC_T d);
 
 typedef void (*func_stage_vertex)(
-	_entry_t* entry0, _entry_t* entry1, _entry_t* entry2, void* attrib);
+	_entry_t* entry, void* attrib);
 
 typedef void (*func_stage_fragment)(
 	_entry_t* normalized, void* attrib);

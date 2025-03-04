@@ -11,10 +11,6 @@
 
 _double_buffer _dbl_buff;
 
-_FORCE_INLINE _core_buffer* _get_current_buffer(_double_buffer* dbl) {
-	return &dbl->buff[dbl->curr_buff];
-}
-
 _FORCE_INLINE void _flip_buffer_index(_double_buffer* dbl) {
 	dbl->curr_buff ^= 1;
 }
@@ -84,6 +80,7 @@ void _close_flush_ctx() {
 	_close_mutex(&_flush_ctx.swap);
 }
 
+// TODO: FIX DOUBLE THREAD FLUSHING
 void swap_terminal_buffers() {
 	bool flushing;
 
@@ -94,18 +91,25 @@ void swap_terminal_buffers() {
 	_write_mutex_data(&_flush_ctx.to_flush, &byte_true);
 	
 	bool ready2swap;
+	
+	// wait untill flushing thread got his buffer, then read mutex
+	// (be the second in the queue)
+	usleep(10);
 
 	do {
 		_read_mutex_data(&_flush_ctx.swap, &ready2swap);
 	} while (!ready2swap);
-
+	
 	_flip_buffer_index(&_dbl_buff);
 	_sync_with_next_frame();
 }
 
-int set_elem(int x, int y, CHAR_T c, PREC_T d) {
+void set_elem(int x, int y, CHAR_T c, PREC_T d) {
 	set(_get_current_buffer(&_dbl_buff), x, y, d, c);
-	return 0;
+}
+
+void set_elem_force(int x, int y, CHAR_T c, PREC_T d) {
+	set_force(_get_current_buffer(&_dbl_buff), x, y, d, c);
 }
 
 extern void _triangle_pipeline(
@@ -311,7 +315,9 @@ _FORCE_INLINE void _triangle_pipeline(
 	_entry_t entry1 = _get_entry(mem1, entry_size);
 	_entry_t entry2 = _get_entry(mem2, entry_size);
 
-	shader->stage_vertex(&entry0, &entry1, &entry2, attrib);
+	shader->stage_vertex(&entry0, attrib);
+	shader->stage_vertex(&entry1, attrib);
+	shader->stage_vertex(&entry2, attrib);
 	
 	_entry_t entries[64];
 	size_t triangles_cnt = 0;

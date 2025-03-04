@@ -74,8 +74,35 @@ void set(_core_buffer* buff, int x, int y, _BUFF_DEPTH_PREC_TYPE d, _BUFF_ELEM_T
 	}
 }
 
+void set_force(_core_buffer* buff, int x, int y, _BUFF_DEPTH_PREC_TYPE d, _BUFF_ELEM_TYPE c) {
+	ASSERT(buff != NULL, "Trying to fetch from null buffer");
+	x += buff->xcenter;
+	y = buff->ycenter - y;
+
+	if (!(y < buff->height && x < buff->width && y >= 0 && x >= 0))
+		return;
+	
+	UINT idx = buff->width * y + x;
+	buff->depth[idx] = d;
+	buff->mem[idx] = c;
+}
+
+_BUFF_DEPTH_PREC_TYPE get_depth(_core_buffer* buff, int x, int y) {
+	ASSERT(buff != NULL, "Trying to fetch from null buffer");
+	x += buff->xcenter;
+	y = buff->ycenter - y;
+
+	if (!(y < buff->height && x < buff->width && y >= 0 && x >= 0))
+		return;
+	
+	UINT idx = buff->width * y + x;
+	return buff->depth[idx];
+}
+
 void flush_buffer(_core_buffer* buff) {
 	ASSERT(buff->mem != NULL, "Operation flush on null buffer");
+	//attron(COLOR_PAIR(1));
 	mvaddwstr(0, 0, buff->mem);
+	//attroff(COLOR_PAIR(1));
 	refresh(); 
 }
