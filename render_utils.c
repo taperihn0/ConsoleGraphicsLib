@@ -2,13 +2,17 @@
 #include "charmap.h"
 #include "terminal.h"
 #include "render.h"
+#include "color.h"
 #include <math.h>
 
 #define _LINE_POINT '.'
 #define _LINE_DEPTH 0.
 
 #define _plot(x, y, c, d) \
-set_elem_force((x), (y), (c), (d));
+set_elem((x), (y), (c), (d));
+
+#define _plot_with_col(x, y, c, d, col) \
+set_elem_force((x), (y), (c), (d), (col));
 
 /*
 	YouTube video by NoBS Code explaining the magics behind 
@@ -231,8 +235,10 @@ void _draw_triangle_solid(
 
 				float brightness = min(_COL_BRIGHTNESS(_ENTRY_COL(&normalized)), 1.f);
 
+				_ncurses_pair_id col_num = color_pair_id(rgb.x, rgb.y, rgb.z);
+
 				ch = _char_by_brightness(brightness);
-				_plot(x, y, ch, z);
+				_plot_with_col(x, y, ch, z, col_num);
 			}
 		}
 	}

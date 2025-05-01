@@ -11,10 +11,6 @@
 
 _double_buffer _dbl_buff;
 
-_FORCE_INLINE void _flip_buffer_index(_double_buffer* dbl) {
-	dbl->curr_buff ^= 1;
-}
-
 void _resize_buffers(_double_buffer* dbl, size_t width, size_t height) {
 	resize_buffer(&dbl->buff[0], width, height);
 	resize_buffer(&dbl->buff[1], width, height);
@@ -80,7 +76,8 @@ void _close_flush_ctx() {
 	_close_mutex(&_flush_ctx.swap);
 }
 
-// TODO: FIX DOUBLE THREAD FLUSHING
+#define _DELAY_MAIN_THREAD_TIME 8
+
 void swap_terminal_buffers() {
 	bool flushing;
 
@@ -94,7 +91,7 @@ void swap_terminal_buffers() {
 	
 	// wait untill flushing thread got his buffer, then read mutex
 	// (be the second in the queue)
-	usleep(10);
+	usleep(_DELAY_MAIN_THREAD_TIME);
 
 	do {
 		_read_mutex_data(&_flush_ctx.swap, &ready2swap);
@@ -108,8 +105,8 @@ void set_elem(int x, int y, CHAR_T c, PREC_T d) {
 	set(_get_current_buffer(&_dbl_buff), x, y, d, c);
 }
 
-void set_elem_force(int x, int y, CHAR_T c, PREC_T d) {
-	set_force(_get_current_buffer(&_dbl_buff), x, y, d, c);
+void set_elem_force(int x, int y, CHAR_T c, PREC_T d, _ncurses_pair_id col) {
+	set_force(_get_current_buffer(&_dbl_buff), x, y, d, c, col);
 }
 
 extern void _triangle_pipeline(

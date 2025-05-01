@@ -5,6 +5,7 @@
 #include "sig.h"
 #include "render.h"
 #include "charmap.h"
+#include "color.h"
 
 void _terminate() {
 	_terminal.over = true;
@@ -33,6 +34,11 @@ void init_mode() {
 	_init_terminal_state();
 
 	_init_char_map();
+
+	if (has_colors() == FALSE)	
+		fprintf(stderr, "Terminal not supporting colors.");
+
+	_init_colors();
 
 	_init_flush_ctx();
 	_close_flush_ctx();

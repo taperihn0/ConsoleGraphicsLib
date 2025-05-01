@@ -5,6 +5,7 @@
 #include "coremath.h"
 #include "buffer.h"
 #include "light.h"
+#include "color.h"
 
 typedef struct _double_buffer {
 	_core_buffer buff[2];
@@ -12,6 +13,7 @@ typedef struct _double_buffer {
 } _double_buffer;
 
 #define _get_current_buffer(dbl) &(dbl)->buff[(dbl)->curr_buff]
+#define _flip_buffer_index(dbl) (dbl)->curr_buff ^= 1
 
 void _resize_buffers(_double_buffer* dbl, size_t width, size_t height);
 void _close_buffers(_double_buffer* dbl);
@@ -34,7 +36,7 @@ void set_render_mode(render_mode_t mode);
 void clear_terminal(CHAR_T c);
 void swap_terminal_buffers();
 void set_elem(int x, int y, CHAR_T c, PREC_T d);
-void set_elem_force(int x, int y, CHAR_T c, PREC_T d);
+void set_elem_force(int x, int y, CHAR_T c, PREC_T d, _ncurses_pair_id col);
 
 typedef void (*func_stage_vertex)(
 	_entry_t* entry, void* attrib);

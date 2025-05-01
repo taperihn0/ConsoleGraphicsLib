@@ -68,10 +68,8 @@ void mouse_callback(int dx, int dy) {
 void button_callback(unsigned short btn_action, int btn) {
 	/*
 	if (btn_action == KEY_PRESSED && btn == BTN_LEFT) {
-		// do something
 	}
 	else if (btn_action == KEY_PRESSED && btn == BTN_RIGHT) {
-		// do something
 	}
 	*/
 }
@@ -159,9 +157,6 @@ void stage_fragment(_entry_t* normalized, void* attrib) {
 int main() {
 	init_mode();
 
-	//start_color();
-	//init_pair(1, 225, COLOR_BLACK);
-
 	enable_raw_mode();
 	enable_focus_events();
 
@@ -172,17 +167,6 @@ int main() {
 
 	keyboard* kbd = malloc(sizeof(keyboard));
 	init_keyboard(kbd);
-	/*
-	while(true) {
-		poll_events_keyboard(kbd);
-		poll_events_mouse(mice);
-
-		if (get_key(kbd, KEY_Q) == KEY_PRESSED)
-			break;
-	}
-	raise(SIGTERM);
-	return 0;
-	*/
 	make_terminal_fullscreen();
 	set_terminal_title("ASCIIGRAPHICS");
 	disable_console_cursor();
@@ -193,12 +177,12 @@ int main() {
 	set_render_mode(mode);
 
 	float cube[] = {
-		10.f, -10.f, 10.f, 0.f, 0.01f, 0.01f, 1.f, 0.f, 0.f,
-		10.f, 10.f, 10.f, 1.f, 0.01f, 0.01f, 1.f, 0.f, 0.f,
-		10.f, 10.f, -10.f, 1.f, 0.01f, 0.01f, 1.f, 0.f, 0.f,
-		10.f, -10.f, 10.f, 0.f, 1.f, 1.f, 1.f, 0.f, 0.f,
-		10.f, -10.f, -10.f, 1.f, 1.f, 1.f, 1.f, 0.f, 0.f,
-		10.f, 10.f, -10.f, 1.f, 1.f, 1.f, 1.f, 0.f, 0.f,
+		10.f, -10.f, 10.f,   0.f, 1.f, 0.f, 1.f, 0.f, 0.f,
+		10.f, 10.f, 10.f,     1.f, 0.f, 0.f, 1.f, 0.f, 0.f,
+		10.f, 10.f, -10.f,   0.f, 1.f, 0.f, 1.f, 0.f, 0.f,
+		10.f, -10.f, 10.f,   1.f, 0.f, 0.f, 1.f, 0.f, 0.f,
+		10.f, -10.f, -10.f, 1.f, 0.f, 0.f, 1.f, 0.f, 0.f,
+		10.f, 10.f, -10.f,   1.f, 0.f, 0.f, 1.f, 0.f, 0.f,
 
 		-10.f, -10.f, 10.f, 1.f, 1.f, 1.f, 0.f, 0.f, 1.f,
 		-10.f, 10.f, 10.f, 1.f, 1.f, 1.f, 0.f, 0.f, 1.f,
@@ -319,22 +303,6 @@ int main() {
 			memcpy(mat_attrib_buff + sizeof(mat4), &normal_model, sizeof(mat3));
 
 			draw_buffer(&shader, id, mat_attrib_buff);
-			
-			/*
-			vec4 tmp1 = vec4f(cube[0], cube[1], cube[2], 1.f);
-			vec4 tmp2 = vec4f(cube[6], cube[7], cube[8], 1.f);
-			vec4 tmp3 = vec4f(cube[12], cube[13], cube[14], 1.f);
-			
-			tmp1 = mult_mv4(&proj_view_model, &tmp1);
-			tmp2 = mult_mv4(&proj_view_model, &tmp2);
-			tmp3 = mult_mv4(&proj_view_model, &tmp3);
-
-			sprintf(msg, "V1: %f %f %f", tmp1.x / tmp1.w, tmp1.y / tmp1.w, tmp1.z / tmp1.w);
-			log_msg(0, 3, msg);
-			sprintf(msg, "V2: %f %f %f", tmp2.x / tmp2.w, tmp2.y / tmp2.w, tmp2.z / tmp2.w);
-			log_msg(0, 4, msg);
-			sprintf(msg, "V3: %f %f %f", tmp3.x / tmp3.w, tmp3.y / tmp3.w, tmp3.z  / tmp3.w);
-			log_msg(0, 5, msg);*/
 		}
 
 		sprintf(msg, "POS: %f %f %f", cam_pos.x, cam_pos.y, cam_pos.z);
