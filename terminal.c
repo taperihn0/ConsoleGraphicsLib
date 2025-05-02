@@ -141,7 +141,7 @@ void _sync_with_next_frame() {
 	
 	usleep(left_delay);
 
-	last_tp = curr_tp;
+	last_tp = curr_tp + left_delay;
 }
 
 UINT get_terminal_width() {

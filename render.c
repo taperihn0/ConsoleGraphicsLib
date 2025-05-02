@@ -35,7 +35,7 @@ void clear_terminal(CHAR_T c) {
 typedef struct _flush_thread_ctx {
 	pthread_t* thread;
 	_mutex_t to_flush;
-	_mutex_t swap;
+	_mutex_t flushed_buff;
 } _flush_thread_ctx;
 
 _flush_thread_ctx _flush_ctx = {
@@ -44,6 +44,7 @@ _flush_thread_ctx _flush_ctx = {
 
 bool byte_false = false;
 bool byte_true = true;
+_core_buffer* null_buffer = NULL;
 
 void* _flush_thread_loop(void* args) {
 	bool ready = false;
@@ -52,9 +53,8 @@ void* _flush_thread_loop(void* args) {
 		_read_mutex_data(&_flush_ctx.to_flush, &ready);
 		
 		if (ready) {
-			_write_mutex_data(&_flush_ctx.swap, &byte_false);
-			_core_buffer* buff = _get_current_buffer(&_dbl_buff);
-			_write_mutex_data(&_flush_ctx.swap, &byte_true);
+			_core_buffer* buff;
+			_read_mutex_data(&_flush_ctx.flushed_buff, &buff);
 
 			flush_buffer(buff);
 			_write_mutex_data(&_flush_ctx.to_flush, &byte_false);
@@ -66,17 +66,15 @@ void* _flush_thread_loop(void* args) {
 
 void _init_flush_ctx() {
 	_init_mutex(&_flush_ctx.to_flush, &byte_false, sizeof(bool));
-	_init_mutex(&_flush_ctx.swap, &byte_false, sizeof(bool));
+	_init_mutex(&_flush_ctx.flushed_buff, &null_buffer, sizeof(_core_buffer*));
 	_flush_ctx.thread = _get_thread();
 	pthread_create(_flush_ctx.thread, NULL, _flush_thread_loop, NULL);
 }
 
 void _close_flush_ctx() {
 	_close_mutex(&_flush_ctx.to_flush);
-	_close_mutex(&_flush_ctx.swap);
+	_close_mutex(&_flush_ctx.flushed_buff);
 }
-
-#define _DELAY_MAIN_THREAD 1
 
 void swap_terminal_buffers() {
 	bool flushing;
@@ -84,19 +82,11 @@ void swap_terminal_buffers() {
 	do {
 		_read_mutex_data(&_flush_ctx.to_flush, &flushing);
 	} while (flushing);
-
+	
+	_core_buffer* to_flush_buff = _get_current_buffer(&_dbl_buff);
+	_write_mutex_data(&_flush_ctx.flushed_buff, &to_flush_buff);
 	_write_mutex_data(&_flush_ctx.to_flush, &byte_true);
-	
-	bool ready2swap;
-	
-	// wait untill flushing thread got his buffer, then read mutex
-	// (be the second in the queue)
-	usleep(_DELAY_MAIN_THREAD);
 
-	do {
-		_read_mutex_data(&_flush_ctx.swap, &ready2swap);
-	} while (!ready2swap);
-	
 	_flip_buffer_index(&_dbl_buff);
 	_sync_with_next_frame();
 }

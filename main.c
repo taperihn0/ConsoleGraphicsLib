@@ -128,7 +128,7 @@ void log_msg(int x, int y, char* msg) {
 }
 
 void print_fps(int x, int y) {
-	static char msg[64];
+	static char msg[32];
 	static UINT frames_cnt = 0;
 	static float fps = 0;
 	static utime_t prev = 0;
@@ -137,12 +137,12 @@ void print_fps(int x, int y) {
 	frames_cnt++;
 
 	if (time - prev >= 1000) {
-		fps = (float)frames_cnt;
+		fps = (float)frames_cnt / (time - prev) * 1000;
 		frames_cnt = 0;
 		prev = time;
 	}
 
-	sprintf(msg, "FPS: %f", fps);
+	sprintf(msg, "FPS: %.3f", fps);
 	log_msg(x, y, msg);
 }
 
@@ -328,15 +328,15 @@ int main() {
 		log_msg(0, 1, msg);
 		sprintf(msg, "RIGHT: %f %f %f", cam_right.x, cam_right.y, cam_right.z);
 		log_msg(0, 2, msg);
-
-		print_fps(0, 3);
 		
+		print_fps(0, 3);
+
 		poll_events_keyboard(kbd);
 		poll_events_mouse(mice);
-
+		
 	    swap_terminal_buffers();
 	}
-		
+
 	register_light_clear();
 
 	delete_mem_buff(id);
