@@ -31,5 +31,5 @@ find_package(Freetype REQUIRED)
 target_link_libraries(ConsoleGraphicsLib X11::X11 ${LIBTERMCAP} ncursesw m ${FREETYPE_LIBRARIES})
 target_include_directories(ConsoleGraphicsLib PRIVATE ${FREETYPE_INCLUDE_DIRS})
 
-set(CFLAGS -DDEBUG -Wall -Og)
+set(CFLAGS -DDEBUG -Wall -Og -Wextra -Wpedantic)
 target_compile_options(ConsoleGraphicsLib PRIVATE ${CFLAGS})

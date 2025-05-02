@@ -36,6 +36,10 @@
 #	define UINT unsigned int
 #endif
 
+#ifndef ULL
+#	define ULONGLONG unsigned long long
+#endif
+
 typedef unsigned char byte;
 
 _STATIC _INLINE bool _assert_error_terminate(const char* err, const char* file, UINT line) {

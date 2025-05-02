@@ -15,18 +15,18 @@
 #endif
 
 // for external usage - terminal and buffer interface
-typedef _BUFF_ELEM_TYPE  	  CHAR_T;
+typedef _BUFF_ELEM_TYPE			CHAR_T;
 typedef _BUFF_DEPTH_PREC_TYPE PREC_T;
 
 typedef struct _core_buffer {
-	_BUFF_ELEM_TYPE* 	   mem;
+	_BUFF_ELEM_TYPE*		  mem;
 	_BUFF_DEPTH_PREC_TYPE* depth;
-	_ncurses_pair_id*  col_pair_num;
+	_ncurses_pair_id*		  col_pair_num;
 
-	size_t   		 	   width,
-			 		 	   height,
-			 		 	   xcenter,
-			 		 	   ycenter;
+	size_t   		 		  width,
+			 		 	   	  height,
+			 		 	   	  xcenter,
+			 		 	   	  ycenter;
 } _core_buffer;
 
 int  init_buffer(_core_buffer* buff, size_t width, size_t height);

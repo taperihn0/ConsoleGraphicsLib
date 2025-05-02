@@ -61,17 +61,17 @@ void _init_colors() {
 	_add_color(COLOR_BRIGHT_WHITE, 255, 255, 255);
 	
 	// 16-231 as a 6x6x6 color cube
-     for (UINT red = 0; red < 6; red++) {
-     	for (UINT green = 0; green < 6; green++) {
-     		for (UINT blue = 0; blue < 6; blue++) {
-     			_color_t code = 16 + (red * 36) + (green * 6) + blue;
+	for (UINT red = 0; red < 6; red++) {
+		for (UINT green = 0; green < 6; green++) {
+			for (UINT blue = 0; blue < 6; blue++) {
+				_color_t code = 16 + (red * 36) + (green * 6) + blue;
 				short r = (red ? red * 40 + 55 : 0);
 				short g = (green ? green * 40 + 55 : 0);
 				short b = (blue ? blue * 40 + 55 : 0);
 				_add_color(code, r, g, b);
-     		}
-     	}
-     }
+			}
+		}
+	}
 	
 	// 232-255 as a grayscale ramp
 	for (UINT gray = 0; gray < 24; gray++) {

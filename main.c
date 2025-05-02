@@ -127,9 +127,26 @@ void log_msg(int x, int y, char* msg) {
 	}
 }
 
-void stage_vertex(
-	_entry_t* entry, void* attrib) 
-{
+void print_fps(int x, int y) {
+	static char msg[64];
+	static UINT frames_cnt = 0;
+	static float fps = 0;
+	static utime_t prev = 0;
+
+	utime_t time = gettime_mls(CLOCK_MONOTONIC_RAW);
+	frames_cnt++;
+
+	if (time - prev >= 1000) {
+		fps = (float)frames_cnt;
+		frames_cnt = 0;
+		prev = time;
+	}
+
+	sprintf(msg, "FPS: %f", fps);
+	log_msg(x, y, msg);
+}
+
+void stage_vertex(_entry_t* entry, void* attrib) {
 	mat4* vt = (mat4*)(attrib);
 	mat3* nt = (mat3*)((byte*)attrib + sizeof(mat4));
 
@@ -172,7 +189,7 @@ int main() {
 	disable_console_cursor();
 	hide_cursor();
 
-	set_framerate_limit(30);
+	set_framerate_limit(60);
 
 	set_render_mode(mode);
 
@@ -311,6 +328,8 @@ int main() {
 		log_msg(0, 1, msg);
 		sprintf(msg, "RIGHT: %f %f %f", cam_right.x, cam_right.y, cam_right.z);
 		log_msg(0, 2, msg);
+
+		print_fps(0, 3);
 		
 		poll_events_keyboard(kbd);
 		poll_events_mouse(mice);

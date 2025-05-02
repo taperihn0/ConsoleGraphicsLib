@@ -3,7 +3,7 @@
 #include "common.h"
 #include <time.h>
 
-typedef long utime_t;
+typedef ULONGLONG utime_t;
 
 _STATIC _FORCE_INLINE utime_t gettime_ns(clockid_t clockid) {
 	struct timespec t;

@@ -134,6 +134,7 @@ int _next_device(_devices_file* f, _dev_simple* dev) {
 			ASSERT(dev->id_product != (unsigned short)_INVALID_BUFFER_SYNTAX, "Invalid device file syntax");
 			break;
 		case _DEVICE_INFO_NAME:
+			;
 			char* pn;
 			size_t sn;
 			int cn = _get_str_of(line, "Name", &pn, &sn, r);
@@ -143,6 +144,7 @@ int _next_device(_devices_file* f, _dev_simple* dev) {
 			dev->name[sn] = '\0';
 			break;
 		case _DEVICE_INFO_PHYS:
+			;
 			char* pp; 
 			size_t sp;
 
@@ -155,6 +157,7 @@ int _next_device(_devices_file* f, _dev_simple* dev) {
 
 			break;
 		case _DEVICE_INFO_HANDLER:
+			;
 			char* ev_occ = strstr(line, "event");
 			ASSERT(ev_occ != NULL, "No proper eventX handler");
 			size_t evs = 0;
@@ -171,6 +174,7 @@ int _next_device(_devices_file* f, _dev_simple* dev) {
 			ASSERT(dev->ev_types != (unsigned short)_INVALID_BUFFER_SYNTAX, "Invalid device file syntax");
 			break;
 		case _DEVICE_INFO_BITMAP_KEYS:
+			;
 			char* pk; 
 			size_t sk;
 			int ck = _get_str_of(line, "KEY", &pk, &sk, r); 

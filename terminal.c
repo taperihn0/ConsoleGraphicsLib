@@ -136,10 +136,10 @@ void _sync_with_next_frame() {
 
 	utime_t microsec_diff = curr_tp - last_tp;
 
-	useconds_t microsec_delay = _terminal.microsec_delay > microsec_diff ? 
-						  		_terminal.microsec_delay - microsec_diff : 0u;
+	useconds_t left_delay = _terminal.microsec_delay > microsec_diff ? 
+						  	_terminal.microsec_delay - microsec_diff : 0;
 	
-	usleep(microsec_delay);
+	usleep(left_delay);
 
 	last_tp = curr_tp;
 }

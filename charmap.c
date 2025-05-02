@@ -28,8 +28,8 @@ _ft_state _ft;
 
 _STATIC _FORCE_INLINE UINT _bitmap_brightness(FT_Bitmap* bitmap) {
 	UINT sum = 0;
-	for (int y = 0; y < bitmap->rows; y++) {
-        for (int x = 0; x < bitmap->width; x++) {
+	for (UINT y = 0; y < bitmap->rows; y++) {
+        for (UINT x = 0; x < bitmap->width; x++) {
 			sum += (UINT)bitmap->buffer[y * bitmap->width + x];
         }
     }

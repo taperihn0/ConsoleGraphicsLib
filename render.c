@@ -76,7 +76,7 @@ void _close_flush_ctx() {
 	_close_mutex(&_flush_ctx.swap);
 }
 
-#define _DELAY_MAIN_THREAD_TIME 8
+#define _DELAY_MAIN_THREAD 1
 
 void swap_terminal_buffers() {
 	bool flushing;
@@ -91,7 +91,7 @@ void swap_terminal_buffers() {
 	
 	// wait untill flushing thread got his buffer, then read mutex
 	// (be the second in the queue)
-	usleep(_DELAY_MAIN_THREAD_TIME);
+	usleep(_DELAY_MAIN_THREAD);
 
 	do {
 		_read_mutex_data(&_flush_ctx.swap, &ready2swap);
@@ -348,7 +348,6 @@ _FORCE_INLINE void _triangle_pipeline(
 	_stage_rasterization_triangle(shader, entries, triangles_cnt, attrib);
 }
 
-// TODO: IMPLEMENT PROPER COLOR INTERPRETATION, NOT ONLY "BRIGHTNESS"
 _FORCE_INLINE void _stage_rasterization_triangle(
 	shader_t* shader, _entry_t* entries, size_t triangles_cnt, void* attrib) 
 {
