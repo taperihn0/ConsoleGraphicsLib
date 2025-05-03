@@ -116,8 +116,8 @@ void swap_terminal_buffers() {
 	_sync_with_next_frame();
 }
 
-void set_elem(int x, int y, CHAR_T c, PREC_T d) {
-	set(_get_current_buffer(&_dbl_buff), x, y, d, c);
+void set_elem(int x, int y, CHAR_T c, PREC_T d, _ncurses_pair_id col) {
+	set(_get_current_buffer(&_dbl_buff), x, y, d, c, col);
 }
 
 void set_elem_force(int x, int y, CHAR_T c, PREC_T d, _ncurses_pair_id col) {

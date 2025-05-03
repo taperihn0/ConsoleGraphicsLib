@@ -35,7 +35,7 @@ void set_render_mode(render_mode_t mode);
 
 void clear_terminal(CHAR_T c);
 void swap_terminal_buffers();
-void set_elem(int x, int y, CHAR_T c, PREC_T d);
+void set_elem(int x, int y, CHAR_T c, PREC_T d, _ncurses_pair_id col);
 void set_elem_force(int x, int y, CHAR_T c, PREC_T d, _ncurses_pair_id col);
 
 // Writes data containing number of how many times 

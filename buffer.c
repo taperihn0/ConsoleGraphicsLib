@@ -70,7 +70,7 @@ void close_buffer(_core_buffer* buff) {
 	}
 }
 
-void set(_core_buffer* buff, int x, int y, _BUFF_DEPTH_PREC_TYPE d, _BUFF_ELEM_TYPE c) {
+void set(_core_buffer* buff, int x, int y, _BUFF_DEPTH_PREC_TYPE d, _BUFF_ELEM_TYPE c, _ncurses_pair_id col) {
 	ASSERT(buff != NULL, "Trying to fetch from null buffer");
 	x += buff->xcenter;
 	y = buff->ycenter - y;
@@ -82,6 +82,7 @@ void set(_core_buffer* buff, int x, int y, _BUFF_DEPTH_PREC_TYPE d, _BUFF_ELEM_T
 	if (buff->depth[idx] > d) {
 		buff->depth[idx] = d;
 		buff->mem[idx] = c;
+		buff->col_pair_num[idx] = col;
 	}
 }
 

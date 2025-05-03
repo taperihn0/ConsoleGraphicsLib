@@ -9,7 +9,7 @@
 #define _LINE_DEPTH 0.
 
 #define _plot(x, y, c, d) \
-set_elem((x), (y), (c), (d));
+set_elem((x), (y), (c), (d), COLOR_WHITE + 1);
 
 #define _plot_with_col(x, y, c, d, col) \
 set_elem_force((x), (y), (c), (d), (col));

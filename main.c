@@ -123,7 +123,7 @@ void log_msg(int x, int y, char* msg) {
 	int half_height = get_terminal_height() / 2;
 
 	for (int i = 0; msg[i] != 0; i++) {
-		set_elem(-half_width + x + i, half_height - y, msg[i], -1.f);
+		set_elem(-half_width + x + i, half_height - y, msg[i], -1.f, COLOR_WHITE + 1);
 	}
 }
 
