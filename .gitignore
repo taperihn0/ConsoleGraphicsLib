@@ -3,3 +3,8 @@ build/*
 
 # Ignore daemon, it's not needed anymore
 hhpc
+
+# Profiler files
+cachegrind.out.*
+callgrind.out.*
+profile.txt

@@ -46,7 +46,7 @@ bool byte_false = false;
 bool byte_true = true;
 _core_buffer* null_buffer = NULL;
 
-void* _flush_thread_loop(void* args) {
+void* _flush_thread_loop(_UNUSED void* args) {
 	bool ready = false;
 
 	while (true) {
@@ -76,8 +76,33 @@ void _close_flush_ctx() {
 	_close_mutex(&_flush_ctx.flushed_buff);
 }
 
+#ifdef DEBUG
+
+typedef struct _lateness_data {
+	ULONGLONG flush_late_cnt;
+	ULONGLONG writer_late_cnt;
+} _lateness_data;
+
+static _lateness_data lateness = { 
+	.flush_late_cnt = 0, 
+	.writer_late_cnt = 0 
+};
+
+void get_late_data(ULONGLONG* flush_late_cnt, ULONGLONG* render_late_cnt) {
+	*flush_late_cnt = lateness.flush_late_cnt;
+	*render_late_cnt = lateness.writer_late_cnt;
+}
+
+#endif // DEBUG
+
 void swap_terminal_buffers() {
 	bool flushing;
+	
+#ifdef DEBUG
+	_read_mutex_data(&_flush_ctx.to_flush, &flushing);
+	if (flushing) lateness.flush_late_cnt++;
+	else lateness.writer_late_cnt++;
+#endif // DEBUG
 
 	do {
 		_read_mutex_data(&_flush_ctx.to_flush, &flushing);
@@ -140,7 +165,7 @@ int draw_order_buffer(
 		fprintf(stderr, "Invalid buffer index (null buffer)\n");
 		return -1;
 	}
-
+	
 	for (UINT i = 0; i < size; i += 3) {
 		_triangle_pipeline(shader, 
 			&mem[elem[i] * entry_size], 

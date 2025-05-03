@@ -17,7 +17,7 @@
 
 typedef int _dev_filetype_t;
 
-int _get_input_file_of(_dev_filetype_t devtype, char* path, size_t n) {
+int _get_input_file_of(_dev_filetype_t devtype, char* path) {
 	_devices_file* f = fopen(_DEVICES_FILEPATH, "r");
 	_dev_simple dev, kbd;
 	bool found = false;
@@ -97,7 +97,7 @@ int _get_key_from_events(_keyboard_events* kev, int key) {
 void init_keyboard(keyboard* keyboard) {
 	char path[_HANDLER_PATH_SIZE];
 
-	_get_input_file_of(_FILE_KEYBOARD, path, _HANDLER_PATH_SIZE);
+	_get_input_file_of(_FILE_KEYBOARD, path);
 	if (_open_device_input_file(&keyboard->device_file, path)) {
 		fprintf(stderr, "Cannot open device input file: %s\n", path);
 		return;
@@ -149,7 +149,7 @@ void close_keyboard(keyboard* keyboard) {
 void init_mouse(mouse* mouse) {
 	char path[_HANDLER_PATH_SIZE];
 
-	_get_input_file_of(_FILE_MOUSE, path, _HANDLER_PATH_SIZE);
+	_get_input_file_of(_FILE_MOUSE, path);
 	if (_open_device_input_file(&mouse->device_file, path)) {
 		fprintf(stderr, "Cannot open device file: %s\n", path);
 		return;

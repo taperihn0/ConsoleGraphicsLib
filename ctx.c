@@ -35,13 +35,14 @@ void init_mode() {
 
 	_init_char_map();
 
+	_init_cursor();
+
 	if (has_colors() == FALSE)	
 		fprintf(stderr, "Terminal not supporting colors.");
 
 	_init_colors();
 
 	_init_flush_ctx();
-	_close_flush_ctx();
 
 	set_render_mode(RENDER_MODE_SOLID);
 
@@ -50,6 +51,7 @@ void init_mode() {
 }
 
 void close_mode() {
+	_close_flush_ctx();
 	_close_terminal_state();
 	_close_all_threads();
 }

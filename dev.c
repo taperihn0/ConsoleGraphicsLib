@@ -23,10 +23,10 @@ _STATIC _INLINE long _get_value_of(char* line, char* str, size_t n) {
 	char* b = strstr(line, str) + strlen(str) + strlen("=");
 	char* e = b;
 
-	while ((isdigit(*e) || *e == ' ') && (e - line) < n)
+	while ((isdigit(*e) || *e == ' ') && (size_t)(e - line) < n)
 		e++;
 
-	if (e - line >= n)
+	if ((size_t)(e - line) >= n)
 		return _INVALID_BUFFER_SYNTAX;
 
 	return strtol(b, &e, 16);
@@ -39,10 +39,10 @@ _STATIC _INLINE int _get_str_of(char* line, char* str, char** beg, size_t* strsi
 
 	char* e = b;
 
-	while (*e != '\"' && *e != '\n' && (e - line) < n)
+	while (*e != '\"' && *e != '\n' && (size_t)(e - line) < n)
 		e++;
 
-	if (e - line >= n)
+	if ((size_t)(e - line) >= n)
 		return _INVALID_BUFFER_SYNTAX;
 	
 	*beg = b;
@@ -51,8 +51,8 @@ _STATIC _INLINE int _get_str_of(char* line, char* str, char** beg, size_t* strsi
 	return 0;
 }
 
-_INLINE int _input_num(char* b, size_t n) {
-	static const size_t input_len = strlen("input");
+_STATIC _INLINE int _input_num(char* b, size_t n) {
+	static const size_t input_len = static_strlen("input");
 	
 	if (!b)
 		return _PRIMARY_INPUT_NUM;
@@ -93,7 +93,7 @@ _STATIC _INLINE int _store_hex_keys(char* dest, char* b, size_t n) {
 	return 0;
 }
 
-_STATIC _INLINE int _spec_dev_bitmap_info(const char* line, size_t n) {
+_STATIC _INLINE int _spec_dev_bitmap_info(const char* line) {
 	bool is_ev_info = (strstr(line, "EV") != NULL);
 	bool is_key_info = (strstr(line, "KEY") != NULL);
 
@@ -102,13 +102,13 @@ _STATIC _INLINE int _spec_dev_bitmap_info(const char* line, size_t n) {
 		   			     _DEVICE_INFO_REDUNDANT;
 }
 
-_STATIC _INLINE int _get_dev_info_from(const char* line, size_t n) {
+_STATIC _INLINE int _get_dev_info_from(const char* line) {
 	switch (line[0]) {
 	case 'I': return _DEVICE_INFO_ID;
 	case 'N': return _DEVICE_INFO_NAME;
 	case 'P': return _DEVICE_INFO_PHYS;
 	case 'H': return _DEVICE_INFO_HANDLER;
-	case 'B': return _spec_dev_bitmap_info(line, n);
+	case 'B': return _spec_dev_bitmap_info(line);
 	default:  break;
 	}
 
@@ -123,7 +123,7 @@ int _next_device(_devices_file* f, _dev_simple* dev) {
 
 	int r;
 	while ((r = getline(&line, &n, f)) != EOF && (r > 0 && line[0] != '\n')) {
-		_device_info_t info = _get_dev_info_from(line, r);
+		_device_info_t info = _get_dev_info_from(line);
 
 		switch (info) {
 		case _DEVICE_INFO_ID:

@@ -27,17 +27,17 @@ void _close_terminal_state() {
 	endwin();
 }
 
-void make_terminal_fullscreen() {
-	system("wmctrl -r :ACTIVE: -b add,fullscreen");
+int make_terminal_fullscreen() {
 	_terminal.fullscreen = true;
+	return system("wmctrl -r :ACTIVE: -b add,fullscreen");
 }
 
-void unmake_terminal_fullscreen() {
-	system("wmctrl -r :ACTIVE: -b remove,fullscreen");
+int unmake_terminal_fullscreen() {
 	_terminal.fullscreen = false;
+	return system("wmctrl -r :ACTIVE: -b remove,fullscreen");
 }
 
-void set_terminal_title(const char* const s) {
+int set_terminal_title(const char* const s) {
 	static size_t buff_size = 128 * sizeof(char);
 	ASSERT(sizeof(s) + sizeof("wmctrl -r :ACTIVE: -T ") <= buff_size, "Title too long.");
 
@@ -45,8 +45,9 @@ void set_terminal_title(const char* const s) {
 	strcpy(comm, "wmctrl -r :ACTIVE: -T ");
 	strcat(comm, s);
 	
-	system(comm);
+	int r = system(comm);
 	free(comm);
+	return r;
 }
 
 void enable_raw_mode() {
@@ -71,14 +72,14 @@ void disable_raw_mode() {
 	_terminal.raw_mode = false;
 }
 
-void enable_focus_events() {
-	system("echo -ne '\e[?1004h'");
+int enable_focus_events() {
 	_terminal.focus_events = true;
+	return system("echo -ne '\033[?1004h'");
 }
 
-void disable_focus_events() {
-	system("echo -ne '\e[?1004l'");
+int disable_focus_events() {
 	_terminal.focus_events = false;
+	return system("echo -ne '\033[?1004l'");
 }
 
 void _update_terminal_size() {
@@ -98,13 +99,13 @@ void _update_terminal_size() {
 }
 
 void enable_console_cursor() {
-	printf("\e[?25h");
+	printf("\033[?25h");
 	fflush(stdout);
 	_terminal.console_cursor = true;
 }
 
 void disable_console_cursor() {
-	printf("\e[?25l");
+	printf("\033[?25l");
 	fflush(stdout);
 	_terminal.console_cursor = false;
 }
@@ -116,9 +117,9 @@ bool _check_focus() {
 	ssize_t n = read(STDIN_FILENO, c, sizeof(c));
 	
 	if (n == sizeof(c)) {
-		if (strncmp(c, "\e[O", 3) == 0)
+		if (strncmp(c, "\033[O", 3) == 0)
 			focus = false;
-		else if (strncmp(c, "\e[I", 3) == 0)
+		else if (strncmp(c, "\033[I", 3) == 0)
 			focus = true;
 	}
 

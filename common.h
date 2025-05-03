@@ -36,7 +36,7 @@
 #	define UINT unsigned int
 #endif
 
-#ifndef ULL
+#ifndef ULONGLONG
 #	define ULONGLONG unsigned long long
 #endif
 
@@ -69,3 +69,5 @@ _STATIC _FORCE_INLINE void swap(int* a, int* b) {
 	*a = *b;
 	*b = tmp;
 }
+
+#define static_strlen(str) (sizeof(str) / sizeof(char) - 1)

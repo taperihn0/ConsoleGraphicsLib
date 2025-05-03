@@ -65,7 +65,7 @@ void mouse_callback(int dx, int dy) {
 	normalize3f(&cam_up);
 }
 
-void button_callback(unsigned short btn_action, int btn) {
+void button_callback(_UNUSED unsigned short btn_action, _UNUSED int btn) {
 	/*
 	if (btn_action == KEY_PRESSED && btn == BTN_LEFT) {
 	}
@@ -154,7 +154,7 @@ void stage_vertex(_entry_t* entry, void* attrib) {
 	*_ENTRY_NORM(entry) = mult_mv3(nt, _ENTRY_NORM(entry));
 }	
 
-void stage_fragment(_entry_t* normalized, void* attrib) {	
+void stage_fragment(_entry_t* normalized, _UNUSED void* attrib) {	
 	// NOTE: LIGHT ID CAN BE ALSO PASSED VIA EXTRA ATTRIBUTES BUFFER.
 	light_id_t* light_ids;
 	size_t light_cnt;
@@ -189,7 +189,7 @@ int main() {
 	disable_console_cursor();
 	hide_cursor();
 
-	set_framerate_limit(60);
+	set_framerate_limit(-1);
 
 	set_render_mode(mode);
 
@@ -256,7 +256,7 @@ int main() {
 	utime_t prev_time = gettime_mls(CLOCK_MONOTONIC_RAW);
 	
 	char msg[512];
-	
+
 	light_id_t light_id;
 	add_light_source(&light_id, LIGHT_DIRECTIONAL);
 	
@@ -331,10 +331,15 @@ int main() {
 		
 		print_fps(0, 3);
 
+		ULONGLONG a, b;
+		get_late_data(&a, &b);
+		sprintf(msg, "FLUSH LATE CNT: %llu, WRITER LATE CNT: %llu", a, b);
+		log_msg(0, 4, msg);
+
 		poll_events_keyboard(kbd);
 		poll_events_mouse(mice);
 		
-	    swap_terminal_buffers();
+		swap_terminal_buffers();
 	}
 
 	register_light_clear();

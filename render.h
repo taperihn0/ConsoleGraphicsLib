@@ -29,7 +29,7 @@ void _close_flush_ctx();
 #define _RENDER_MODE_MAX 1
 #define _RENDER_MODE_CNT _RENDER_MODE_MAX + 1
 
-typedef UINT render_mode_t;
+typedef int render_mode_t;
 
 void set_render_mode(render_mode_t mode);
 
@@ -37,6 +37,14 @@ void clear_terminal(CHAR_T c);
 void swap_terminal_buffers();
 void set_elem(int x, int y, CHAR_T c, PREC_T d);
 void set_elem_force(int x, int y, CHAR_T c, PREC_T d, _ncurses_pair_id col);
+
+// Writes data containing number of how many times 
+// flushing thread or rendering (main) thread was late comparing
+// when entering buffer swapping function.
+// Useful while debuging efficiency problems.
+#ifdef DEBUG
+void get_late_data(ULONGLONG* flush_late_cnt, ULONGLONG* render_late_cnt);
+#endif
 
 typedef void (*func_stage_vertex)(
 	_entry_t* entry, void* attrib);

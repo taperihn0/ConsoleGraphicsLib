@@ -9,6 +9,8 @@ typedef struct _main_cursor {
 
 extern _main_cursor _cursor;
 
+void _init_cursor();
+
 // Returns -1 when error occured, else 0 
 int hide_cursor();
 

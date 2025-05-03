@@ -20,6 +20,10 @@ _STATIC _INLINE Cursor nullCursor(Display* dpy, Drawable dw) {
 
 _main_cursor _cursor;
 
+void _init_cursor() {
+	_cursor.visible = true;
+}
+
 int hide_cursor() {
 	dpy = XOpenDisplay(NULL);
 
@@ -42,7 +46,7 @@ int hide_cursor() {
 
 void show_cursor() {
 	XUngrabPointer(dpy, CurrentTime);
-    XFreeCursor(dpy, empty_cursor);
-    XCloseDisplay(dpy);
-    _cursor.visible = true;
+	XFreeCursor(dpy, empty_cursor);
+	XCloseDisplay(dpy);
+	_cursor.visible = true;
 }

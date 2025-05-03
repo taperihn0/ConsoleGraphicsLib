@@ -75,7 +75,7 @@ void set(_core_buffer* buff, int x, int y, _BUFF_DEPTH_PREC_TYPE d, _BUFF_ELEM_T
 	x += buff->xcenter;
 	y = buff->ycenter - y;
 	
-	if (!(y < buff->height && x < buff->width && y >= 0 && x >= 0))
+	if (!(y < (int)buff->height && x < (int)buff->width && y >= 0 && x >= 0))
 		return;
 
 	UINT idx = buff->width * y + x;
@@ -90,7 +90,7 @@ void set_force(_core_buffer* buff, int x, int y, _BUFF_DEPTH_PREC_TYPE d, _BUFF_
 	x += buff->xcenter;
 	y = buff->ycenter - y;
 
-	if (!(y < buff->height && x < buff->width && y >= 0 && x >= 0))
+	if (!(y < (int)buff->height && x < (int)buff->width && y >= 0 && x >= 0))
 		return;
 	
 	UINT idx = buff->width * y + x;
@@ -104,7 +104,7 @@ _BUFF_DEPTH_PREC_TYPE get_depth(_core_buffer* buff, int x, int y) {
 	x += buff->xcenter;
 	y = buff->ycenter - y;
 
-	if (!(y < buff->height && x < buff->width && y >= 0 && x >= 0))
+	if (!(y < (int)buff->height && x < (int)buff->width && y >= 0 && x >= 0))
 		return (_BUFF_DEPTH_PREC_TYPE)(-1.);
 	
 	UINT idx = buff->width * y + x;
@@ -117,8 +117,8 @@ void flush_buffer(_core_buffer* buff) {
 	// wide character string must end with the 0 character, as 
 	// stated in documentation: https://linux.die.net/man/3/setcchar
 	wchar_t wstr[2] = { 0, L'\0' };
-	for (int y = 0; y < buff->height; y++) {
-		for (int x = 0; x < buff->width; x++) {
+	for (UINT y = 0; y < buff->height; y++) {
+		for (UINT x = 0; x < buff->width; x++) {
 			wstr[0] = buff->mem[y * buff->width + x];
 			setcchar(&cchar, wstr, A_NORMAL, buff->col_pair_num[y * buff->width + x], NULL);
 			mvadd_wch(y, x, &cchar);
