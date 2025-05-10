@@ -23,7 +23,7 @@ _UNUSED static size_t _entry_norm_offset = offsetof(_entry_t, norm_x);
 
 #define _ENTRY_POS3(entry) ((vec3*)entry)
 #define _ENTRY_POS4(entry) ((vec4*)entry)
-#define _ENTRY_COL(entry) ((vec3*)((byte*)entry + _entry_col_offset))
+#define _ENTRY_COL(entry)  ((vec3*)((byte*)entry + _entry_col_offset))
 #define _ENTRY_NORM(entry) ((vec3*)((byte*)entry + _entry_norm_offset))
 
 _entry_t _get_entry(void* mem, size_t entry_size);

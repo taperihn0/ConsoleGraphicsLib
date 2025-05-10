@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 3.20)
+set(C_STANDARD 11)
 project(ConsoleGraphicsLib C)
 
 set(
@@ -32,4 +33,4 @@ target_include_directories(ConsoleGraphicsLib PRIVATE ${FREETYPE_INCLUDE_DIRS})
 
 #set(CFLAGS -DDEBUG -Wall -g -pg -Wextra -Wpedantic)
 #target_compile_options(ConsoleGraphicsLib PRIVATE ${CFLAGS})
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DDEBUG -Wall -Og -Wextra -Wpedantic -Werror -Wall")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DDEBUG -Wall -Og -Wextra -Wpedantic -Werror -Wall -msse4.1")

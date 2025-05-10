@@ -1,43 +1,99 @@
 #pragma once
 
-#include "common.h"
+#include "simd.h"
 #include <math.h>
 
 /*
 	MAIN MINIMALISTIC MATH HEADER FOR GRAPHICS PURPOSES (MATH CORE)
 */
 
-typedef float   	_prec0_t;
-typedef double  	_prec1_t;
-typedef long double _prec2_t;
+typedef float _prec0_t;
+typedef double _prec1_t;
 
-#ifndef MATH_PREC_T
-#	define MATH_PREC_T _prec0_t
-#endif
+#define MATH_PREC_T _prec0_t
+#define MATH_INT_T  int32_t
 
-#ifndef MATH_INT_T
-#	define MATH_INT_T int
-#endif
-
-#define PI 3.14159265358979
+#define PI 	3.14159265358979
+#define PIf ((float)(PI))
 
 #define RADIANS(deg) deg / 180. * PI
+#define RADIANSf(def) deg / 180.f * PIf
 
-typedef struct vec_2fl {
-	MATH_PREC_T x, y;
+typedef _ALIGN(8) union _vec_2fl_t {
+	struct {
+		MATH_PREC_T x, 
+					y;
+	};
+	MATH_PREC_T col[2];
 } vec2;
 
-typedef struct vec_2i {
-	MATH_INT_T x, y;
+typedef _ALIGN(8) union _vec_2i_t {
+	struct {
+		MATH_INT_T x, 
+				   y;
+	};
+	MATH_INT_T col[2];
 } vec2_i;
 
-typedef struct vec_3fl {
-	MATH_PREC_T x, y, z;
+typedef union _vec_3fl_t {
+	struct {
+		MATH_PREC_T x, 
+					y, 
+					z;
+	};
+	struct {
+		MATH_PREC_T r,
+					g,
+					b;
+	};
+	MATH_PREC_T col[3];
 } vec3;
 
-typedef struct vec_4fl {
-	MATH_PREC_T x, y, z, w;
+typedef union _vec_3i_t {
+	struct {
+		MATH_INT_T x, 
+				   y, 
+				   z;
+	};
+	struct {
+		MATH_INT_T r,
+				   g,
+				   b;
+	};
+	MATH_INT_T col[3];
+} vec3_i;
+
+typedef _ALIGN(16) union _vec_4fl_t {
+	struct {
+		MATH_PREC_T x, 
+					y, 
+					z, 
+					w;
+	};
+	struct {
+		MATH_PREC_T r,
+					g,
+					b,
+					a;
+	};
+	MATH_PREC_T col[4];
 } vec4;
+
+typedef _ALIGN(16) union _vec_4i_t {
+	struct {
+		MATH_INT_T x, 
+				   y, 
+				   z, 
+				   w;
+	};
+	struct {
+		MATH_INT_T r,
+				   g,
+				   b,
+				   a;
+	};
+	MATH_INT_T col[4];
+} vec4_i;
 
 typedef struct mat_2fl {
 	MATH_PREC_T rc[2][2];
@@ -52,7 +108,6 @@ typedef struct mat_4fl {
 } mat4;
 
 vec2_i vec2i(MATH_INT_T x, MATH_INT_T y);
-
 vec2 vec2f(MATH_PREC_T x, MATH_PREC_T y);
 vec3 vec3f(MATH_PREC_T x, MATH_PREC_T y, MATH_PREC_T z);
 vec4 vec4f(MATH_PREC_T x, MATH_PREC_T y, MATH_PREC_T z, MATH_PREC_T w);
@@ -62,11 +117,15 @@ mat3 mat3f(MATH_PREC_T* elems);
 mat4 mat4f(MATH_PREC_T* elems);
 
 #define LENGTHSQ2F(v2) dot2f(v2, v2)
-#define LENGTH2F(v2) sqrt(LENGTHSQ2F(v2))
+#define LENGTH2F(v2)   sqrt(LENGTHSQ2F(v2))
 #define LENGTHSQ3F(v3) dot3f(v3, v3)
-#define LENGTH3F(v3) sqrt(LENGTHSQ3F(v3))
+#define LENGTH3F(v3)   sqrt(LENGTHSQ3F(v3))
 #define LENGTHSQ4F(v4) dot4f(v4, v4)
-#define LENGTH4F(v4) sqrt(LENGTHSQ4F(v4))
+#define LENGTH4F(v4)   sqrt(LENGTHSQ4F(v4))
+
+int equal2f(vec2* a, vec2* b);
+int equal3f(vec3* a, vec3* b);
+int equal4f(vec4* a, vec4* b);
 
 void normalize2f(vec2* v);
 void normalize3f(vec3* v);
@@ -80,9 +139,9 @@ vec2 sub2f(vec2* a, vec2* b);
 vec3 sub3f(vec3* a, vec3* b);
 vec4 sub4f(vec4* a, vec4* b);
 
-vec2 mult_av2(float alpha, vec2* a);
-vec3 mult_av3(float alpha, vec3* a);
-vec4 mult_av4(float alpha, vec4* a);
+vec2 mult_av2(MATH_PREC_T alpha, vec2* a);
+vec3 mult_av3(MATH_PREC_T alpha, vec3* a);
+vec4 mult_av4(MATH_PREC_T alpha, vec4* a);
 
 // Custom multipling.
 // mult_v2(a, b) -> vec2(a->x * b->x, a->y * b->y)

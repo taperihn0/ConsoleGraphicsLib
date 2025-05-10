@@ -53,8 +53,10 @@ void mouse_callback(int dx, int dy) {
 	cam_dir.y = sin(RADIANS(pitch));
 	cam_dir.z = sin(RADIANS(yaw)) * cos(RADIANS(pitch));
 	
-	static vec3 tmp_up = {
-		0.f, 1.f, 0.f
+	vec3 tmp_up = (vec3) { 
+		.x = 0.f, 
+		.y = 1.f, 
+		.z = 0.f 
 	};
 
 	cam_right = cross3f(&cam_dir, &tmp_up);

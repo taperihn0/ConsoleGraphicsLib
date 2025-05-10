@@ -58,6 +58,24 @@ mat4 mat4f(MATH_PREC_T* elems) {
 	return m;
 }
 
+int equal2f(vec2* a, vec2* b) { 
+	return a->x == b->x && 
+		   a->y == b->y;
+}
+
+int equal3f(vec3* a, vec3* b) {
+	return a->x == b->x && 
+		   a->y == b->y &&
+		   a->z == b->z;
+}
+
+int equal4f(vec4* a, vec4* b) {
+	return a->x == b->x && 
+		   a->y == b->y &&
+		   a->z == b->z &&
+		   a->w == b->w;
+}
+
 void normalize2f(vec2* v) {
 	MATH_PREC_T l = LENGTH2F(v);
 	v->x /= l;
@@ -73,10 +91,15 @@ void normalize3f(vec3* v) {
 
 void normalize4f(vec4* v) {
 	MATH_PREC_T l = LENGTH4F(v);
+#ifndef _SIMD_SSE
 	v->x /= l;
 	v->y /= l;
 	v->z /= l;
 	v->w /= l;
+#else
+	amm_store_ps((float*)v, _mm_div_ps(amm_load_ps((float*)v),
+									   _mm_load_ps1(&l)));
+#endif
 }
 
 vec2 add2f(vec2* a, vec2* b) {
@@ -97,12 +120,18 @@ vec3 add3f(vec3* a, vec3* b) {
 }
 
 vec4 add4f(vec4* a, vec4* b) {
-	vec4 r = {
+	vec4 r;
+#ifndef _SIMD_SSE
+	r = (vec4) {
 		.x = a->x + b->x,
 		.y = a->y + b->y,
 		.z = a->z + b->z,
 		.w = a->w + b->w
 	};
+#else
+	_mm_store_ps((float*)(&r), _mm_add_ps(amm_load_ps((float*)a), 
+							   amm_load_ps((float*)b)));
+#endif
 	return r;
 }
 
@@ -122,60 +151,101 @@ vec3 sub3f(vec3* a, vec3* b) {
 }
 
 vec4 sub4f(vec4* a, vec4* b) {
-	return (vec4) {
+	vec4 r;
+#ifndef _SIMD_SSE
+	r = (vec4) {
 		.x = a->x - b->x,
 		.y = a->y - b->y,
 		.z = a->z - b->z,
 		.w = a->w - b->w,
 	};
+#else
+	_mm_store_ps((float*)(&r), _mm_sub_ps(amm_load_ps((float*)a),
+							   amm_load_ps((float*)b)));
+#endif
+	return r;
 }
 
-vec2 mult_av2(float alpha, vec2* a) {
-	return (vec2){
+vec2 mult_av2(MATH_PREC_T alpha, vec2* a) {
+	return (vec2) {
 		.x = a->x * alpha,
 		.y = a->y * alpha,
 	};
 }
 
-vec3 mult_av3(float alpha, vec3* a) {
-	return (vec3){
+vec3 mult_av3(MATH_PREC_T alpha, vec3* a) {
+	return (vec3) {
 		.x = a->x * alpha,
 		.y = a->y * alpha,
 		.z = a->z * alpha,
 	};
 }
 
-vec4 mult_av4(float alpha, vec4* a) {
-	return (vec4){
+vec4 mult_av4(MATH_PREC_T alpha, vec4* a) {
+	vec4 r;
+#ifndef _SIMD_SSE
+	r = (vec4) {
 		.x = a->x * alpha,
 		.y = a->y * alpha,
 		.z = a->z * alpha,
 		.w = a->w * alpha,
 	};
+#else
+	_mm_store_ps((float*)(&r), _mm_mul_ps(amm_load_ps((float*)a),
+							   _mm_load_ps1(&alpha)));
+#endif
+	return r;
 }
 
 vec2 mult_v2(vec2* a, vec2* b) {
-	return vec2f(a->x * b->x, a->y * b->y);
+	return vec2f(a->x * b->x, 
+				 a->y * b->y);
 }
 
 vec3 mult_v3(vec3* a, vec3* b) {
-	return vec3f(a->x * b->x, a->y * b->y, a->z * b->z);
+	return vec3f(a->x * b->x, 
+				 a->y * b->y, 
+				 a->z * b->z);
 }
 
 vec4 mult_v4(vec4* a, vec4* b) {
-	return vec4f(a->x * b->x, a->y * b->y, a->z * b->z, a->w * b->w);
+	vec4 r;
+#ifndef _SIMD_SSE
+	r = vec4f(a->x * b->x, 
+			  a->y * b->y, 
+			  a->z * b->z, 
+			  a->w * b->w);
+#else
+	_mm_store_ps((float*)(&r), _mm_mul_ps(amm_load_ps((float*)a),
+							   amm_load_ps((float*)b)));
+#endif
+	return r;
 }
 
 MATH_PREC_T dot2f(vec2* a, vec2* b) {
-	return a->x * b->x + a->y * b->y;
+	return a->x * b->x + 
+		   a->y * b->y;
 }
 
 MATH_PREC_T dot3f(vec3* a, vec3* b) {
-	return a->x * b->x + a->y * b->y + a->z * b->z;
+	return a->x * b->x + 
+		   a->y * b->y + 
+		   a->z * b->z;
 }
 
 MATH_PREC_T dot4f(vec4* a, vec4* b) {
-	return a->x * b->x + a->y * b->y + a->z * b->z + a->w * b->w;
+	MATH_PREC_T r;
+#ifndef _SIMD_SSE
+	r = a->x * b->x + 
+		a->y * b->y + 
+		a->z * b->z + 
+		a->w * b->w;
+#else
+	r = _mm_cvtss_f32(_mm_dp_ps(amm_load_ps((float*)a), 
+								amm_load_ps((float*)b), 
+								0xFF));
+#endif
+	return r;
 }
 
 vec3 cross3f(vec3* a, vec3* b) {
