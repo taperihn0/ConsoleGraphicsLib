@@ -168,7 +168,8 @@ MATH_PREC_T dot4f(vec4* a, vec4* b);
 
 // frequent use of this expansion make it necessary 
 // to make it a macro, which is *ALWAYS* inlined
-#define CROSSPROD_2D(v1, v2) ((v1).x * (v2).y - (v1).y * (v2).x)
+#define CROSSPROD_2D(v1, v2) \
+	((v1).x * (v2).y - (v1).y * (v2).x)
 
 vec3 cross3f(vec3* a, vec3* b);
 

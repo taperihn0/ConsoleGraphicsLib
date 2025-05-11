@@ -114,19 +114,24 @@ void normalize4f(vec4* v) {
 }
 
 vec2 add2f(vec2* a, vec2* b) {
-	vec2 r = {
+	return (vec2) {
 		.x = a->x + b->x,
 		.y = a->y + b->y
 	};
-	return r;
 }
 
 vec3 add3f(vec3* a, vec3* b) {
-	vec3 r = {
+	_ALIGN(16) vec3 r;
+#ifndef _SIMD_SEE
+	r = (vec3) {
 		.x = a->x + b->x,
 		.y = a->y + b->y,
 		.z = a->z + b->z
 	};
+#else
+	amm_store96_ps((float*)(&r), _mm_add_ps(amm_load96_ps((float*)a),
+	                                        amm_load96_ps((float*)b)));
+#endif
 	return r;
 }
 
@@ -154,11 +159,18 @@ vec2 sub2f(vec2* a, vec2* b) {
 }
 
 vec3 sub3f(vec3* a, vec3* b) {
-	return (vec3) {
+	_ALIGN(16) vec3 r;
+#ifndef _SIMD_SEE
+	r = (vec3) {
 		.x = a->x - b->x,
 		.y = a->y - b->y,
 		.z = a->z - b->z,
 	};
+#else
+	amm_store96_ps((float*)(&r), _mm_sub_ps(amm_load96_ps((float*)a),
+	                                        amm_load96_ps((float*)b)));
+#endif
+	return r;
 }
 
 vec4 sub4f(vec4* a, vec4* b) {
@@ -185,11 +197,18 @@ vec2 mult_av2(MATH_PREC_T alpha, vec2* a) {
 }
 
 vec3 mult_av3(MATH_PREC_T alpha, vec3* a) {
-	return (vec3) {
+	_ALIGN(16) vec3 r;
+#ifndef _SIMD_SEE
+	r = (vec3) {
 		.x = a->x * alpha,
 		.y = a->y * alpha,
 		.z = a->z * alpha,
 	};
+#else
+	amm_store96_ps((float*)(&r), _mm_mul_ps(amm_load96_ps((float*)a),
+	                                        _mm_load_ps1(&alpha)));
+#endif
+	return r;
 }
 
 vec4 mult_av4(MATH_PREC_T alpha, vec4* a) {
@@ -214,9 +233,16 @@ vec2 mult_v2(vec2* a, vec2* b) {
 }
 
 vec3 mult_v3(vec3* a, vec3* b) {
-	return vec3f(a->x * b->x, 
-	             a->y * b->y, 
-	             a->z * b->z);
+	_ALIGN(16) vec3 r;
+#ifndef _SIMD_SEE
+	r = vec3f(a->x * b->x, 
+				 a->y * b->y, 
+				 a->z * b->z);
+#else
+	amm_store96_ps((float*)(&r), _mm_mul_ps(amm_load96_ps((float*)a),
+	                                        amm_load96_ps((float*)b)));
+#endif
+	return r;
 }
 
 vec4 mult_v4(vec4* a, vec4* b) {
@@ -247,7 +273,7 @@ MATH_PREC_T dot3f(vec3* a, vec3* b) {
 #else
 	r = _mm_cvtss_f32(_mm_dp_ps(amm_load96_ps((float*)a), 
 	                            amm_load96_ps((float*)b), 
-	                            0xFF));
+	                            0x77));
 #endif
 	return r;
 }
@@ -403,30 +429,70 @@ mat2 mult_m2(mat2* a, mat2* b) {
 }
 
 mat3 mult_m3(mat3* a, mat3* b) {
-	mat3 m = mat3f(NULL);
-
+	mat3 m;
+#ifndef _SIMD_SEE
 	for (UINT i = 0; i < 3; i++) {
 		for (UINT j = 0; j < 3; j++) {
+			m.rc[j][i] = 0;
 			for (UINT k = 0; k < 3; k++) {
 				m.rc[j][i] += a->rc[j][k] * b->rc[k][i];
 			}
 		}
 	}
+#else
+	__m128 ps3ra[3];
+	ps3ra[0] = amm_load96_ps((float*)(&a->r0));
+	ps3ra[1] = amm_load96_ps((float*)(&a->r1));
+	ps3ra[2] = amm_load96_ps((float*)(&a->r2));
+	
+	__m128 ps3cb[3];
+	ps3cb[0] = amm_set96r_ps(b->rc[0][0], b->rc[1][0], b->rc[2][0]);
+	ps3cb[1] = amm_set96r_ps(b->rc[0][1], b->rc[1][1], b->rc[2][1]);
+	ps3cb[2] = amm_set96r_ps(b->rc[0][2], b->rc[1][2], b->rc[2][2]);
 
+	for (UINT j = 0; j < 3; j++) {
+		for (UINT i = 0; i < 3; i++) {
+			m.rc[j][i] = _mm_cvtss_f32(_mm_dp_ps(ps3ra[j], 
+			                                     ps3cb[i], 
+			                                     0x77));
+		}
+	}
+#endif
 	return m;
 }
 
 mat4 mult_m4(mat4* a, mat4* b) {
-	mat4 m = mat4f(NULL);
-
-	for (UINT i = 0; i < 4; i++) {
-		for (UINT j = 0; j < 4; j++) {
+	mat4 m;
+#ifndef _SIMD_SEE
+	for (UINT j = 0; j < 4; j++) {
+		for (UINT i = 0; i < 4; i++) {
+			m.rc[j][i] = 0;
 			for (UINT k = 0; k < 4; k++) {
 				m.rc[j][i] += a->rc[j][k] * b->rc[k][i];
 			}
 		}
 	}
+#else
+	__m128 ps3ra[4];
+	ps3ra[0] = amm_load_ps((float*)(&a->r0));
+	ps3ra[1] = amm_load_ps((float*)(&a->r1));
+	ps3ra[2] = amm_load_ps((float*)(&a->r2));
+	ps3ra[3] = amm_load_ps((float*)(&a->r3));
+	
+	__m128 ps3cb[4];
+	ps3cb[0] = _mm_setr_ps(b->rc[0][0], b->rc[1][0], b->rc[2][0], b->rc[3][0]);
+	ps3cb[1] = _mm_setr_ps(b->rc[0][1], b->rc[1][1], b->rc[2][1], b->rc[3][1]);
+	ps3cb[2] = _mm_setr_ps(b->rc[0][2], b->rc[1][2], b->rc[2][2], b->rc[3][2]);
+	ps3cb[3] = _mm_setr_ps(b->rc[0][3], b->rc[1][3], b->rc[2][3], b->rc[3][3]);
 
+	for (UINT j = 0; j < 4; j++) {
+		for (UINT i = 0; i < 4; i++) {
+			m.rc[j][i] = _mm_cvtss_f32(_mm_dp_ps(ps3ra[j], 
+			                                     ps3cb[i], 
+															 0xFF));
+		}
+	}
+#endif
 	return m;
 }
 
