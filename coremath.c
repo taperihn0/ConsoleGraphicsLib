@@ -273,7 +273,7 @@ MATH_PREC_T dot3f(vec3* a, vec3* b) {
 #else
 	r = _mm_cvtss_f32(_mm_dp_ps(amm_load96_ps((float*)a), 
 	                            amm_load96_ps((float*)b), 
-	                            0x77));
+	                            0x71));
 #endif
 	return r;
 }
@@ -288,7 +288,7 @@ MATH_PREC_T dot4f(vec4* a, vec4* b) {
 #else
 	r = _mm_cvtss_f32(_mm_dp_ps(amm_load_ps((float*)a), 
 	                            amm_load_ps((float*)b), 
-	                            0xFF));
+	                            0xF1));
 #endif
 	return r;
 }
@@ -415,16 +415,25 @@ mat4 inverse_m4(mat4* a) {
 */
 
 mat2 mult_m2(mat2* a, mat2* b) {
-	mat2 m = mat2f(NULL);
-
+	mat2 m;
+#ifndef _SIMD_SEE
 	for (UINT i = 0; i < 2; i++) {
 		for (UINT j = 0; j < 2; j++) {
+			m.rc[j][i] = 0;
 			for (UINT k = 0; k < 2; k++) {
 				m.rc[j][i] += a->rc[j][k] * b->rc[k][i];
 			}
 		}
 	}
-
+#else
+	__m128 ps4a = amm_load_ps((float*)(&a));
+	__m128 ps4b  = _mm_setr_ps(b->rc[0][0], b->rc[1][0], b->rc[0][1], b->rc[1][1]);
+	__m128 ps4br = _mm_setr_ps(b->rc[0][1], b->rc[1][1], b->rc[0][0], b->rc[1][0]);
+	m.rc[0][0] = _mm_cvtss_f32(_mm_dp_ps(ps4a, ps4b,  0x21));
+	m.rc[1][1] = _mm_cvtss_f32(_mm_dp_ps(ps4a, ps4b,  0xC1));
+	m.rc[0][1] = _mm_cvtss_f32(_mm_dp_ps(ps4a, ps4br, 0x21));
+	m.rc[1][0] = _mm_cvtss_f32(_mm_dp_ps(ps4a, ps4br, 0xC1));
+#endif
 	return m;
 }
 
@@ -454,7 +463,7 @@ mat3 mult_m3(mat3* a, mat3* b) {
 		for (UINT i = 0; i < 3; i++) {
 			m.rc[j][i] = _mm_cvtss_f32(_mm_dp_ps(ps3ra[j], 
 			                                     ps3cb[i], 
-			                                     0x77));
+			                                     0x71));
 		}
 	}
 #endif
@@ -489,7 +498,7 @@ mat4 mult_m4(mat4* a, mat4* b) {
 		for (UINT i = 0; i < 4; i++) {
 			m.rc[j][i] = _mm_cvtss_f32(_mm_dp_ps(ps3ra[j], 
 			                                     ps3cb[i], 
-															 0xFF));
+															 0xF1));
 		}
 	}
 #endif
