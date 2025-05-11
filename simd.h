@@ -4,7 +4,7 @@
 #include <immintrin.h>
 
 #ifdef __SSE__
-#	define _SIMD_SSE 
+#	define _SIMD_SEE 
 #endif
 
 // TODO: PROVIDE A SYSTEM WITH PROPER ALIGNMENT, NOW
@@ -21,3 +21,11 @@
 #	define amm_store_ps(a, b) _mm_storeu_ps((a), (b))
 #	define amm_load_ps(a)     _mm_loadu_ps((a))
 #endif
+
+#define amm_load96_ps(a) _mm_movelh_ps(_mm_loadl_pi( 						     \
+													_mm_setzero_ps(), (__m64*)(a)),    \
+													_mm_load_ss((float*)(a) + 2))	   
+
+#define amm_store96_ps(a, b) (_mm_storel_pi((__m64*)(a), (b)),            \
+										_mm_store_ss((float*)(a) + 2, 			     \
+										             _mm_shuffle_ps((b), (b), 2)))

@@ -16,13 +16,13 @@ typedef double _prec1_t;
 #define PI 	3.14159265358979
 #define PIf ((float)(PI))
 
-#define RADIANS(deg) deg / 180. * PI
+#define RADIANS(deg)  deg / 180. * PI
 #define RADIANSf(def) deg / 180.f * PIf
 
 typedef _ALIGN(8) union _vec_2fl_t {
 	struct {
 		MATH_PREC_T x, 
-					y;
+						y;
 	};
 	MATH_PREC_T col[2];
 } vec2;
@@ -30,7 +30,7 @@ typedef _ALIGN(8) union _vec_2fl_t {
 typedef _ALIGN(8) union _vec_2i_t {
 	struct {
 		MATH_INT_T x, 
-				   y;
+					  y;
 	};
 	MATH_INT_T col[2];
 } vec2_i;
@@ -38,13 +38,13 @@ typedef _ALIGN(8) union _vec_2i_t {
 typedef union _vec_3fl_t {
 	struct {
 		MATH_PREC_T x, 
-					y, 
-					z;
+						y, 
+						z;
 	};
 	struct {
 		MATH_PREC_T r,
-					g,
-					b;
+						g,
+						b;
 	};
 	MATH_PREC_T col[3];
 } vec3;
@@ -52,13 +52,13 @@ typedef union _vec_3fl_t {
 typedef union _vec_3i_t {
 	struct {
 		MATH_INT_T x, 
-				   y, 
-				   z;
+					  y, 
+					  z;
 	};
 	struct {
 		MATH_INT_T r,
-				   g,
-				   b;
+					  g,
+					  b;
 	};
 	MATH_INT_T col[3];
 } vec3_i;
@@ -66,15 +66,15 @@ typedef union _vec_3i_t {
 typedef _ALIGN(16) union _vec_4fl_t {
 	struct {
 		MATH_PREC_T x, 
-					y, 
-					z, 
-					w;
+						y, 
+						z, 
+						w;
 	};
 	struct {
 		MATH_PREC_T r,
-					g,
-					b,
-					a;
+						g,
+						b,
+						a;
 	};
 	MATH_PREC_T col[4];
 } vec4;
@@ -82,28 +82,43 @@ typedef _ALIGN(16) union _vec_4fl_t {
 typedef _ALIGN(16) union _vec_4i_t {
 	struct {
 		MATH_INT_T x, 
-				   y, 
-				   z, 
-				   w;
+					  y, 
+					  z, 
+					  w;
 	};
 	struct {
 		MATH_INT_T r,
-				   g,
-				   b,
-				   a;
+					  g,
+					  b,
+					  a;
 	};
 	MATH_INT_T col[4];
 } vec4_i;
 
-typedef struct mat_2fl {
+typedef _ALIGN(8) struct mat_2fl {
+	struct {
+		vec2 r0,
+			  r1;
+	};
 	MATH_PREC_T rc[2][2];
 } mat2;
 
-typedef struct mat_3fl {
+typedef union mat_3fl {
+	struct {
+		vec3 r0,
+			  r1,
+			  r2;
+	};
 	MATH_PREC_T rc[3][3];
 } mat3;
 
-typedef struct mat_4fl {
+typedef _ALIGN(16) union mat_4fl {
+	struct {
+		vec4 r0,
+			  r1,
+			  r2,
+			  r3;
+	};
 	MATH_PREC_T rc[4][4];
 } mat4;
 
@@ -143,10 +158,6 @@ vec2 mult_av2(MATH_PREC_T alpha, vec2* a);
 vec3 mult_av3(MATH_PREC_T alpha, vec3* a);
 vec4 mult_av4(MATH_PREC_T alpha, vec4* a);
 
-// Custom multipling.
-// mult_v2(a, b) -> vec2(a->x * b->x, a->y * b->y)
-// mult_v3(a, b) -> vec3(a->x * b->x, a->y * b->y, a->z * b->z)
-// mult_v4(a, b) -> vec4(a->x * b->x, a->y * b->y, a->z * b->z, a->w * b->w)
 vec2 mult_v2(vec2* a, vec2* b);
 vec3 mult_v3(vec3* a, vec3* b);
 vec4 mult_v4(vec4* a, vec4* b);

@@ -8,21 +8,27 @@ vec2_i vec2i(MATH_INT_T x, MATH_INT_T y) {
 }
 
 vec2 vec2f(MATH_PREC_T x, MATH_PREC_T y) {
-	vec2 v;
-	v.x = x, v.y = y;
-	return v;
+	return (vec2) {
+		.x = x,
+		.y = y
+	};
 }
 
 vec3 vec3f(MATH_PREC_T x, MATH_PREC_T y, MATH_PREC_T z) {
-	vec3 v;
-	v.x = x, v.y = y, v.z = z;
-	return v;
+	return (vec3) {
+		.x = x,
+		.y = y,
+		.z = z
+	};
 }
 
 vec4 vec4f(MATH_PREC_T x, MATH_PREC_T y, MATH_PREC_T z, MATH_PREC_T w) {
-	vec4 v;
-	v.x = x, v.y = y, v.z = z, v.w = w;
-	return v;
+	return (vec4) {
+		.x = x,
+		.y = y,
+		.z = z,
+		.w = w
+	};
 }
 
 mat2 mat2f(MATH_PREC_T* elems) {
@@ -60,20 +66,20 @@ mat4 mat4f(MATH_PREC_T* elems) {
 
 int equal2f(vec2* a, vec2* b) { 
 	return a->x == b->x && 
-		   a->y == b->y;
+			 a->y == b->y;
 }
 
 int equal3f(vec3* a, vec3* b) {
 	return a->x == b->x && 
-		   a->y == b->y &&
-		   a->z == b->z;
+			 a->y == b->y &&
+			 a->z == b->z;
 }
 
 int equal4f(vec4* a, vec4* b) {
 	return a->x == b->x && 
-		   a->y == b->y &&
-		   a->z == b->z &&
-		   a->w == b->w;
+			 a->y == b->y &&
+			 a->z == b->z &&
+			 a->w == b->w;
 }
 
 void normalize2f(vec2* v) {
@@ -84,21 +90,26 @@ void normalize2f(vec2* v) {
 
 void normalize3f(vec3* v) {
 	MATH_PREC_T l = LENGTH3F(v);
+#ifndef _SIMD_SEE
 	v->x /= l;
 	v->y /= l;
 	v->z /= l;
+#else
+	amm_store96_ps((float*)v, _mm_div_ps(amm_load96_ps((float*)v), 
+	                                     _mm_load_ps1(&l)));
+#endif
 }
 
 void normalize4f(vec4* v) {
 	MATH_PREC_T l = LENGTH4F(v);
-#ifndef _SIMD_SSE
+#ifndef _SIMD_SEE
 	v->x /= l;
 	v->y /= l;
 	v->z /= l;
 	v->w /= l;
 #else
-	amm_store_ps((float*)v, _mm_div_ps(amm_load_ps((float*)v),
-									   _mm_load_ps1(&l)));
+	amm_store_ps((float*)v, _mm_div_ps(amm_load_ps((float*)v), 
+	                                   _mm_load_ps1(&l)));
 #endif
 }
 
@@ -121,7 +132,7 @@ vec3 add3f(vec3* a, vec3* b) {
 
 vec4 add4f(vec4* a, vec4* b) {
 	vec4 r;
-#ifndef _SIMD_SSE
+#ifndef _SIMD_SEE
 	r = (vec4) {
 		.x = a->x + b->x,
 		.y = a->y + b->y,
@@ -130,7 +141,7 @@ vec4 add4f(vec4* a, vec4* b) {
 	};
 #else
 	_mm_store_ps((float*)(&r), _mm_add_ps(amm_load_ps((float*)a), 
-							   amm_load_ps((float*)b)));
+	                                      amm_load_ps((float*)b)));
 #endif
 	return r;
 }
@@ -152,7 +163,7 @@ vec3 sub3f(vec3* a, vec3* b) {
 
 vec4 sub4f(vec4* a, vec4* b) {
 	vec4 r;
-#ifndef _SIMD_SSE
+#ifndef _SIMD_SEE
 	r = (vec4) {
 		.x = a->x - b->x,
 		.y = a->y - b->y,
@@ -161,7 +172,7 @@ vec4 sub4f(vec4* a, vec4* b) {
 	};
 #else
 	_mm_store_ps((float*)(&r), _mm_sub_ps(amm_load_ps((float*)a),
-							   amm_load_ps((float*)b)));
+	                                      amm_load_ps((float*)b)));
 #endif
 	return r;
 }
@@ -183,7 +194,7 @@ vec3 mult_av3(MATH_PREC_T alpha, vec3* a) {
 
 vec4 mult_av4(MATH_PREC_T alpha, vec4* a) {
 	vec4 r;
-#ifndef _SIMD_SSE
+#ifndef _SIMD_SEE
 	r = (vec4) {
 		.x = a->x * alpha,
 		.y = a->y * alpha,
@@ -192,67 +203,86 @@ vec4 mult_av4(MATH_PREC_T alpha, vec4* a) {
 	};
 #else
 	_mm_store_ps((float*)(&r), _mm_mul_ps(amm_load_ps((float*)a),
-							   _mm_load_ps1(&alpha)));
+	                                      _mm_load_ps1(&alpha)));
 #endif
 	return r;
 }
 
 vec2 mult_v2(vec2* a, vec2* b) {
 	return vec2f(a->x * b->x, 
-				 a->y * b->y);
+	             a->y * b->y);
 }
 
 vec3 mult_v3(vec3* a, vec3* b) {
 	return vec3f(a->x * b->x, 
-				 a->y * b->y, 
-				 a->z * b->z);
+	             a->y * b->y, 
+	             a->z * b->z);
 }
 
 vec4 mult_v4(vec4* a, vec4* b) {
 	vec4 r;
-#ifndef _SIMD_SSE
+#ifndef _SIMD_SEE
 	r = vec4f(a->x * b->x, 
-			  a->y * b->y, 
-			  a->z * b->z, 
-			  a->w * b->w);
+	          a->y * b->y, 
+	          a->z * b->z, 
+	          a->w * b->w);
 #else
 	_mm_store_ps((float*)(&r), _mm_mul_ps(amm_load_ps((float*)a),
-							   amm_load_ps((float*)b)));
+	                                      amm_load_ps((float*)b)));
 #endif
 	return r;
 }
 
 MATH_PREC_T dot2f(vec2* a, vec2* b) {
 	return a->x * b->x + 
-		   a->y * b->y;
+			 a->y * b->y;
 }
 
 MATH_PREC_T dot3f(vec3* a, vec3* b) {
-	return a->x * b->x + 
-		   a->y * b->y + 
-		   a->z * b->z;
+	MATH_PREC_T r;
+#ifndef _SIMD_SEE
+	r = a->x * b->x + 
+		 a->y * b->y + 
+		 a->z * b->z;
+#else
+	r = _mm_cvtss_f32(_mm_dp_ps(amm_load96_ps((float*)a), 
+	                            amm_load96_ps((float*)b), 
+	                            0xFF));
+#endif
+	return r;
 }
 
 MATH_PREC_T dot4f(vec4* a, vec4* b) {
 	MATH_PREC_T r;
-#ifndef _SIMD_SSE
+#ifndef _SIMD_SEE
 	r = a->x * b->x + 
-		a->y * b->y + 
-		a->z * b->z + 
-		a->w * b->w;
+		 a->y * b->y + 
+		 a->z * b->z + 
+		 a->w * b->w;
 #else
 	r = _mm_cvtss_f32(_mm_dp_ps(amm_load_ps((float*)a), 
-								amm_load_ps((float*)b), 
-								0xFF));
+	                            amm_load_ps((float*)b), 
+	                            0xFF));
 #endif
 	return r;
 }
 
 vec3 cross3f(vec3* a, vec3* b) {
-	vec3 v;
+	_ALIGN(16) vec3 v;
+#ifndef _SIMD_SEE
 	v.x = a->y * b->z - a->z * b->y;
 	v.y = b->x * a->z - b->z * a->x;
 	v.z = a->x * b->y - a->y * b->x;
+#else
+	__m128 ps3a = amm_load96_ps(a);
+	__m128 ps3b = amm_load96_ps(b);
+	__m128 sa   = _mm_shuffle_ps(ps3a, ps3a, _MM_SHUFFLE(3, 0, 2, 1));
+	__m128 sb   = _mm_shuffle_ps(ps3b, ps3b, _MM_SHUFFLE(3, 1, 0, 2));
+	__m128 cl1  = _mm_mul_ps(sa, ps3b);
+	__m128 cl0  = _mm_mul_ps(sa, sb);
+	__m128 sl1  = _mm_shuffle_ps(cl1, cl1, _MM_SHUFFLE(3, 0, 2, 1));
+	amm_store96_ps((float*)(&v), _mm_sub_ps(cl0, sl1));
+#endif
 	return v;
 }
 
@@ -297,8 +327,10 @@ mat4 projmat4f(float fov, float aspect_ratio, float n, float f) {
 
 mat4 viewmat4f(vec3* pos, vec3* dir, vec3* up, vec3* right) {
 	mat4 view = mat4f(NULL);
-
+	
+	int nright = 0;
 	if (!right) {
+		nright = 1;
 		right = malloc(sizeof(vec3));
 		*right = cross3f(dir, up);
 		normalize3f(right);
@@ -322,6 +354,7 @@ mat4 viewmat4f(vec3* pos, vec3* dir, vec3* up, vec3* right) {
 	translation.rc[2][3] = -pos->z;
 
 	mat4 final = mult_m4(&view, &translation);
+	if (nright) free(right);
 	return final;
 }
 
@@ -405,18 +438,31 @@ vec2 mult_mv2(mat2* a, vec2* v) {
 }
 
 vec3 mult_mv3(mat3* a, vec3* v) {
-	vec3 r;
+	_ALIGN(16) vec3 r;
+#ifndef _SIMD_SSE
 	r.x = a->rc[0][0] * v->x + a->rc[0][1] * v->y + a->rc[0][2] * v->z;
 	r.y = a->rc[1][0] * v->x + a->rc[1][1] * v->y + a->rc[1][2] * v->z;
 	r.z = a->rc[2][0] * v->x + a->rc[2][1] * v->y + a->rc[2][2] * v->z;
+#else
+	r.x = dot3f(&a->r0, v);
+	r.y = dot3f(&a->r1, v);
+	r.z = dot3f(&a->r2, v);
+#endif
 	return r;
 }
 
 vec4 mult_mv4(mat4* a, vec4* v) {
 	vec4 r;
+#ifndef _SIMD_SSE
 	r.x = a->rc[0][0] * v->x + a->rc[0][1] * v->y + a->rc[0][2] * v->z + a->rc[0][3] * v->w;
 	r.y = a->rc[1][0] * v->x + a->rc[1][1] * v->y + a->rc[1][2] * v->z + a->rc[1][3] * v->w;
 	r.z = a->rc[2][0] * v->x + a->rc[2][1] * v->y + a->rc[2][2] * v->z + a->rc[2][3] * v->w;
 	r.w = a->rc[3][0] * v->x + a->rc[3][1] * v->y + a->rc[3][2] * v->z + a->rc[3][3] * v->w;
+#else
+	r.x = dot4f(&a->r0, v);
+	r.y = dot4f(&a->r1, v);
+	r.z = dot4f(&a->r2, v);
+	r.w = dot4f(&a->r3, v);
+#endif
 	return r;
 }
