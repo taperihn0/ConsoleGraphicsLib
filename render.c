@@ -4,9 +4,9 @@
 #include "render_utils.h"
 #include "thread.h"
 
-#define _TERMINAL_WIDTH  	  get_terminal_width()
-#define _TERMINAL_HEIGHT 	  get_terminal_height()
-#define _HALF_TERMINAL_WIDTH  (_TERMINAL_WIDTH / 2)
+#define _TERMINAL_WIDTH  	   get_terminal_width()
+#define _TERMINAL_HEIGHT 	   get_terminal_height()
+#define _HALF_TERMINAL_WIDTH  (_TERMINAL_WIDTH  / 2)
 #define _HALF_TERMINAL_HEIGHT (_TERMINAL_HEIGHT / 2)
 
 _double_buffer _dbl_buff;
@@ -337,21 +337,21 @@ _FORCE_INLINE void _triangle_pipeline(
 
 	// PERSPECTIVE DIVISION
 	for (UINT i = 0; i < triangles_cnt * 3; i += 3) {
-		vec4* v0 = _ENTRY_POS4(&entries[i]);
-		vec4* v1 = _ENTRY_POS4(&entries[i + 1]);
-		vec4* v2 = _ENTRY_POS4(&entries[i + 2]);
-
-		v0->x = v0->x / v0->w * _HALF_TERMINAL_WIDTH;
-		v0->y = v0->y / v0->w * _HALF_TERMINAL_HEIGHT;
-		v0->z = v0->z / v0->w;
+		vec3* v0 = (vec3*)_ENTRY_POS4(&entries[i]);
+		vec3* v1 = (vec3*)_ENTRY_POS4(&entries[i + 1]);
+		vec3* v2 = (vec3*)_ENTRY_POS4(&entries[i + 2]);
 	
-		v1->x = v1->x / v1->w * _HALF_TERMINAL_WIDTH;
-		v1->y = v1->y / v1->w * _HALF_TERMINAL_HEIGHT;
-		v1->z = v1->z / v1->w;
+		*v0 = div_av3(*((float*)v0 + 3), v0); 
+		v0->x *= _HALF_TERMINAL_WIDTH;
+		v0->y *= _HALF_TERMINAL_HEIGHT;
 		
-		v2->x = v2->x / v2->w * _HALF_TERMINAL_WIDTH;
-		v2->y = v2->y / v2->w * _HALF_TERMINAL_HEIGHT;
-		v2->z = v2->z / v2->w;
+		*v1 = div_av3(*((float*)v1 + 3), v1);
+		v1->x *= _HALF_TERMINAL_WIDTH;
+		v1->y *= _HALF_TERMINAL_HEIGHT;
+		
+		*v2 = div_av3(*((float*)v2 + 3), v2);
+		v2->x *= _HALF_TERMINAL_WIDTH;
+		v2->y *= _HALF_TERMINAL_HEIGHT;
 	}
 
 	if (_mode == RENDER_MODE_EDGES) {

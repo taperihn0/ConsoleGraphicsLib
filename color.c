@@ -2,6 +2,8 @@
 #include "coremath.h"
 #include <limits.h>
 
+typedef short _color_t;
+
 typedef struct _predef_color {
 	_color_t code;
 	float r, g, b;
@@ -86,14 +88,14 @@ void _init_colors() {
 	}
 }
 
-_ncurses_pair_id _color_by_rgb(float r, float g, float b) {
+_ncurses_pair_id _color_by_rgb(vec3* col) {
 	float min_diff = 10.f;
 	_color_t code = 0;
 
 	for (UINT i = 0; i < _PREDEF_COLOR_NUM; i++) {
-		float diff = fabs(predef.list[i].r - r) 
-			+ fabs(predef.list[i].g - g)
-			+ fabs(predef.list[i].b - b);
+		float diff = fabs(predef.list[i].r - col->r) 
+					  + fabs(predef.list[i].g - col->g)
+					  + fabs(predef.list[i].b - col->b);
 
 		if (diff < min_diff) {
 			min_diff = diff;

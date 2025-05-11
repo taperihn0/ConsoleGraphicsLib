@@ -1,14 +1,13 @@
 #pragma once
 
 #include "common.h"
+#include "coremath.h"
 
 typedef unsigned short _ncurses_pair_id;
-typedef short _color_t;
+
+#define _COL_BRIGHTNESS(col) \
+	(((col)->r + (col)->g + (col)->b) / 3.f)
 
 void _init_colors();
 
-_ncurses_pair_id _color_by_rgb(float r, float g, float b);
-
-_STATIC _FORCE_INLINE _ncurses_pair_id color_pair_id(float r, float g, float b)  {
-	return _color_by_rgb(r, g, b);
-}
+_ncurses_pair_id _color_by_rgb(vec3* col);

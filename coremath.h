@@ -7,6 +7,12 @@
 	MAIN MINIMALISTIC MATH HEADER FOR GRAPHICS PURPOSES (MATH CORE)
 */
 
+#ifndef MATH_EXTENSIONS
+#	ifdef _SIMD_SEE
+#		define MATH_EXTENSIONS
+#	endif
+#endif
+
 typedef float _prec0_t;
 typedef double _prec1_t;
 
@@ -158,9 +164,17 @@ vec2 mult_av2(MATH_PREC_T alpha, vec2* a);
 vec3 mult_av3(MATH_PREC_T alpha, vec3* a);
 vec4 mult_av4(MATH_PREC_T alpha, vec4* a);
 
+vec2 div_av2(MATH_PREC_T alpha, vec2* a);
+vec3 div_av3(MATH_PREC_T alpha, vec3* a);
+vec4 div_av4(MATH_PREC_T alpha, vec4* a);
+
 vec2 mult_v2(vec2* a, vec2* b);
 vec3 mult_v3(vec3* a, vec3* b);
 vec4 mult_v4(vec4* a, vec4* b);
+
+vec2 div_v2(vec2* a, vec2* b);
+vec3 div_v3(vec3* a, vec3* b);
+vec4 div_v4(vec4* a, vec4* b);
 
 MATH_PREC_T dot2f(vec2* a, vec2* b);
 MATH_PREC_T dot3f(vec3* a, vec3* b);
@@ -172,6 +186,16 @@ MATH_PREC_T dot4f(vec4* a, vec4* b);
 	((v1).x * (v2).y - (v1).y * (v2).x)
 
 vec3 cross3f(vec3* a, vec3* b);
+
+#ifdef MATH_EXTENSIONS
+// returns vector of fields [x, y, z], where:
+//  x - CROSSPROD_2D(a, b),
+//  y - CROSSPROD_2D(c, d)
+//  z - CROSSPROD_2D(e, f)
+vec3 mext_cross2fx3(vec2* a, vec2* b, 
+                    vec2* c, vec2* d,
+                    vec2* e, vec2* f);
+#endif
 
 mat2 diagmat2f(MATH_PREC_T a);
 mat3 diagmat3f(MATH_PREC_T a);

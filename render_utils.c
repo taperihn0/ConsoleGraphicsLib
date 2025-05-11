@@ -11,7 +11,7 @@
 #define _plot(x, y, c, d) \
 set_elem((x), (y), (c), (d), COLOR_WHITE + 1);
 
-#define _plot_with_col(x, y, c, d, col) \
+#define _plot_with_col(x, y, d, c, col) \
 set_elem_force((x), (y), (c), (d), (col));
 
 /*
@@ -115,14 +115,20 @@ typedef struct _triangle_data {
 */
 
 _STATIC _FORCE_INLINE bool _is_inside_triangle(
-	vec2* a1p, vec2* a2p, vec2* a3p, _triangle_data*  triangle) 
+	vec2* a1p, vec2* a2p, vec2* a3p, _triangle_data* triangle) 
 {
-	float det1 = CROSSPROD_2D(*a1p, triangle->a1a2);
-	float det2 = CROSSPROD_2D(*a2p, triangle->a2a3);
-	float det3 = CROSSPROD_2D(*a3p, triangle->a3a1);
-	
-	return (det1 >= 0.f && det2 >= 0.f && det3 >= 0.f) || 
-		(det1 <= 0.f && det2 <= 0.f && det3 <= 0.f);
+	vec3 det;
+#if !defined(MATH_EXTENSIONS) || !defined(_SIMD_SEE)
+	det = vec3f(CROSSPROD_2D(*a1p, triangle->a1a2),
+	            CROSSPROD_2D(*a2p, triangle->a2a3),
+	            CROSSPROD_2D(*a3p, triangle->a3a1));
+#else
+	det = mext_cross2fx3(a1p, &triangle->a1a2,
+	                     a2p, &triangle->a2a3,
+	                     a3p, &triangle->a3a1);
+#endif
+	return (det.x >= 0.f && det.y >= 0.f && det.z >= 0.f) || 
+			 (det.x <= 0.f && det.y <= 0.f && det.z <= 0.f);
 }
 
 /*
@@ -132,8 +138,7 @@ _STATIC _FORCE_INLINE bool _is_inside_triangle(
 
 _STATIC _FORCE_INLINE void _barycentric_coords(
 	vec2* a1p, vec2* a2p, vec2* a3p,
-	_triangle_data* triangle, 
-	vec3* cords) 
+	_triangle_data* triangle, vec3* cords) 
 {
 	float det1 = CROSSPROD_2D(triangle->a2a1, triangle->a2a3);
 	float det2 = CROSSPROD_2D(triangle->a3a1, triangle->a3a2);
@@ -143,8 +148,6 @@ _STATIC _FORCE_INLINE void _barycentric_coords(
 	cords->y = det2 == 0.f ? 0.f : CROSSPROD_2D(triangle->a3a1, *a3p) / det2;
 	cords->z = det3 == 0.f ? 0.f : CROSSPROD_2D(triangle->a1a2, *a1p) / det3;	
 }
-
-#define _COL_BRIGHTNESS(col) (((col)->x + (col)->y + (col)->z) / 3.f)
 
 void _draw_triangle_solid(
 	vec4* v1, vec4* v2, vec4* v3,
@@ -162,20 +165,25 @@ void _draw_triangle_solid(
 	triangle.a3a2 = vec2f(v2->x - v3->x, v2->y - v3->y);
 	triangle.a1a3 = vec2f(v3->x - v1->x, v3->y - v1->y);
 
-	int half_width = get_terminal_width() / 2;
-	int half_height = get_terminal_height() / 2;
+	const int half_width = get_terminal_width() / 2;
+	const int half_height = get_terminal_height() / 2;
 
-	int l = max(minof3(v1->x, v2->x, v3->x), -half_width);
-	int u = max(minof3(v1->y, v2->y, v3->y), -half_height);
-	int r = min(maxof3(v1->x, v2->x, v3->x), half_width);
-	int d = max(maxof3(v1->y, v2->y, v3->y), half_height);
+	const int l = max(minof3(v1->x, v2->x, v3->x), -half_width);
+	const int u = max(minof3(v1->y, v2->y, v3->y), -half_height);
+	const int r = min(maxof3(v1->x, v2->x, v3->x), half_width);
+	const int d = max(maxof3(v1->y, v2->y, v3->y), half_height);
 	
-	vec2 a1p, a2p, a3p;
+	vec3 v1wv2wv3w = vec3f(v1->w, v2->w, v3->w);
+	vec3 v1zv2zv3z = vec3f(v1->z, v2->z, v3->z);
+	vec3 c1xc2xc3x = vec3f(col1->x, col2->x, col3->x);
+	vec3 c1yc2yc3y = vec3f(col1->y, col2->y, col3->y);
+	vec3 c1zc2zc3z = vec3f(col1->z, col2->z, col3->z);
+	vec3 n1xn2xn3x = vec3f(norm1->x, norm2->x, norm3->x);
+	vec3 n1yn2yn3y = vec3f(norm1->y, norm2->y, norm3->y);
+	vec3 n1zn2zn3z = vec3f(norm1->z, norm2->z, norm3->z);
 
-	float z, divisor, curr_z;
-	CHAR_T ch;
+	vec2 a1p, a2p, a3p;
 	vec3 cords, norm, rgb;
-	_entry_t normalized;
 	
 	// Optimization:
 	// while interating through row and getting out of the 
@@ -202,43 +210,36 @@ void _draw_triangle_solid(
 				// https://registry.khronos.org/OpenGL/specs/gl/glspec44.core.pdf
 
 				// interpolating depth without w division
-				z =  v1->z * cords.x + v2->z * cords.y + v3->z * cords.z;
-				
-				curr_z = get_depth(_get_current_buffer(&_dbl_buff), x, y);
+				const float z = dot3f(&cords, &v1zv2zv3z);
+				const float curr_z = get_depth(_get_current_buffer(&_dbl_buff), x, y);
 
 				if (curr_z < z)
 					continue;
 
 				// Division by homogeneus coordinate, as stated on page 427
-				cords.x /= v1->w;
-				cords.y /= v2->w;
-				cords.z /= v3->w;
-				divisor = 1.f / (cords.x + cords.y + cords.z);
+				cords = div_v3(&cords, &v1wv2wv3w);
+				const float div = cords.x + cords.y + cords.z;
 				
-				rgb = vec3f(
-					cords.x * col1->x + cords.y * col2->x + cords.z * col3->x,
-					cords.x * col1->y + cords.y * col2->y + cords.z * col3->y,
-					cords.x * col1->z + cords.y * col2->z + cords.z * col3->z);
+				rgb = vec3f(dot3f(&cords, &c1xc2xc3x),
+				            dot3f(&cords, &c1yc2yc3y),
+				            dot3f(&cords, &c1zc2zc3z));
 				
-				rgb = mult_av3(divisor, &rgb);
+				rgb = div_av3(div, &rgb);
 
-				norm = vec3f(
-					cords.x * norm1->x + cords.y * norm2->x + cords.z * norm3->x,
-					cords.x * norm1->y + cords.y * norm2->y + cords.z * norm3->y,
-					cords.x * norm1->z + cords.y * norm2->z + cords.z * norm3->z);
+				norm = vec3f(dot3f(&cords, &n1xn2xn3x),
+				             dot3f(&cords, &n1yn2yn3y),
+				             dot3f(&cords, &n1zn2zn3z));
 
-				norm = mult_av3(divisor, &norm);
+				norm = div_av3(div, &norm);
 				
 				// passing interpolated data in a form of entry
-				normalized = _entry_from(x, y, z, &rgb, &norm);
+				_entry_t normalized = _entry_from(x, y, z, &rgb, &norm);
 				stage_fragment(&normalized, attrib);
 
-				float brightness = min(_COL_BRIGHTNESS(_ENTRY_COL(&normalized)), 1.f);
-
-				_ncurses_pair_id col_num = color_pair_id(rgb.x, rgb.y, rgb.z);
-
-				ch = _char_by_brightness(brightness);
-				_plot_with_col(x, y, ch, z, col_num);
+				const float brightness = min(_COL_BRIGHTNESS(_ENTRY_COL(&normalized)), 1.f);
+				_plot_with_col(x, y, z, 
+				               _char_by_brightness(brightness), 
+				               _color_by_rgb(&rgb));
 			}
 		}
 	}

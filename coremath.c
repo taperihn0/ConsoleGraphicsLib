@@ -227,6 +227,44 @@ vec4 mult_av4(MATH_PREC_T alpha, vec4* a) {
 	return r;
 }
 
+vec2 div_av2(MATH_PREC_T alpha, vec2* a) {
+	return (vec2) {
+		.x = a->x / alpha,
+		.y = a->y / alpha
+	};
+}
+
+vec3 div_av3(MATH_PREC_T alpha, vec3* a) {
+	_ALIGN(16) vec3 r;
+#ifndef _SIMD_SEE
+	r = (vec3) {
+		.x = a->x / alpha,
+		.y = a->y / alpha,
+		.z = a->z / alpha
+	};
+#else
+	amm_store96_ps((float*)(&r), _mm_div_ps(amm_load96_ps((float*)a),
+	                                        _mm_load_ps1(&alpha)));
+#endif
+	return r;
+}
+
+vec4 div_av4(MATH_PREC_T alpha, vec4* a) {
+	_ALIGN(16) vec4 r;
+#ifndef _SIMD_SEE
+	r = (vec4) {
+		.x = a->x / alpha,
+		.y = a->y / alpha,
+		.z = a->z / alpha,
+		.w = a->w / alpha
+	};
+#else
+	_mm_store_ps((float*)(&r), _mm_div_ps(amm_load_ps((float*)a),
+	                                      _mm_load_ps1(&alpha)));
+#endif
+	return r;
+}
+
 vec2 mult_v2(vec2* a, vec2* b) {
 	return vec2f(a->x * b->x, 
 	             a->y * b->y);
@@ -254,6 +292,44 @@ vec4 mult_v4(vec4* a, vec4* b) {
 	          a->w * b->w);
 #else
 	_mm_store_ps((float*)(&r), _mm_mul_ps(amm_load_ps((float*)a),
+	                                      amm_load_ps((float*)b)));
+#endif
+	return r;
+}
+
+vec2 div_v2(vec2* a, vec2* b) {
+	return (vec2) {
+		.x = a->x / b->x,
+		.y = a->y / b->y
+	};
+}
+
+vec3 div_v3(vec3* a, vec3* b) {
+	_ALIGN(16) vec3 r;
+#ifndef _SIMD_SEE
+	r = (vec3) {
+		.x = a->x / b->x,
+		.y = a->y / b->y,
+		.z = a->z / b->z
+	};
+#else
+	amm_store96_ps((float*)(&r), _mm_div_ps(amm_load96_ps((float*)a),
+	                                        amm_load96_ps((float*)b)));
+#endif
+	return r;
+}
+
+vec4 div_v4(vec4* a, vec4* b) {
+	vec4 r;
+#ifndef _SIMD_SEE
+	r = (vec4) {
+		.x = a->x / b->x,
+		.y = a->y / b->y,
+		.z = a->z / b->z,
+		.w = a->w / b->w
+	};
+#else
+	_mm_store_ps((float*)(&r), _mm_div_ps(amm_load_ps((float*)a),
 	                                      amm_load_ps((float*)b)));
 #endif
 	return r;
@@ -311,6 +387,27 @@ vec3 cross3f(vec3* a, vec3* b) {
 #endif
 	return v;
 }
+
+#ifdef MATH_EXTENSIONS
+vec3 mext_cross2fx3(vec2* a, vec2* b, 
+                    vec2* c, vec2* d,
+                    vec2* e, vec2* f) 
+{
+	vec3 r;
+# ifndef _SIMD_SEE
+	r = vec3f(CROSSPROD_2D(*a, *b),
+	          CROSSPROD_2D(*c, *d),
+	          CROSSPROD_2D(*e, *f));	
+# else
+	amm_store96_ps((float*)(&r), 
+	               _mm_sub_ps(_mm_mul_ps(amm_set96r_ps(a->x, c->x, e->x), 
+	                                     amm_set96r_ps(b->y, d->y, f->y)),
+	               			  _mm_mul_ps(amm_set96r_ps(a->y, c->y, e->y), 
+	                          				 amm_set96r_ps(b->x, d->x, f->x))));
+# endif // _SIMD_SEE
+	return r;
+}
+#endif // MATH_EXTENSION
 
 mat2 diagmat2f(MATH_PREC_T a) {
 	mat2 m = mat2f(NULL);
