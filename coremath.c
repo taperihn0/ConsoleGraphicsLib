@@ -395,9 +395,9 @@ vec3 mext_cross2fx3(vec2* a, vec2* b,
 {
 	vec3 r;
 # ifndef _SIMD_SEE
-	r = vec3f(CROSSPROD_2D(*a, *b),
-	          CROSSPROD_2D(*c, *d),
-	          CROSSPROD_2D(*e, *f));	
+	r = vec3f(CROSS2F(a, b),
+	          CROSS2F(c, d),
+	          CROSS2F(e, f));	
 # else
 	amm_store96_ps((float*)(&r), 
 	               _mm_sub_ps(_mm_mul_ps(amm_set96r_ps(a->x, c->x, e->x), 

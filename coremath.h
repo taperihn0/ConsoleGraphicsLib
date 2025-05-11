@@ -129,9 +129,9 @@ typedef _ALIGN(16) union mat_4fl {
 } mat4;
 
 vec2_i vec2i(MATH_INT_T x, MATH_INT_T y);
-vec2 vec2f(MATH_PREC_T x, MATH_PREC_T y);
-vec3 vec3f(MATH_PREC_T x, MATH_PREC_T y, MATH_PREC_T z);
-vec4 vec4f(MATH_PREC_T x, MATH_PREC_T y, MATH_PREC_T z, MATH_PREC_T w);
+vec2   vec2f(MATH_PREC_T x, MATH_PREC_T y);
+vec3   vec3f(MATH_PREC_T x, MATH_PREC_T y, MATH_PREC_T z);
+vec4   vec4f(MATH_PREC_T x, MATH_PREC_T y, MATH_PREC_T z, MATH_PREC_T w);
 
 mat2 mat2f(MATH_PREC_T* elems);
 mat3 mat3f(MATH_PREC_T* elems);
@@ -182,16 +182,16 @@ MATH_PREC_T dot4f(vec4* a, vec4* b);
 
 // frequent use of this expansion make it necessary 
 // to make it a macro, which is *ALWAYS* inlined
-#define CROSSPROD_2D(v1, v2) \
-	((v1).x * (v2).y - (v1).y * (v2).x)
+#define CROSS2F(v1, v2) \
+	((v1)->x * (v2)->y - (v1)->y * (v2)->x)
 
 vec3 cross3f(vec3* a, vec3* b);
 
 #ifdef MATH_EXTENSIONS
 // returns vector of fields [x, y, z], where:
-//  x - CROSSPROD_2D(a, b),
-//  y - CROSSPROD_2D(c, d)
-//  z - CROSSPROD_2D(e, f)
+//  x - CROSS2F(a, b),
+//  y - CROSS2F(c, d)
+//  z - CROSS2F(e, f)
 vec3 mext_cross2fx3(vec2* a, vec2* b, 
                     vec2* c, vec2* d,
                     vec2* e, vec2* f);

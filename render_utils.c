@@ -119,9 +119,9 @@ _STATIC _FORCE_INLINE bool _is_inside_triangle(
 {
 	vec3 det;
 #if !defined(MATH_EXTENSIONS) || !defined(_SIMD_SEE)
-	det = vec3f(CROSSPROD_2D(*a1p, triangle->a1a2),
-	            CROSSPROD_2D(*a2p, triangle->a2a3),
-	            CROSSPROD_2D(*a3p, triangle->a3a1));
+	det = vec3f(CROSS2F(a1p, &triangle->a1a2),
+	            CROSS2F(a2p, &triangle->a2a3),
+	            CROSS2F(a3p, &triangle->a3a1));
 #else
 	det = mext_cross2fx3(a1p, &triangle->a1a2,
 	                     a2p, &triangle->a2a3,
@@ -140,13 +140,13 @@ _STATIC _FORCE_INLINE void _barycentric_coords(
 	vec2* a1p, vec2* a2p, vec2* a3p,
 	_triangle_data* triangle, vec3* cords) 
 {
-	float det1 = CROSSPROD_2D(triangle->a2a1, triangle->a2a3);
-	float det2 = CROSSPROD_2D(triangle->a3a1, triangle->a3a2);
-	float det3 = CROSSPROD_2D(triangle->a1a2, triangle->a1a3);
+	float det1 = CROSS2F(&triangle->a2a1, &triangle->a2a3);
+	float det2 = CROSS2F(&triangle->a3a1, &triangle->a3a2);
+	float det3 = CROSS2F(&triangle->a1a2, &triangle->a1a3);
 
-	cords->x = det1 == 0.f ? 0.f : CROSSPROD_2D(*a2p, triangle->a2a3) / det1;
-	cords->y = det2 == 0.f ? 0.f : CROSSPROD_2D(triangle->a3a1, *a3p) / det2;
-	cords->z = det3 == 0.f ? 0.f : CROSSPROD_2D(triangle->a1a2, *a1p) / det3;	
+	cords->x = det1 == 0.f ? 0.f : CROSS2F(a2p, &triangle->a2a3) / det1;
+	cords->y = det2 == 0.f ? 0.f : CROSS2F(&triangle->a3a1, a3p) / det2;
+	cords->z = det3 == 0.f ? 0.f : CROSS2F(&triangle->a1a2, a1p) / det3;	
 }
 
 void _draw_triangle_solid(
