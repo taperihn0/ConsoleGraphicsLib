@@ -189,9 +189,9 @@ vec3 cross3f(vec3* a, vec3* b);
 
 #ifdef MATH_EXTENSIONS
 // returns vector of fields [x, y, z], where:
-//  x - CROSS2F(a, b),
-//  y - CROSS2F(c, d)
-//  z - CROSS2F(e, f)
+//  x: CROSS2F(a, b),
+//  y: CROSS2F(c, d)
+//  z: CROSS2F(e, f)
 vec3 mext_cross2fx3(vec2* a, vec2* b, 
                     vec2* c, vec2* d,
                     vec2* e, vec2* f);

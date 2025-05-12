@@ -124,12 +124,14 @@ void set_elem_force(int x, int y, CHAR_T c, PREC_T d, _ncurses_pair_id col) {
 	set_force(_get_current_buffer(&_dbl_buff), x, y, d, c, col);
 }
 
+// Forward function declarations
 extern void _triangle_pipeline(
 	shader_t* shader, byte* mem0, byte* mem1, 
 	byte* mem2, size_t entry_size, void* attrib);
 extern void _stage_rasterization_triangle(
 	shader_t* shader, _entry_t* entries, size_t triangles_cnt, void* attrib);
-extern void _stage_assembly_triangle(vec4* v1, vec4* v2, vec4* v3);
+extern void _stage_assembly_triangle(
+	shader_t* shader, _entry_t* entries, size_t triangles_cnt, void* attrib);
 
 int draw_buffer(shader_t* shader, buff_idx_t id, void* attrib) {
 	ASSERT(shader->stage_vertex && shader->stage_fragment, "Invalid shader");
@@ -182,11 +184,11 @@ int draw_order_buffer(
 	https://cs418.cs.illinois.edu/website/text/clipping.html
 */
 
-#define _PLANE_LEFT 0
-#define _PLANE_RIGHT 1
-#define _PLANE_DOWN 2
-#define _PLANE_UP 3
-#define _PLANE_FRONT 4
+#define _PLANE_LEFT   0
+#define _PLANE_RIGHT  1
+#define _PLANE_DOWN   2
+#define _PLANE_UP 	 3
+#define _PLANE_FRONT  4
 #define _PLANE_BEHIND 5
 
 void _clip_against(
@@ -355,8 +357,7 @@ _FORCE_INLINE void _triangle_pipeline(
 	}
 
 	if (_mode == RENDER_MODE_EDGES) {
-		// TODO: COMPATIBILITY WITH CLIPPER FORMAT
-		_stage_assembly_triangle(NULL, NULL, NULL);
+		_stage_assembly_triangle(shader, entries, triangles_cnt, attrib);
 		return;
 	}
 
@@ -369,13 +370,22 @@ _FORCE_INLINE void _stage_rasterization_triangle(
 	for (UINT i = 0; i < 3 * triangles_cnt; i += 3) {
 		_draw_triangle_solid(
 			_ENTRY_POS4(&entries[i]), _ENTRY_POS4(&entries[i + 1]), _ENTRY_POS4(&entries[i + 2]),
-			_ENTRY_COL(&entries[i]), _ENTRY_COL(&entries[i + 1]), _ENTRY_COL(&entries[i + 2]),
+			_ENTRY_COL(&entries[i]),  _ENTRY_COL(&entries[i + 1]),  _ENTRY_COL(&entries[i + 2]),
 			_ENTRY_NORM(&entries[i]), _ENTRY_NORM(&entries[i + 1]), _ENTRY_NORM(&entries[i + 2]),
 			shader->stage_fragment,
 			attrib);
 	}
 }
 
-_FORCE_INLINE void _stage_assembly_triangle(vec4* v1, vec4* v2, vec4* v3) {
-	_draw_triangle_edges(v1->x, v1->y, v2->x, v2->y, v3->x, v3->y);
+_FORCE_INLINE void _stage_assembly_triangle(
+	shader_t* shader, _entry_t* entries, size_t triangles_cnt, void* attrib) 
+{
+	for (UINT i = 0; i < 3 * triangles_cnt; i += 3) {
+		_draw_triangle_edges(
+			_ENTRY_POS4(&entries[i]), _ENTRY_POS4(&entries[i + 1]), _ENTRY_POS4(&entries[i + 2]),
+			_ENTRY_COL(&entries[i]),  _ENTRY_COL(&entries[i + 1]),  _ENTRY_COL(&entries[i + 2]),
+			_ENTRY_NORM(&entries[i]), _ENTRY_NORM(&entries[i + 1]), _ENTRY_NORM(&entries[i + 2]),
+			shader->stage_fragment,
+			attrib);
+	}
 }

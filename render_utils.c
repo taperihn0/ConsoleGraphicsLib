@@ -72,17 +72,32 @@ _STATIC _FORCE_INLINE void _draw_line_vertical(int x1, int y1, int x2, int y2) {
 	}
 }
 
-void _draw_line(int x1, int y1, int x2, int y2) {
-	if (abs(x1 - x2) > abs(y1 - y2))
-		_draw_line_horizontal(x1, y1, x2, y2);
+_STATIC _FORCE_INLINE void _draw_line(
+	vec4* v1, vec4* v2,
+	_UNUSED vec3* col1, _UNUSED vec3* col2,
+	_UNUSED vec3* norm1, _UNUSED vec3* norm2,
+	_UNUSED func_stage_fragment stage_fragment,
+	_UNUSED void* attrib) 
+{
+	vec2 rv1xy = vec2f(roundf(v1->x), roundf(v1->y));
+	vec2 rv2xy = vec2f(roundf(v2->x), roundf(v2->y));
+
+	if (fabs(rv1xy.x - rv2xy.x) > fabs(rv1xy.y - rv2xy.y))
+		_draw_line_horizontal(rv1xy.x, rv1xy.y, rv2xy.x, rv2xy.y);
 	else 
-		_draw_line_vertical(x1, y1, x2, y2);
+		_draw_line_vertical(rv1xy.x, rv1xy.y, rv2xy.x, rv2xy.y);
 }
 
-void _draw_triangle_edges(int x1, int y1, int x2, int y2, int x3, int y3) {
-	_draw_line(x1, y1, x2, y2);
-	_draw_line(x2, y2, x3, y3);
-	_draw_line(x3, y3, x1, y1);
+void _draw_triangle_edges(
+	vec4* v1, vec4* v2, vec4* v3,
+	vec3* col1, vec3* col2, vec3* col3,
+	vec3* norm1, vec3* norm2, vec3* norm3,
+	func_stage_fragment stage_fragment,
+	void* attrib) 
+{
+	_draw_line(v1, v2, col1, col2, norm1, norm2, stage_fragment, attrib);
+	_draw_line(v2, v3, col2, col3, norm2, norm3, stage_fragment, attrib);
+	_draw_line(v3, v1, col3, col1, norm3, norm1, stage_fragment, attrib);
 }
 
 /*
@@ -99,13 +114,21 @@ void _draw_triangle_edges(int x1, int y1, int x2, int y2, int x3, int y3) {
 */
 
 typedef struct _triangle_data {
-	vec2
-		a1a2, 
-		a1a3,
-		a2a3,
-		a2a1,
-		a3a1,
-		a3a2;
+	/*
+		Determinant vector [x, y, z], where:
+		  x: CROSS2F(a2a1, a2a3);
+		  y: CROSS2F(a3a1, a3a2);
+		  x: CROSS2F(a1a2, a1a3);
+		Used for calculating barycentric coordinates.
+	*/
+	vec3 det;
+
+	vec2 a1a2, 
+		  a1a3,
+		  a2a3,
+		  a2a1,
+		  a3a1,
+		  a3a2;
 } _triangle_data;
 
 /*
@@ -117,18 +140,18 @@ typedef struct _triangle_data {
 _STATIC _FORCE_INLINE bool _is_inside_triangle(
 	vec2* a1p, vec2* a2p, vec2* a3p, _triangle_data* triangle) 
 {
-	vec3 det;
+	vec3 detp;
 #if !defined(MATH_EXTENSIONS) || !defined(_SIMD_SEE)
-	det = vec3f(CROSS2F(a1p, &triangle->a1a2),
-	            CROSS2F(a2p, &triangle->a2a3),
-	            CROSS2F(a3p, &triangle->a3a1));
+	detp = vec3f(CROSS2F(a1p, &triangle->a1a2),
+	             CROSS2F(a2p, &triangle->a2a3),
+	             CROSS2F(a3p, &triangle->a3a1));
 #else
-	det = mext_cross2fx3(a1p, &triangle->a1a2,
-	                     a2p, &triangle->a2a3,
-	                     a3p, &triangle->a3a1);
+	detp = mext_cross2fx3(a1p, &triangle->a1a2,
+	                      a2p, &triangle->a2a3,
+	                      a3p, &triangle->a3a1);
 #endif
-	return (det.x >= 0.f && det.y >= 0.f && det.z >= 0.f) || 
-			 (det.x <= 0.f && det.y <= 0.f && det.z <= 0.f);
+	return (detp.x > 0.f && detp.y > 0.f && detp.z > 0.f) || 
+			 (detp.x < 0.f && detp.y < 0.f && detp.z < 0.f);
 }
 
 /*
@@ -140,13 +163,16 @@ _STATIC _FORCE_INLINE void _barycentric_coords(
 	vec2* a1p, vec2* a2p, vec2* a3p,
 	_triangle_data* triangle, vec3* cords) 
 {
-	float det1 = CROSS2F(&triangle->a2a1, &triangle->a2a3);
-	float det2 = CROSS2F(&triangle->a3a1, &triangle->a3a2);
-	float det3 = CROSS2F(&triangle->a1a2, &triangle->a1a3);
-
-	cords->x = det1 == 0.f ? 0.f : CROSS2F(a2p, &triangle->a2a3) / det1;
-	cords->y = det2 == 0.f ? 0.f : CROSS2F(&triangle->a3a1, a3p) / det2;
-	cords->z = det3 == 0.f ? 0.f : CROSS2F(&triangle->a1a2, a1p) / det3;	
+#if !defined(MATH_EXTENSIONS) || !defined(_SIMD_SEE)
+	cords->x = CROSS2F(a2p, &triangle->a2a3) / triangle->det.x;
+	cords->y = CROSS2F(&triangle->a3a1, a3p) / triangle->det.y;
+	cords->z = CROSS2F(&triangle->a1a2, a1p) / triangle->det.z;	
+#else
+	*cords = mext_cross2fx3(a2p, &triangle->a2a3,
+	                        &triangle->a3a1, a3p,
+	                        &triangle->a1a2, a1p);
+	*cords = div_v3(cords, &triangle->det);
+#endif
 }
 
 void _draw_triangle_solid(
@@ -159,11 +185,42 @@ void _draw_triangle_solid(
 	_triangle_data triangle;
 
 	triangle.a1a2 = vec2f(v2->x - v1->x, v2->y - v1->y);
+	
+	// Triangle is a straight from a1 to a3
+	if (LENGTHSQ2F(&triangle.a1a2) == 0.f) {
+		_draw_line(v1, v3, NULL, NULL, NULL, NULL, NULL, NULL);
+		return;
+	}
+
 	triangle.a2a3 = vec2f(v3->x - v2->x, v3->y - v2->y);
+
+	// straight from a1 to a2
+	if (LENGTHSQ2F(&triangle.a2a3) == 0.f) {
+		_draw_line(v1, v2, NULL, NULL, NULL, NULL, NULL, NULL);
+		return;
+	}
+
 	triangle.a3a1 = vec2f(v1->x - v3->x, v1->y - v3->y);
+
+	// straight from a1 to a2
+	if (LENGTHSQ2F(&triangle.a3a1) == 0.f) {
+		_draw_line(v1, v2, NULL, NULL, NULL, NULL, NULL, NULL);
+		return;
+	}
+
 	triangle.a2a1 = vec2f(v1->x - v2->x, v1->y - v2->y);
 	triangle.a3a2 = vec2f(v2->x - v3->x, v2->y - v3->y);
 	triangle.a1a3 = vec2f(v3->x - v1->x, v3->y - v1->y);
+
+#if !defined(MATH_EXTENSIONS) || !defined(_SIMD_SEE)
+	triangle.det.x = CROSS2F(&triangle.a2a1, &triangle.a2a3);
+	triangle.det.y = CROSS2F(&triangle.a3a1, &triangle.a3a2);
+	triangle.det.z = CROSS2F(&triangle.a1a2, &triangle.a1a3);
+#else
+	triangle.det = mext_cross2fx3(&triangle.a2a1, &triangle.a2a3,
+	                              &triangle.a3a1, &triangle.a3a2,
+	                              &triangle.a1a2, &triangle.a1a3);
+#endif
 
 	const int half_width = get_terminal_width() / 2;
 	const int half_height = get_terminal_height() / 2;
@@ -236,7 +293,8 @@ void _draw_triangle_solid(
 				_entry_t normalized = _entry_from(x, y, z, &rgb, &norm);
 				stage_fragment(&normalized, attrib);
 
-				const float brightness = min(_COL_BRIGHTNESS(_ENTRY_COL(&normalized)), 1.f);
+				const float brightness = min(_COL_BRIGHTNESS(_ENTRY_COL(&normalized)), 
+				                             1.f);
 				_plot_with_col(x, y, z, 
 				               _char_by_brightness(brightness), 
 				               _color_by_rgb(&rgb));

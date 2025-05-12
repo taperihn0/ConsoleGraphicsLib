@@ -108,7 +108,9 @@ void process_kbd_events(keyboard* kbd) {
 		cam_pos.y -= 0.01 * delta_time;
 	}
 
-	if (get_key(kbd, KEY_M) == KEY_PRESSED) {
+	static utime_t prevtp_mode_change = 0;
+	if (get_key(kbd, KEY_M) == KEY_PRESSED && curr_time - prevtp_mode_change > 100) {
+		prevtp_mode_change = curr_time;
 		mode++;
 		mode %= _RENDER_MODE_CNT;
 		set_render_mode(mode);
