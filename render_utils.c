@@ -3,16 +3,53 @@
 #include "terminal.h"
 #include "render.h"
 #include "color.h"
-#include <math.h>
-
-#define _LINE_POINT '.'
-#define _LINE_DEPTH 0.
-
-#define _plot(x, y, c, d) \
-set_elem((x), (y), (c), (d), COLOR_WHITE + 1);
+#include "coremath.h"
 
 #define _plot_with_col(x, y, d, c, col) \
 set_elem_force((x), (y), (c), (d), (col));
+
+_STATIC _FORCE_INLINE int _line_rectange_intersect(
+	int x1, int y1, int x2, int y2,
+	int l, int r, int d, int u) 
+{
+	if (x1 == x2) {
+		const float miy = min(y1, y2);
+		const float may = max(y1, y2);
+		return l <= x1 && x1 <= r && max(may, d) <= min(miy, u);
+	}
+
+	const float a = (y2 - y1) / (x2 - x1);
+
+	// calculate intervals of the line and intersection
+	// on the Y-axis
+	float yi0, yi1, yl0, yl1;
+
+	if (a > 0) {
+		yi0 = y1 + (l - x1) * a;
+		yi1 = y1 + (r - x1) * a;
+		yl0 = (float)y1;
+		yl1 = (float)y2;
+	} else {
+		yi0 = y1 + (x1 - l) * a;
+		yi1 = y1 + (x1 - r) * a;
+		yl0 = (float)y1;
+		yl1 = (float)y2;
+	}
+
+	const float ma0 = max(yi0, yl0);
+	const float mi1 = min(yi1, yl1);
+	
+	return ma0 <= mi1 && max(ma0, d) < min(mi1, u);
+}
+
+_STATIC _FORCE_INLINE int _is_line_inside_rectangle(
+	int x1, int y1, int x2, int y2,
+	int l, int r, int d, int u)
+{
+	return (l <= x1 && x1 <= r && d <= y1 && y1 <= u) ||
+			 (l <= x2 && x2 <= r && d <= y2 && y2 <= u) ||
+			 _line_rectange_intersect(x1, y1, x2, y2, l, r, d, u);
+}
 
 /*
 	YouTube video by NoBS Code explaining the magics behind 
@@ -22,11 +59,34 @@ set_elem_force((x), (y), (c), (d), (col));
 	https://en.wikipedia.org/wiki/Line_drawing_algorithm
 */
 
-_STATIC _FORCE_INLINE void _draw_line_horizontal(int x1, int y1, int x2, int y2) {
+// TODO:
+// 	- PROPER INTERPOLATION IN RESPECT OF HOMOGENEOUS COORDINATE
+// 	- FIXED BRIGHTNESS (CLAMP) (?)
+// 	- OPTIMIZE PLANE CUTTING, CURRENT SOLUTION IS NOT QUITE WORKING
+_STATIC _FORCE_INLINE void _draw_line_horizontal(
+	int x1, int y1, int z1, 
+	int x2, int y2, int z2,
+	vec3* col1, vec3* col2,
+	vec3* norm1, vec3* norm2,
+	func_stage_fragment stage_fragment,
+	void* attrib) 
+{
 	if (x2 < x1) {
 		swap(&x2, &x1);
 		swap(&y2, &y1);
 	}
+
+	const int half_width = get_terminal_width() / 2;
+	const int half_height = get_terminal_height() / 2;
+
+	if (!_is_line_inside_rectangle(x1, y1, x2, y2, 
+	                               -half_width, half_width, 
+	                               -half_height, half_height)) {
+		return;
+	}
+
+	vec2_i v1v2 = vec2i(x1 - x2, y1 - y2);
+	const float length = LENGTH2I(&v1v2);
 
 	int dx = x2 - x1;
 	int dy = y2 - y1;
@@ -35,9 +95,26 @@ _STATIC _FORCE_INLINE void _draw_line_horizontal(int x1, int y1, int x2, int y2)
 	int iy = dy < 0 ? -1 : 1;
 	dy *= iy;
 
-	int y = y1;
-	for (int i = x1; i <= x2; i++) {
-		_plot(i, y, _LINE_POINT, _LINE_DEPTH);
+	for (int x = x1, y = y1; x <= x2; x++) {
+		vec2_i v1p = vec2i(x - x1, y - y1);
+		
+		// TODO: CLAMP AT HOMOGENEOUS COORDINATE SYSTEM
+		const float t = CLAMP(LENGTH2I(&v1p) / length, 0.f, 1.f);
+		const float z = LERP_UNCHECK(z1, z2, t);
+
+		if (get_depth(_get_current_buffer(&_dbl_buff), x, y) < z)
+			continue;
+
+		vec3 rgb = lerp3f(col1, col2, t);
+		vec3 norm = lerp3f(norm1, norm2, t);
+
+		_entry_t normalized = _entry_from(x, y, z, &rgb, &norm);
+		stage_fragment(&normalized, attrib);
+
+		const float brightness = min(_COL_BRIGHTNESS(&rgb), 1.f);
+		_plot_with_col(x, y, z, 
+		               _char_by_brightness(brightness), 
+		               _color_by_rgb(&rgb));
 		
 		if (d > 0) {
 			y += iy;
@@ -47,6 +124,7 @@ _STATIC _FORCE_INLINE void _draw_line_horizontal(int x1, int y1, int x2, int y2)
 	}
 }
 
+// TODO: SAME AS IN ABOVE FUNCTION
 _STATIC _FORCE_INLINE void _draw_line_vertical(
 	int x1, int y1, int z1, 
 	int x2, int y2, int z2,
@@ -60,6 +138,15 @@ _STATIC _FORCE_INLINE void _draw_line_vertical(
 		swap(&y2, &y1);
 	}
 	
+	const int half_width = get_terminal_width() / 2;
+	const int half_height = get_terminal_height() / 2;
+
+	if (!_is_line_inside_rectangle(x1, y1, x2, y2, 
+	                               -half_width, half_width, 
+	                               -half_height, half_height)) {
+		return;
+	}
+
 	vec2_i v1v2 = vec2i(x1 - x2, y1 - y2);
 	const float length = LENGTH2I(&v1v2);
 
@@ -70,11 +157,10 @@ _STATIC _FORCE_INLINE void _draw_line_vertical(
 	int ix = dx < 0 ? -1 : 1;
 	dx *= ix;
 	
-	int x = x1;
-	for (int y = y1; y <= y2; y++) {
+	for (int y = y1, x = x1; y <= y2; y++) {
 		vec2_i v1p = vec2i(x - x1, y - y1);
 		
-		// CLAMP AT HOMOGENEOUS COORDINATE SYSTEM
+		// TODO: CLAMP AT HOMOGENEOUS COORDINATE SYSTEM
 		const float t = CLAMP(LENGTH2I(&v1p) / length, 0.f, 1.f);
 		const float z = LERP_UNCHECK(z1, z2, t);
 
@@ -111,7 +197,12 @@ _STATIC _FORCE_INLINE void _draw_line(
 	vec2_i rv2xy = vec2i(roundf(v2->x), roundf(v2->y));
 
 	if (abs(rv1xy.x - rv2xy.x) > abs(rv1xy.y - rv2xy.y))
-		_draw_line_horizontal(rv1xy.x, rv1xy.y, rv2xy.x, rv2xy.y);
+		_draw_line_horizontal(rv1xy.x, rv1xy.y, v1->z,
+		                  	rv2xy.x, rv2xy.y, v2->z,
+		                  	col1, col2,
+		                  	norm1, norm2,
+		                  	stage_fragment,
+		                  	attrib);
 	else 
 		_draw_line_vertical(rv1xy.x, rv1xy.y, v1->z,
 		                    rv2xy.x, rv2xy.y, v2->z,
@@ -260,8 +351,8 @@ void _draw_triangle_solid(
 
 	const int l = max(minof3(v1->x, v2->x, v3->x), -half_width);
 	const int u = max(minof3(v1->y, v2->y, v3->y), -half_height);
-	const int r = min(maxof3(v1->x, v2->x, v3->x), half_width);
-	const int d = max(maxof3(v1->y, v2->y, v3->y), half_height);
+	const int r = min(maxof3(v1->x, v2->x, v3->x),  half_width);
+	const int d = max(maxof3(v1->y, v2->y, v3->y),  half_height);
 	
 	vec3 v1wv2wv3w = vec3f(v1->w, v2->w, v3->w);
 	vec3 v1zv2zv3z = vec3f(v1->z, v2->z, v3->z);

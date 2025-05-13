@@ -296,7 +296,10 @@ void _clip_planes(
 
 	clip[0] = *entry0;
 	clip[1] = *entry1;
-	clip[2] = *entry2 ;
+	clip[2] = *entry2;
+
+	if (_mode == RENDER_MODE_EDGES)
+		return;
 	
 	for (UINT against = _PLANE_LEFT; against <= _PLANE_UP; against++) {
 		new_total_cnt = 0;
@@ -334,7 +337,7 @@ _FORCE_INLINE void _triangle_pipeline(
 	shader->stage_vertex(&entry2, attrib);
 	
 	_entry_t entries[64];
-	size_t triangles_cnt = 0;
+	size_t triangles_cnt = 1;
 	_clip_planes(&entry0, &entry1, &entry2, entries, &triangles_cnt);
 
 	// PERSPECTIVE DIVISION
