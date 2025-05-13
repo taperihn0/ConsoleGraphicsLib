@@ -47,11 +47,21 @@ _STATIC _FORCE_INLINE void _draw_line_horizontal(int x1, int y1, int x2, int y2)
 	}
 }
 
-_STATIC _FORCE_INLINE void _draw_line_vertical(int x1, int y1, int x2, int y2) {
+_STATIC _FORCE_INLINE void _draw_line_vertical(
+	int x1, int y1, int z1, 
+	int x2, int y2, int z2,
+	vec3* col1, vec3* col2,
+	vec3* norm1, vec3* norm2,
+	func_stage_fragment stage_fragment,
+	void* attrib) 
+{
 	if (y2 < y1) {
 		swap(&x2, &x1);
 		swap(&y2, &y1);
 	}
+	
+	vec2_i v1v2 = vec2i(x1 - x2, y1 - y2);
+	const float length = LENGTH2I(&v1v2);
 
 	int dy = y2 - y1;
 	int dx = x2 - x1;
@@ -59,11 +69,29 @@ _STATIC _FORCE_INLINE void _draw_line_vertical(int x1, int y1, int x2, int y2) {
 
 	int ix = dx < 0 ? -1 : 1;
 	dx *= ix;
-
+	
 	int x = x1;
-	for (int i = y1; i <= y2; i++) {
-		_plot(x, i, _LINE_POINT, _LINE_DEPTH);
+	for (int y = y1; y <= y2; y++) {
+		vec2_i v1p = vec2i(x - x1, y - y1);
 		
+		// CLAMP AT HOMOGENEOUS COORDINATE SYSTEM
+		const float t = CLAMP(LENGTH2I(&v1p) / length, 0.f, 1.f);
+		const float z = LERP_UNCHECK(z1, z2, t);
+
+		if (get_depth(_get_current_buffer(&_dbl_buff), x, y) < z)
+			continue;
+
+		vec3 rgb = lerp3f(col1, col2, t);
+		vec3 norm = lerp3f(norm1, norm2, t);
+
+		_entry_t normalized = _entry_from(x, y, z, &rgb, &norm);
+		stage_fragment(&normalized, attrib);
+
+		const float brightness = min(_COL_BRIGHTNESS(&rgb), 1.f);
+		_plot_with_col(x, y, z, 
+		               _char_by_brightness(brightness), 
+		               _color_by_rgb(&rgb));
+
 		if (d > 0) {
 			x += ix;
 			d = d - 2 * dy;
@@ -74,18 +102,23 @@ _STATIC _FORCE_INLINE void _draw_line_vertical(int x1, int y1, int x2, int y2) {
 
 _STATIC _FORCE_INLINE void _draw_line(
 	vec4* v1, vec4* v2,
-	_UNUSED vec3* col1, _UNUSED vec3* col2,
-	_UNUSED vec3* norm1, _UNUSED vec3* norm2,
-	_UNUSED func_stage_fragment stage_fragment,
-	_UNUSED void* attrib) 
+	vec3* col1, vec3* col2,
+	vec3* norm1, _UNUSED vec3* norm2,
+	func_stage_fragment stage_fragment,
+	void* attrib) 
 {
-	vec2 rv1xy = vec2f(roundf(v1->x), roundf(v1->y));
-	vec2 rv2xy = vec2f(roundf(v2->x), roundf(v2->y));
+	vec2_i rv1xy = vec2i(roundf(v1->x), roundf(v1->y));
+	vec2_i rv2xy = vec2i(roundf(v2->x), roundf(v2->y));
 
-	if (fabs(rv1xy.x - rv2xy.x) > fabs(rv1xy.y - rv2xy.y))
+	if (abs(rv1xy.x - rv2xy.x) > abs(rv1xy.y - rv2xy.y))
 		_draw_line_horizontal(rv1xy.x, rv1xy.y, rv2xy.x, rv2xy.y);
 	else 
-		_draw_line_vertical(rv1xy.x, rv1xy.y, rv2xy.x, rv2xy.y);
+		_draw_line_vertical(rv1xy.x, rv1xy.y, v1->z,
+		                    rv2xy.x, rv2xy.y, v2->z,
+		                    col1, col2,
+		                    norm1, norm2,
+		                    stage_fragment,
+		                    attrib);
 }
 
 void _draw_triangle_edges(
@@ -268,9 +301,8 @@ void _draw_triangle_solid(
 
 				// interpolating depth without w division
 				const float z = dot3f(&cords, &v1zv2zv3z);
-				const float curr_z = get_depth(_get_current_buffer(&_dbl_buff), x, y);
 
-				if (curr_z < z)
+				if (get_depth(_get_current_buffer(&_dbl_buff), x, y) < z)
 					continue;
 
 				// Division by homogeneus coordinate, as stated on page 427

@@ -335,6 +335,24 @@ vec4 div_v4(vec4* a, vec4* b) {
 	return r;
 }
 
+MATH_INT_T dot2i(vec2_i* a, vec2_i* b) {
+	return a->x * b->x + 
+			 a->y * b->y;
+}
+
+MATH_INT_T dot3i(vec3_i* a, vec3_i* b) {
+	return a->x * b->x + 
+			 a->y * b->y +
+			 a->z * b->z;
+}
+
+MATH_INT_T dot4i(vec4_i* a, vec4_i* b) {
+	return a->x * b->x + 
+			 a->y * b->y +
+			 a->z * b->z +
+			 a->w * b->w;
+}
+
 MATH_PREC_T dot2f(vec2* a, vec2* b) {
 	return a->x * b->x + 
 			 a->y * b->y;
@@ -408,6 +426,27 @@ vec3 mext_cross2fx3(vec2* a, vec2* b,
 	return r;
 }
 #endif // MATH_EXTENSION
+
+vec2 lerp2f(vec2* a, vec2* b, MATH_PREC_T t) {
+	t = CLAMP(t, (MATH_PREC_T)0., (MATH_PREC_T)1.);
+	vec2 v1 = mult_av2(t, a);
+	vec2 v2 = mult_av2((MATH_PREC_T)1. - t, b);
+	return add2f(&v1, &v2);
+}
+
+vec3 lerp3f(vec3* a, vec3* b, MATH_PREC_T t) {
+	t = CLAMP(t, (MATH_PREC_T)0., (MATH_PREC_T)1.);
+	vec3 v1 = mult_av3(t, a);
+	vec3 v2 = mult_av3((MATH_PREC_T)1. - t, b);
+	return add3f(&v1, &v2);
+}
+
+vec4 lerp4f(vec4* a, vec4* b, MATH_PREC_T t) {
+	t = CLAMP(t, (MATH_PREC_T)0., (MATH_PREC_T)1.);
+	vec4 v1 = mult_av4(t, a); 
+	vec4 v2 = mult_av4((MATH_PREC_T)1. - t, b);
+	return add4f(&v1, &v2);
+}
 
 mat2 diagmat2f(MATH_PREC_T a) {
 	mat2 m = mat2f(NULL);

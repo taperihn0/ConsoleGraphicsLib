@@ -13,6 +13,7 @@
 #	endif
 #endif
 
+// MAKE SURE FLOAT IS 32 BITS
 typedef float _prec0_t;
 typedef double _prec1_t;
 
@@ -20,10 +21,19 @@ typedef double _prec1_t;
 #define MATH_INT_T  int32_t
 
 #define PI 	3.14159265358979
-#define PIf ((float)(PI))
+#define PIf (float)PI
 
-#define RADIANS(deg)  deg / 180. * PI
+#define RADIANS(deg)  deg / 180.  * PI
 #define RADIANSf(def) deg / 180.f * PIf
+
+#define CLAMP(a, mi, ma) \
+	max(min((a), (ma)), (mi))
+
+#define LERP_CHECK(a, b, t) \
+	CLAMP((t), 0., 1.) * b + (1. - CLAMP((t), 0., 1.)) * a
+
+#define LERP_UNCHECK(a, b, t) \
+	t * b + (1. - t) * a
 
 typedef _ALIGN(8) union _vec_2fl_t {
 	struct {
@@ -137,12 +147,20 @@ mat2 mat2f(MATH_PREC_T* elems);
 mat3 mat3f(MATH_PREC_T* elems);
 mat4 mat4f(MATH_PREC_T* elems);
 
+#define LENGTHSQ2I(v2) dot2i(v2, v2)
+#define LENGTH2I(v2)   sqrt(LENGTHSQ2I(v2))
+#define LENGTHSQ3I(v3) dot3i(v3, v3)
+#define LENGTH3I(v3)   sqrt(LENGTHSQ3I(v3))
+#define LENGTHSQ4I(v4) dot4i(v4, v4)
+#define LENGTH4I(v4)   sqrt(LENGTHSQ4I(v4))
+
 #define LENGTHSQ2F(v2) dot2f(v2, v2)
 #define LENGTH2F(v2)   sqrt(LENGTHSQ2F(v2))
 #define LENGTHSQ3F(v3) dot3f(v3, v3)
 #define LENGTH3F(v3)   sqrt(LENGTHSQ3F(v3))
 #define LENGTHSQ4F(v4) dot4f(v4, v4)
 #define LENGTH4F(v4)   sqrt(LENGTHSQ4F(v4))
+
 
 int equal2f(vec2* a, vec2* b);
 int equal3f(vec3* a, vec3* b);
@@ -176,6 +194,10 @@ vec2 div_v2(vec2* a, vec2* b);
 vec3 div_v3(vec3* a, vec3* b);
 vec4 div_v4(vec4* a, vec4* b);
 
+MATH_INT_T dot2i(vec2_i* a, vec2_i* b);
+MATH_INT_T dot3i(vec3_i* a, vec3_i* b);
+MATH_INT_T dot4i(vec4_i* a, vec4_i* b);
+
 MATH_PREC_T dot2f(vec2* a, vec2* b);
 MATH_PREC_T dot3f(vec3* a, vec3* b);
 MATH_PREC_T dot4f(vec4* a, vec4* b);
@@ -196,6 +218,10 @@ vec3 mext_cross2fx3(vec2* a, vec2* b,
                     vec2* c, vec2* d,
                     vec2* e, vec2* f);
 #endif
+
+vec2 lerp2f(vec2* a, vec2* b, MATH_PREC_T t);
+vec3 lerp3f(vec3* a, vec3* b, MATH_PREC_T t);
+vec4 lerp4f(vec4* a, vec4* b, MATH_PREC_T t);
 
 mat2 diagmat2f(MATH_PREC_T a);
 mat3 diagmat3f(MATH_PREC_T a);
