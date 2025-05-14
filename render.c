@@ -4,10 +4,8 @@
 #include "render_utils.h"
 #include "thread.h"
 
-#define _TERMINAL_WIDTH  	   get_terminal_width()
-#define _TERMINAL_HEIGHT 	   get_terminal_height()
-#define _HALF_TERMINAL_WIDTH  (_TERMINAL_WIDTH  / 2)
-#define _HALF_TERMINAL_HEIGHT (_TERMINAL_HEIGHT / 2)
+#define _TERMINAL_WIDTH		get_terminal_width()
+#define _TERMINAL_HEIGHT	get_terminal_height()
 
 _double_buffer _dbl_buff;
 
@@ -127,11 +125,17 @@ void set_elem_force(int x, int y, CHAR_T c, PREC_T d, _ncurses_pair_id col) {
 // Forward function declarations
 extern void _triangle_pipeline(
 	shader_t* shader, byte* mem0, byte* mem1, 
-	byte* mem2, size_t entry_size, void* attrib);
+	byte* mem2, size_t entry_size, void* attrib,
+	/* terminal size parameters */
+	UINT half_width, UINT half_height);
 extern void _stage_rasterization_triangle(
-	shader_t* shader, _entry_t* entries, size_t triangles_cnt, void* attrib);
+	shader_t* shader, _entry_t* entries, size_t triangles_cnt, void* attrib,
+	/* terminal size parameters */
+	UINT half_width, UINT half_height);
 extern void _stage_assembly_triangle(
-	shader_t* shader, _entry_t* entries, size_t triangles_cnt, void* attrib);
+	shader_t* shader, _entry_t* entries, size_t triangles_cnt, void* attrib,
+	/* terminal size parameters */
+	UINT half_width, UINT half_height);
 
 int draw_buffer(shader_t* shader, buff_idx_t id, void* attrib) {
 	ASSERT(shader->stage_vertex && shader->stage_fragment, "Invalid shader");
@@ -146,8 +150,10 @@ int draw_buffer(shader_t* shader, buff_idx_t id, void* attrib) {
 	}
 
 	for (UINT i = 0; i < size; i += 3 * entry_size) {
-		_triangle_pipeline(shader, &mem[i], &mem[i + entry_size], 
-			&mem[i + 2 * entry_size], entry_size, attrib);
+		_triangle_pipeline(shader, 
+		                   &mem[i], &mem[i + entry_size], 
+		                   &mem[i + 2 * entry_size], entry_size, attrib,
+		                   _TERMINAL_WIDTH / 2, _TERMINAL_HEIGHT / 2);
 	}
 	
 	return 0;
@@ -170,10 +176,11 @@ int draw_order_buffer(
 	
 	for (UINT i = 0; i < size; i += 3) {
 		_triangle_pipeline(shader, 
-			&mem[elem[i] * entry_size], 
-			&mem[elem[i + 1] * entry_size], 
-			&mem[elem[i + 2] * entry_size], 
-			entry_size, attrib);
+								 &mem[elem[i] * entry_size], 
+								 &mem[elem[i + 1] * entry_size], 
+								 &mem[elem[i + 2] * entry_size], 
+								 entry_size, attrib,
+								 _TERMINAL_WIDTH / 2, _TERMINAL_HEIGHT / 2);
 	}
 	
 	return 0;
@@ -326,7 +333,9 @@ void _clip_planes(
 
 _FORCE_INLINE void _triangle_pipeline(
 	shader_t* shader, byte* mem0, byte* mem1, byte* mem2, 
-	size_t entry_size, void* attrib) 
+	size_t entry_size, void* attrib,
+	/* terminal size parameters */
+	UINT half_width, UINT half_height) 
 {
 	_entry_t entry0 = _get_entry(mem0, entry_size);
 	_entry_t entry1 = _get_entry(mem1, entry_size);
@@ -347,28 +356,31 @@ _FORCE_INLINE void _triangle_pipeline(
 		vec3* v2 = (vec3*)_ENTRY_POS4(&entries[i + 2]);
 	
 		*v0 = div_av3(*((float*)v0 + 3), v0); 
-		v0->x *= _HALF_TERMINAL_WIDTH;
-		v0->y *= _HALF_TERMINAL_HEIGHT;
+		v0->x *= half_width;
+		v0->y *= half_height;
 		
 		*v1 = div_av3(*((float*)v1 + 3), v1);
-		v1->x *= _HALF_TERMINAL_WIDTH;
-		v1->y *= _HALF_TERMINAL_HEIGHT;
+		v1->x *= half_width;
+		v1->y *= half_height;
 		
 		*v2 = div_av3(*((float*)v2 + 3), v2);
-		v2->x *= _HALF_TERMINAL_WIDTH;
-		v2->y *= _HALF_TERMINAL_HEIGHT;
+		v2->x *= half_width;
+		v2->y *= half_height;
 	}
 
 	if (_mode == RENDER_MODE_EDGES) {
-		_stage_assembly_triangle(shader, entries, triangles_cnt, attrib);
+		_stage_assembly_triangle(shader, entries, triangles_cnt, attrib,
+		                         half_width, half_height);
 		return;
 	}
 
-	_stage_rasterization_triangle(shader, entries, triangles_cnt, attrib);
+	_stage_rasterization_triangle(shader, entries, triangles_cnt, attrib,
+	                              half_width, half_height);
 }
 
 _FORCE_INLINE void _stage_rasterization_triangle(
-	shader_t* shader, _entry_t* entries, size_t triangles_cnt, void* attrib) 
+	shader_t* shader, _entry_t* entries, size_t triangles_cnt, void* attrib,
+	UINT half_width, UINT half_height) 
 {
 	for (UINT i = 0; i < 3 * triangles_cnt; i += 3) {
 		_draw_triangle_solid(
@@ -376,12 +388,14 @@ _FORCE_INLINE void _stage_rasterization_triangle(
 			_ENTRY_COL(&entries[i]),  _ENTRY_COL(&entries[i + 1]),  _ENTRY_COL(&entries[i + 2]),
 			_ENTRY_NORM(&entries[i]), _ENTRY_NORM(&entries[i + 1]), _ENTRY_NORM(&entries[i + 2]),
 			shader->stage_fragment,
-			attrib);
+			attrib,
+			half_width, half_height);
 	}
 }
 
 _FORCE_INLINE void _stage_assembly_triangle(
-	shader_t* shader, _entry_t* entries, size_t triangles_cnt, void* attrib) 
+	shader_t* shader, _entry_t* entries, size_t triangles_cnt, void* attrib,
+	UINT half_width, UINT half_height) 
 {
 	for (UINT i = 0; i < 3 * triangles_cnt; i += 3) {
 		_draw_triangle_edges(
@@ -389,6 +403,7 @@ _FORCE_INLINE void _stage_assembly_triangle(
 			_ENTRY_COL(&entries[i]),  _ENTRY_COL(&entries[i + 1]),  _ENTRY_COL(&entries[i + 2]),
 			_ENTRY_NORM(&entries[i]), _ENTRY_NORM(&entries[i + 1]), _ENTRY_NORM(&entries[i + 2]),
 			shader->stage_fragment,
-			attrib);
+			attrib,
+			half_width, half_height);
 	}
 }

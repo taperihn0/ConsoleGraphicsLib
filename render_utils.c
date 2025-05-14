@@ -6,7 +6,7 @@
 #include "coremath.h"
 
 #define _plot_with_col(x, y, d, c, col) \
-set_elem_force((x), (y), (c), (d), (col));
+	set_elem_force((x), (y), (c), (d), (col))
 
 _STATIC _FORCE_INLINE int _line_rectange_intersect(
 	int x1, int y1, int x2, int y2,
@@ -69,15 +69,14 @@ _STATIC _FORCE_INLINE void _draw_line_horizontal(
 	vec3* col1, vec3* col2,
 	vec3* norm1, vec3* norm2,
 	func_stage_fragment stage_fragment,
-	void* attrib) 
+	void* attrib,
+	/* terminal size parameters */
+	int half_width, int half_height) 
 {
 	if (x2 < x1) {
 		swap(&x2, &x1);
 		swap(&y2, &y1);
 	}
-
-	const int half_width = get_terminal_width() / 2;
-	const int half_height = get_terminal_height() / 2;
 
 	if (!_is_line_inside_rectangle(x1, y1, x2, y2, 
 	                               -half_width, half_width, 
@@ -131,15 +130,14 @@ _STATIC _FORCE_INLINE void _draw_line_vertical(
 	vec3* col1, vec3* col2,
 	vec3* norm1, vec3* norm2,
 	func_stage_fragment stage_fragment,
-	void* attrib) 
+	void* attrib,
+	/* terminal size parameters */
+	int half_width, int half_height) 
 {
 	if (y2 < y1) {
 		swap(&x2, &x1);
 		swap(&y2, &y1);
 	}
-	
-	const int half_width = get_terminal_width() / 2;
-	const int half_height = get_terminal_height() / 2;
 
 	if (!_is_line_inside_rectangle(x1, y1, x2, y2, 
 	                               -half_width, half_width, 
@@ -192,25 +190,30 @@ _STATIC _FORCE_INLINE void _draw_line(
 	vec3* col1, vec3* col2,
 	vec3* norm1, _UNUSED vec3* norm2,
 	func_stage_fragment stage_fragment,
-	void* attrib) 
+	void* attrib,
+	UINT half_width, UINT half_height) 
 {
 	vec2_i rv1xy = vec2i(roundf(v1->x), roundf(v1->y));
 	vec2_i rv2xy = vec2i(roundf(v2->x), roundf(v2->y));
 
-	if (abs(rv1xy.x - rv2xy.x) > abs(rv1xy.y - rv2xy.y))
+	if (abs(rv1xy.x - rv2xy.x) > abs(rv1xy.y - rv2xy.y)) {
 		_draw_line_horizontal(rv1xy.x, rv1xy.y, v1->z,
 		                  	 rv2xy.x, rv2xy.y, v2->z,
 		                  	 col1, col2,
 		                  	 norm1, norm2,
 		                  	 stage_fragment,
-		                  	 attrib);
-	else 
+		                  	 attrib,
+		                  	 half_width, half_height);
+	}
+	else {
 		_draw_line_vertical(rv1xy.x, rv1xy.y, v1->z,
 		                    rv2xy.x, rv2xy.y, v2->z,
 		                    col1, col2,
 		                    norm1, norm2,
 		                    stage_fragment,
-		                    attrib);
+		                    attrib,
+		                    half_width, half_height);
+	}
 }
 
 void _draw_triangle_edges(
@@ -218,11 +221,16 @@ void _draw_triangle_edges(
 	vec3* col1, vec3* col2, vec3* col3,
 	vec3* norm1, vec3* norm2, vec3* norm3,
 	func_stage_fragment stage_fragment,
-	void* attrib) 
+	void* attrib,
+	/* terminal size parameters */
+	int half_width, int half_height) 
 {
-	_draw_line(v1, v2, col1, col2, norm1, norm2, stage_fragment, attrib);
-	_draw_line(v2, v3, col2, col3, norm2, norm3, stage_fragment, attrib);
-	_draw_line(v3, v1, col3, col1, norm3, norm1, stage_fragment, attrib);
+	_draw_line(v1, v2, col1, col2, norm1, norm2, stage_fragment, attrib,
+	           half_width, half_height);
+	_draw_line(v2, v3, col2, col3, norm2, norm3, stage_fragment, attrib,
+	           half_width, half_height);
+	_draw_line(v3, v1, col3, col1, norm3, norm1, stage_fragment, attrib,
+	           half_width, half_height);
 }
 
 /*
@@ -305,7 +313,9 @@ void _draw_triangle_solid(
 	vec3* col1, vec3* col2, vec3* col3,
 	vec3* norm1, vec3* norm2, vec3* norm3,
 	func_stage_fragment stage_fragment,
-	void* attrib)
+	void* attrib,
+	/* terminal size parameters */
+	int half_width, int half_height)
 {
 	_triangle_data triangle;
 
@@ -346,9 +356,6 @@ void _draw_triangle_solid(
 	                              &triangle.a3a1, &triangle.a3a2,
 	                              &triangle.a1a2, &triangle.a1a3);
 #endif
-
-	const int half_width = get_terminal_width() / 2;
-	const int half_height = get_terminal_height() / 2;
 
 	const int l = max(minof3(v1->x, v2->x, v3->x), -half_width);
 	const int u = max(minof3(v1->y, v2->y, v3->y), -half_height);
