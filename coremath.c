@@ -562,7 +562,7 @@ mat2 mult_m2(mat2* a, mat2* b) {
 		}
 	}
 #else
-	__m128 ps4a = amm_load_ps((float*)(&a));
+	__m128 ps4a = amm_load_ps((float*)a);
 	__m128 ps4b  = _mm_setr_ps(b->rc[0][0], b->rc[1][0], b->rc[0][1], b->rc[1][1]);
 	__m128 ps4br = _mm_setr_ps(b->rc[0][1], b->rc[1][1], b->rc[0][0], b->rc[1][0]);
 	m.rc[0][0] = _mm_cvtss_f32(_mm_dp_ps(ps4a, ps4b,  0x21));
