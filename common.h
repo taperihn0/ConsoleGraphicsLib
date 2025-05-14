@@ -42,6 +42,10 @@
 
 typedef unsigned char byte;
 
+#define _LIKELY(x)   __builtin_expect(!!(x), 1)
+#define _UNLIKELY(x) __builtin_expect(!!(x), 0)
+
+
 _STATIC _INLINE bool _assert_error_terminate(const char* err, const char* file, UINT line) {
 	if (stdscr)
 		endwin();

@@ -143,7 +143,8 @@ _STATIC _FORCE_INLINE void _draw_line_vertical(
 
 	if (!_is_line_inside_rectangle(x1, y1, x2, y2, 
 	                               -half_width, half_width, 
-	                               -half_height, half_height)) {
+	                               -half_height, half_height)) 
+	{
 		return;
 	}
 
@@ -198,11 +199,11 @@ _STATIC _FORCE_INLINE void _draw_line(
 
 	if (abs(rv1xy.x - rv2xy.x) > abs(rv1xy.y - rv2xy.y))
 		_draw_line_horizontal(rv1xy.x, rv1xy.y, v1->z,
-		                  	rv2xy.x, rv2xy.y, v2->z,
-		                  	col1, col2,
-		                  	norm1, norm2,
-		                  	stage_fragment,
-		                  	attrib);
+		                  	 rv2xy.x, rv2xy.y, v2->z,
+		                  	 col1, col2,
+		                  	 norm1, norm2,
+		                  	 stage_fragment,
+		                  	 attrib);
 	else 
 		_draw_line_vertical(rv1xy.x, rv1xy.y, v1->z,
 		                    rv2xy.x, rv2xy.y, v2->z,
@@ -311,24 +312,24 @@ void _draw_triangle_solid(
 	triangle.a1a2 = vec2f(v2->x - v1->x, v2->y - v1->y);
 	
 	// Triangle is a straight from a1 to a3
-	if (LENGTHSQ2F(&triangle.a1a2) == 0.f) {
-		_draw_line(v1, v3, NULL, NULL, NULL, NULL, NULL, NULL);
+	if (_UNLIKELY(triangle.a1a2.x == 0.f && triangle.a1a2.y == 0.f)) {
+		//_draw_line(v1, v3, NULL, NULL, NULL, NULL, NULL, NULL);
 		return;
 	}
 
 	triangle.a2a3 = vec2f(v3->x - v2->x, v3->y - v2->y);
 
 	// straight from a1 to a2
-	if (LENGTHSQ2F(&triangle.a2a3) == 0.f) {
-		_draw_line(v1, v2, NULL, NULL, NULL, NULL, NULL, NULL);
+	if (_UNLIKELY(triangle.a2a3.x == 0.f && triangle.a2a3.y == 0.f)) {
+		//_draw_line(v1, v2, NULL, NULL, NULL, NULL, NULL, NULL);
 		return;
 	}
 
 	triangle.a3a1 = vec2f(v1->x - v3->x, v1->y - v3->y);
 
 	// straight from a1 to a2
-	if (LENGTHSQ2F(&triangle.a3a1) == 0.f) {
-		_draw_line(v1, v2, NULL, NULL, NULL, NULL, NULL, NULL);
+	if (_UNLIKELY(triangle.a3a1.x == 0.f && triangle.a3a1.y == 0.f)) {
+		//_draw_line(v1, v2, NULL, NULL, NULL, NULL, NULL, NULL);
 		return;
 	}
 
