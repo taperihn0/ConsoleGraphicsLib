@@ -3,7 +3,7 @@
 #include "common.h"
 #include "coremath.h"
 
-typedef unsigned short _ncurses_pair_id;
+typedef uint8_t _ncurses_pair_id;
 
 #define _COL_BRIGHTNESS(col) \
 	(((col)->r + (col)->g + (col)->b) / 3.f)

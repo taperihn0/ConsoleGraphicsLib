@@ -7,6 +7,23 @@ vec2_i vec2i(MATH_INT_T x, MATH_INT_T y) {
 	};
 }
 
+vec3_i vec3i(MATH_INT_T x, MATH_INT_T y, MATH_INT_T z) {
+	return (vec3_i) {
+		.x = x,
+		.y = y,
+		.z = z
+	};
+}
+
+vec4_i vec4i(MATH_INT_T x, MATH_INT_T y, MATH_INT_T z, MATH_INT_T w) {
+	return (vec4_i) {
+		.x = x,
+		.y = y,
+		.z = z,
+		.w = w
+	};
+}
+
 vec2 vec2f(MATH_PREC_T x, MATH_PREC_T y) {
 	return (vec2) {
 		.x = x,
@@ -29,6 +46,37 @@ vec4 vec4f(MATH_PREC_T x, MATH_PREC_T y, MATH_PREC_T z, MATH_PREC_T w) {
 		.z = z,
 		.w = w
 	};
+}
+
+/* COMPILE ERROR WILL REMIND TO ADD SIMD VERSION OF ROUNDING */
+vec2_i round2f(vec2* a) {
+	vec2_i r;
+#ifndef _SIMD_SEE
+	r = vec2i(round(a->x),
+	          round(a->y));
+	return r;
+#endif
+}
+
+vec3_i round3f(vec3* a) {
+	vec3_i r;
+#ifndef _SIMD_SEE
+	r = vec3i(round(a->x),
+	          round(a->y),
+	          round(a->z));
+	return r;
+#endif
+}
+
+vec4_i round4f(vec4* a) {
+	vec4_i r;
+#ifndef _SIMD_SEE
+	r = vec4i(round(a->x),
+	          round(a->y),
+	          round(a->z),
+	          round(a->w));
+	return r;
+#endif
 }
 
 mat2 mat2f(MATH_PREC_T* elems) {

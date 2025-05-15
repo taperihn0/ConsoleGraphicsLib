@@ -139,9 +139,15 @@ typedef _ALIGN(16) union mat_4fl {
 } mat4;
 
 vec2_i vec2i(MATH_INT_T x, MATH_INT_T y);
+vec3_i vec3i(MATH_INT_T x, MATH_INT_T y, MATH_INT_T z);
+vec4_i vec4i(MATH_INT_T x, MATH_INT_T y, MATH_INT_T z, MATH_INT_T w);
 vec2   vec2f(MATH_PREC_T x, MATH_PREC_T y);
 vec3   vec3f(MATH_PREC_T x, MATH_PREC_T y, MATH_PREC_T z);
 vec4   vec4f(MATH_PREC_T x, MATH_PREC_T y, MATH_PREC_T z, MATH_PREC_T w);
+
+vec2_i round2f(vec2* a);
+vec3_i round3f(vec3* a);
+vec4_i round4f(vec4* a);
 
 mat2 mat2f(MATH_PREC_T* elems);
 mat3 mat3f(MATH_PREC_T* elems);

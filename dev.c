@@ -17,7 +17,7 @@ typedef int _device_info_t;
 #define _DEVICE_BITMAP_KEYS_FIELD_SIZE 16
 
 #define _char_to_int_16(c) 		 (isdigit(c) ? c - '0' : 10 + c - 'a')
-#define _is_bit_set(mask, shift) (mask & (1 << shift))
+#define _is_bit_set(mask, shift)  (mask & (1 << shift))
 
 _STATIC _INLINE long _get_value_of(char* line, char* str, size_t n) {
 	char* b = strstr(line, str) + strlen(str) + strlen("=");

@@ -13,9 +13,7 @@
 #define NCURSES_WIDECHAR 1
 #include <ncurses.h>
 
-#ifndef _FORCE_INLINE
-#	define _FORCE_INLINE inline __attribute__((always_inline))
-#endif
+#define _FORCE_INLINE inline __attribute__((always_inline))
 #define _INLINE inline
 
 #ifndef _UNUSED
