@@ -4,7 +4,7 @@
 #include <immintrin.h>
 
 #ifdef __SSE__
-#	define _SIMD_SEE 
+#	define _SIMD_SEE_N
 #endif
 
 // TODO: PROVIDE A SYSTEM WITH PROPER ALIGNMENT, NOW

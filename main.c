@@ -10,7 +10,7 @@
 static vec3 cam_pos = {
 	.x = 0.f, 
 	.y = 0.f, 
-	.z = 40.f,
+	.z = 65.f,
 };
 
 static vec3 cam_dir = {
@@ -131,17 +131,20 @@ void log_msg(int x, int y, char* msg) {
 	}
 }
 
+ULONGLONG total_frames = 0;
+
 void print_fps(int x, int y) {
 	static char msg[32];
 	static UINT frames_cnt = 0;
-	static float fps = 0;
+	static double fps = 0.;
 	static utime_t prev = 0;
 
 	utime_t time = gettime_mls(CLOCK_MONOTONIC_RAW);
 	frames_cnt++;
+	total_frames++;
 
 	if (time - prev >= 1000) {
-		fps = (float)frames_cnt / (time - prev) * 1000;
+		fps = frames_cnt / (double)(time - prev) * 1000;
 		frames_cnt = 0;
 		prev = time;
 	}
@@ -164,7 +167,7 @@ void stage_fragment(_entry_t* normalized, _UNUSED void* attrib) {
 	size_t light_cnt;
 	register_light_get(&light_ids, &light_cnt);
 
-	light_directional* light_dir;
+	light_directional* light_dir = NULL;
 	get_light_source(*light_ids, (void**)&light_dir, NULL);
 
 	float diffuse_factor = max(0.f, -dot3f(&light_dir->dir, _ENTRY_NORM(normalized)));
@@ -288,6 +291,8 @@ int main() {
 	shader_t shader;
 	shader.stage_vertex = stage_vertex;
 	shader.stage_fragment = stage_fragment;
+	
+	utime_t start_tp = gettime_mls(CLOCK_MONOTONIC_RAW);
 
 	while (run && !should_quit()) {
 		clear_terminal((CHAR_T)' ');
@@ -296,6 +301,7 @@ int main() {
 
 		mat4 rot = diagmat4f(1);
 		utime_t time = gettime_mls(CLOCK_MONOTONIC_RAW);
+		if (time - start_tp > 20000) break;
 		utime_t delta_time = time - prev_time;
 		prev_time = time;
 		angle += 0.001f * delta_time;
@@ -335,10 +341,12 @@ int main() {
 		
 		print_fps(0, 3);
 
+#ifdef DEBUG
 		ULONGLONG a, b;
 		get_late_data(&a, &b);
 		sprintf(msg, "FLUSH LATE CNT: %llu, WRITER LATE CNT: %llu", a, b);
 		log_msg(0, 4, msg);
+#endif
 
 		poll_events_keyboard(kbd);
 		poll_events_mouse(mice);
@@ -362,6 +370,10 @@ int main() {
 	enable_console_cursor();
 
 	close_mode();
+	
+	utime_t total_time = gettime_mls(CLOCK_MONOTONIC_RAW) - start_tp;
+
+	printf("AVERAGE FPS: %ffps\nEXECUTION TIME: ~%fs\n", total_frames / (double)total_time * 1000, total_time / 1000.);
 
 	fflush(stdout);
 	return 0;

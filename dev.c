@@ -135,8 +135,8 @@ int _next_device(_devices_file* f, _dev_simple* dev) {
 			break;
 		case _DEVICE_INFO_NAME:
 			;
-			char* pn;
-			size_t sn;
+			char* pn = NULL;
+			size_t sn = 0;
 			int cn = _get_str_of(line, "Name", &pn, &sn, r);
 			ASSERT(cn != _INVALID_BUFFER_SYNTAX && sn < _STR_DEV_NAME_SIZE_LIMIT, "Invalid device file syntax");
 
@@ -145,7 +145,7 @@ int _next_device(_devices_file* f, _dev_simple* dev) {
 			break;
 		case _DEVICE_INFO_PHYS:
 			;
-			char* pp; 
+			char* pp = NULL; 
 			size_t sp;
 
 			int cp = _get_str_of(line, "Phys", &pp, &sp, r);
@@ -175,8 +175,8 @@ int _next_device(_devices_file* f, _dev_simple* dev) {
 			break;
 		case _DEVICE_INFO_BITMAP_KEYS:
 			;
-			char* pk; 
-			size_t sk;
+			char* pk = NULL; 
+			size_t sk = 0;
 			int ck = _get_str_of(line, "KEY", &pk, &sk, r); 
 			ASSERT(ck != _INVALID_BUFFER_SYNTAX && sk < _STR_KEYS_SIZE_LIMIT, "Invalid device file syntax");
 

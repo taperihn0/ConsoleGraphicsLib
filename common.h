@@ -46,7 +46,7 @@ typedef unsigned char byte;
 #define _UNLIKELY(x) __builtin_expect(!!(x), 0)
 
 
-_STATIC _INLINE bool _assert_error_terminate(const char* err, const char* file, UINT line) {
+_STATIC _FORCE_INLINE bool _assert_error_terminate(const char* err, const char* file, UINT line) {
 	if (stdscr)
 		endwin();
 
@@ -60,7 +60,11 @@ _STATIC _INLINE bool _assert_error_terminate(const char* err, const char* file, 
 	return true;
 }
 
-#define ASSERT(val, err) (void)((val) || _assert_error_terminate((err), __FILE__, __LINE__))
+#ifdef DEBUG
+#	define ASSERT(val, err) (void)((val) || _assert_error_terminate((err), __FILE__, __LINE__))
+#else
+#	define ASSERT(val, err) (void)(val), (void)(err)
+#endif
 
 #define min(a, b) ((a < b) ? a : b)
 #define max(a, b) ((a < b) ? b : a)
