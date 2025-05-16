@@ -111,6 +111,6 @@ void _init_colors() {
 
 _ncurses_pair_id _color_by_rgb(vec3* col) {
 	vec3 ind = mult_av3(255.f, col);
-	vec3_i rnd = round3f(&ind);
-	return idmap[rnd.x][rnd.y][rnd.z];
+	ind = round3f(&ind);
+	return idmap[(size_t)ind.x][(size_t)ind.y][(size_t)ind.z];
 }

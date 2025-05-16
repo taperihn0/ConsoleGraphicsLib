@@ -48,35 +48,42 @@ vec4 vec4f(MATH_PREC_T x, MATH_PREC_T y, MATH_PREC_T z, MATH_PREC_T w) {
 	};
 }
 
-/* COMPILE ERROR WILL REMIND TO ADD SIMD VERSION OF ROUNDING */
-vec2_i round2f(vec2* a) {
-	vec2_i r;
-#ifndef _SIMD_SEE
-	r = vec2i(round(a->x),
-	          round(a->y));
-	return r;
-#endif
+vec2 round2f(vec2* a) {
+	return (vec2) {
+		.x = round(a->x),
+		.y = round(a->y)
+	};
 }
 
-vec3_i round3f(vec3* a) {
-	vec3_i r;
+vec3 round3f(vec3* a) {
+	_ALIGN(16) vec3 r;
 #ifndef _SIMD_SEE
-	r = vec3i(round(a->x),
-	          round(a->y),
-	          round(a->z));
-	return r;
+	r = (vec3) {
+		.x = round(a->x),
+		.y = round(a->y),
+		.z = round(a->z)
+	};
+#else
+	amm_store96_ps((float*)(&r), _mm_round_ps(amm_load96_ps((float*)a),
+	                                          _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC));
 #endif
+	return r;
 }
 
-vec4_i round4f(vec4* a) {
-	vec4_i r;
+vec4 round4f(vec4* a) {
+	vec4 r;
 #ifndef _SIMD_SEE
-	r = vec4i(round(a->x),
-	          round(a->y),
-	          round(a->z),
-	          round(a->w));
-	return r;
+	r = (vec4) {
+		.x = round(a->x),
+		.y = round(a->y),
+		.z = round(a->z),
+		.w = round(a->w)
+	};
+#else
+	_mm_store_ps((float*)(&r), _mm_round_ps(amm_load_ps((float*)a), 
+	                                        _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC));
 #endif
+	return r;
 }
 
 mat2 mat2f(MATH_PREC_T* elems) {
@@ -128,6 +135,18 @@ int equal4f(vec4* a, vec4* b) {
 			 a->y == b->y &&
 			 a->z == b->z &&
 			 a->w == b->w;
+}
+
+int equal2i(vec2_i* a, vec2_i* b) {
+	return equal2f((vec2*)a, (vec2*)b);
+}
+
+int equal3i(vec3_i* a, vec3_i* b) {
+	return equal3f((vec3*)a, (vec3*)b);
+}
+
+int equal4i(vec4_i* a, vec4_i* b) {
+	return equal4f((vec4*)a, (vec4*)b);
 }
 
 void normalize2f(vec2* v) {

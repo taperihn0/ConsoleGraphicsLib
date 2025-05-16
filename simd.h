@@ -3,9 +3,8 @@
 #include "common.h"
 #include <immintrin.h>
 
-// DISABLING SSE FOR NOW
 #ifdef __SSE__
-#	define _SIMD_SEE_N
+#	define _SIMD_SEE
 #endif
 
 // TODO: PROVIDE A SYSTEM WITH PROPER ALIGNMENT, NOW

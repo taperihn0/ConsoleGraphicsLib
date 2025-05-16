@@ -145,9 +145,9 @@ vec2   vec2f(MATH_PREC_T x, MATH_PREC_T y);
 vec3   vec3f(MATH_PREC_T x, MATH_PREC_T y, MATH_PREC_T z);
 vec4   vec4f(MATH_PREC_T x, MATH_PREC_T y, MATH_PREC_T z, MATH_PREC_T w);
 
-vec2_i round2f(vec2* a);
-vec3_i round3f(vec3* a);
-vec4_i round4f(vec4* a);
+vec2 round2f(vec2* a);
+vec3 round3f(vec3* a);
+vec4 round4f(vec4* a);
 
 mat2 mat2f(MATH_PREC_T* elems);
 mat3 mat3f(MATH_PREC_T* elems);
@@ -167,10 +167,13 @@ mat4 mat4f(MATH_PREC_T* elems);
 #define LENGTHSQ4F(v4) dot4f(v4, v4)
 #define LENGTH4F(v4)   sqrt(LENGTHSQ4F(v4))
 
-
 int equal2f(vec2* a, vec2* b);
 int equal3f(vec3* a, vec3* b);
 int equal4f(vec4* a, vec4* b);
+
+int equal2i(vec2_i* a, vec2_i* b);
+int equal3i(vec3_i* a, vec3_i* b);
+int equal4i(vec4_i* a, vec4_i* b);
 
 void normalize2f(vec2* v);
 void normalize3f(vec3* v);
