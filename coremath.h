@@ -138,9 +138,9 @@ typedef _ALIGN(16) union mat_4fl {
 	MATH_PREC_T rc[4][4];
 } mat4;
 
-vec2_i vec2i(MATH_INT_T x, MATH_INT_T y);
-vec3_i vec3i(MATH_INT_T x, MATH_INT_T y, MATH_INT_T z);
-vec4_i vec4i(MATH_INT_T x, MATH_INT_T y, MATH_INT_T z, MATH_INT_T w);
+vec2_i vec2i(MATH_INT_T  x, MATH_INT_T  y);
+vec3_i vec3i(MATH_INT_T  x, MATH_INT_T  y, MATH_INT_T z);
+vec4_i vec4i(MATH_INT_T  x, MATH_INT_T  y, MATH_INT_T z, MATH_INT_T w);
 vec2   vec2f(MATH_PREC_T x, MATH_PREC_T y);
 vec3   vec3f(MATH_PREC_T x, MATH_PREC_T y, MATH_PREC_T z);
 vec4   vec4f(MATH_PREC_T x, MATH_PREC_T y, MATH_PREC_T z, MATH_PREC_T w);
@@ -186,6 +186,11 @@ vec4 add4f(vec4* a, vec4* b);
 vec2 sub2f(vec2* a, vec2* b);
 vec3 sub3f(vec3* a, vec3* b);
 vec4 sub4f(vec4* a, vec4* b);
+
+// PARALLELIZATION NOT PROVIDED
+vec2_i sub2i(vec2_i* a, vec2_i* b);
+vec3_i sub3i(vec3_i* a, vec3_i* b);
+vec4_i sub4i(vec4_i* a, vec4_i* b);
 
 vec2 mult_av2(MATH_PREC_T alpha, vec2* a);
 vec3 mult_av3(MATH_PREC_T alpha, vec3* a);

@@ -31,4 +31,4 @@ find_package(Freetype REQUIRED)
 target_link_libraries(ConsoleGraphicsLib X11::X11 ${LIBTERMCAP} ncursesw m pthread ${FREETYPE_LIBRARIES})
 target_include_directories(ConsoleGraphicsLib PRIVATE ${FREETYPE_INCLUDE_DIRS})
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DDEBUG -Wall -Og -g -Wextra -Wpedantic -Werror -Wall -msse4.2 -fopenmp")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DDEBUG -Wall -Og -Wextra -Wpedantic -Werror -Wall -msse4.2 -fopenmp")

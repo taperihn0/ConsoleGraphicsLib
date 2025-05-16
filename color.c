@@ -17,11 +17,27 @@ typedef short _color_ind;
 #define _COLOR_BRIGHT_WHITE   15
 #define _BACKGROUND_COLOR	   COLOR_BLACK
 
+// Define color approximation, higher the value
+// lower the color accuracy.
+// For debug builds set is high, as the loading
+// colors takes 8+ seconds at average.
+// For release builds, set it to zero to
+// fully match the colors.
+#ifdef DEBUG
+#	define _EPSILON_COLOR_MATCHING 80
+#else
+#	define _EPSILON_COLOR_MATCHING 0
+#endif
+
 vec3_i rgbof[_PREDEF_COLOR_NUM];
 
 void _add_color(_color_ind code, short r, short g, short b) {
 	ASSERT(code < _PREDEF_COLOR_NUM, "Invalid color");
-	rgbof[code] = vec3i(r, g, b);
+	rgbof[code] = (vec3_i) {
+		.r = r,
+		.g = g, 
+		.b = b
+	};
 }
 
 _STATIC _FORCE_INLINE _ncurses_pair_id _closest_color(short r, short g, short b) {
@@ -29,12 +45,16 @@ _STATIC _FORCE_INLINE _ncurses_pair_id _closest_color(short r, short g, short b)
 	_color_ind code = 0;
 
 	for (UINT i = 0; i < _PREDEF_COLOR_NUM; i++) {
-		int diff = abs(rgbof[i].r - r) 
-					+ abs(rgbof[i].g - g)
-					+ abs(rgbof[i].b - b);
-
-		if (diff < min_diff) {
-			min_diff = diff;
+		int absdiff = abs(rgbof[i].x - r) 
+						+ abs(rgbof[i].y - g)
+						+ abs(rgbof[i].z - b);
+		
+		if (absdiff <= _EPSILON_COLOR_MATCHING) {
+			code = i;
+			break;
+		}
+		else if (absdiff < min_diff) {
+			min_diff = absdiff;
 			code = i;
 		}
 	}
@@ -46,6 +66,7 @@ _STATIC _FORCE_INLINE _ncurses_pair_id _closest_color(short r, short g, short b)
 _ncurses_pair_id idmap[_PREDEF_COLOR_NUM][_PREDEF_COLOR_NUM][_PREDEF_COLOR_NUM];
 
 void _init_idmap() {
+	// TEMPORARY
 	#pragma omp parallel for
 	for (short r = 0; r < _PREDEF_COLOR_NUM; r++) {
 		for (short g = 0; g < _PREDEF_COLOR_NUM; g++) {

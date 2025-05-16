@@ -64,8 +64,9 @@ vec3 round3f(vec3* a) {
 		.z = round(a->z)
 	};
 #else
-	amm_store96_ps((float*)(&r), _mm_round_ps(amm_load96_ps((float*)a),
-	                                          _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC));
+	__m128 r3ps = _mm_round_ps(amm_load96_ps((float*)a), 
+	                           _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC);
+	amm_store96_ps((float*)(&r), r3ps);
 #endif
 	return r;
 }
@@ -162,8 +163,9 @@ void normalize3f(vec3* v) {
 	v->y /= l;
 	v->z /= l;
 #else
-	amm_store96_ps((float*)v, _mm_div_ps(amm_load96_ps((float*)v), 
-	                                     _mm_load_ps1(&l)));
+	__m128 d3ps = _mm_div_ps(amm_load96_ps((float*)v), 
+	                        _mm_load_ps1(&l));
+	amm_store96_ps((float*)v, d3ps);
 #endif
 }
 
@@ -196,8 +198,9 @@ vec3 add3f(vec3* a, vec3* b) {
 		.z = a->z + b->z
 	};
 #else
-	amm_store96_ps((float*)(&r), _mm_add_ps(amm_load96_ps((float*)a),
-	                                        amm_load96_ps((float*)b)));
+	__m128 a3ps = _mm_add_ps(amm_load96_ps((float*)a), 
+	                         amm_load96_ps((float*)b));
+	amm_store96_ps((float*)(&r), a3ps);
 #endif
 	return r;
 }
@@ -234,8 +237,9 @@ vec3 sub3f(vec3* a, vec3* b) {
 		.z = a->z - b->z,
 	};
 #else
-	amm_store96_ps((float*)(&r), _mm_sub_ps(amm_load96_ps((float*)a),
-	                                        amm_load96_ps((float*)b)));
+	__m128 s3ps = _mm_sub_ps(amm_load96_ps((float*)a), 
+	                         amm_load96_ps((float*)b));
+	amm_store96_ps((float*)(&r), s3ps);
 #endif
 	return r;
 }
@@ -256,6 +260,31 @@ vec4 sub4f(vec4* a, vec4* b) {
 	return r;
 }
 
+/* TODO: UPLOAD SIMD VERSIONS */
+vec2_i sub2i(vec2_i* a, vec2_i* b) {
+	return (vec2_i) {
+		.x = a->x - b->x,
+		.y = a->y - b->y,
+	};
+}
+
+vec3_i sub3i(vec3_i* a, vec3_i* b) {
+	return (vec3_i) {
+		.x = a->x - b->x,
+		.y = a->y - b->y,
+		.z = a->z - b->z,
+	};
+}
+
+vec4_i sub4i(vec4_i* a, vec4_i* b) {
+	return (vec4_i) {
+		.x = a->x - b->x,
+		.y = a->y - b->y,
+		.z = a->z - b->z,
+		.w = a->w - b->w,
+	};
+}
+
 vec2 mult_av2(MATH_PREC_T alpha, vec2* a) {
 	return (vec2) {
 		.x = a->x * alpha,
@@ -272,8 +301,9 @@ vec3 mult_av3(MATH_PREC_T alpha, vec3* a) {
 		.z = a->z * alpha,
 	};
 #else
-	amm_store96_ps((float*)(&r), _mm_mul_ps(amm_load96_ps((float*)a),
-	                                        _mm_load_ps1(&alpha)));
+	__m128 m3ps = _mm_mul_ps(amm_load96_ps((float*)a), 
+	                         _mm_load_ps1(&alpha));
+	amm_store96_ps((float*)(&r), m3ps);
 #endif
 	return r;
 }
@@ -310,14 +340,15 @@ vec3 div_av3(MATH_PREC_T alpha, vec3* a) {
 		.z = a->z / alpha
 	};
 #else
-	amm_store96_ps((float*)(&r), _mm_div_ps(amm_load96_ps((float*)a),
-	                                        _mm_load_ps1(&alpha)));
+	__m128 d3ps = _mm_div_ps(amm_load96_ps((float*)a),
+	                         _mm_load_ps1(&alpha));
+	amm_store96_ps((float*)(&r), d3ps);
 #endif
 	return r;
 }
 
 vec4 div_av4(MATH_PREC_T alpha, vec4* a) {
-	_ALIGN(16) vec4 r;
+	vec4 r;
 #ifndef _SIMD_SEE
 	r = (vec4) {
 		.x = a->x / alpha,
@@ -344,8 +375,9 @@ vec3 mult_v3(vec3* a, vec3* b) {
 				 a->y * b->y, 
 				 a->z * b->z);
 #else
-	amm_store96_ps((float*)(&r), _mm_mul_ps(amm_load96_ps((float*)a),
-	                                        amm_load96_ps((float*)b)));
+	__m128 m3ps = _mm_mul_ps(amm_load96_ps((float*)a),
+	                         amm_load96_ps((float*)b));
+	amm_store96_ps((float*)(&r), m3ps);
 #endif
 	return r;
 }
@@ -380,8 +412,9 @@ vec3 div_v3(vec3* a, vec3* b) {
 		.z = a->z / b->z
 	};
 #else
-	amm_store96_ps((float*)(&r), _mm_div_ps(amm_load96_ps((float*)a),
-	                                        amm_load96_ps((float*)b)));
+	__m128 d3ps = _mm_div_ps(amm_load96_ps((float*)a),
+	                         amm_load96_ps((float*)b));
+	amm_store96_ps((float*)(&r), d3ps);
 #endif
 	return r;
 }
@@ -468,7 +501,8 @@ vec3 cross3f(vec3* a, vec3* b) {
 	__m128 cl1  = _mm_mul_ps(sa, ps3b);
 	__m128 cl0  = _mm_mul_ps(sa, sb);
 	__m128 sl1  = _mm_shuffle_ps(cl1, cl1, _MM_SHUFFLE(3, 0, 2, 1));
-	amm_store96_ps((float*)(&v), _mm_sub_ps(cl0, sl1));
+	__m128 sub  = _mm_sub_ps(cl0, sl1);
+	amm_store96_ps((float*)(&v), sub);
 #endif
 	return v;
 }
@@ -484,11 +518,11 @@ vec3 mext_cross2fx3(vec2* a, vec2* b,
 	          CROSS2F(c, d),
 	          CROSS2F(e, f));	
 # else
-	amm_store96_ps((float*)(&r), 
-	               _mm_sub_ps(_mm_mul_ps(amm_set96r_ps(a->x, c->x, e->x), 
-	                                     amm_set96r_ps(b->y, d->y, f->y)),
-	               			  _mm_mul_ps(amm_set96r_ps(a->y, c->y, e->y), 
-	                          				 amm_set96r_ps(b->x, d->x, f->x))));
+	__m128 sub = _mm_sub_ps(_mm_mul_ps(amm_set96r_ps(a->x, c->x, e->x), 
+	                                   amm_set96r_ps(b->y, d->y, f->y)),
+									_mm_mul_ps(amm_set96r_ps(a->y, c->y, e->y), 
+									           amm_set96r_ps(b->x, d->x, f->x)));
+	amm_store96_ps((float*)(&r), sub);
 # endif // _SIMD_SEE
 	return r;
 }

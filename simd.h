@@ -22,12 +22,12 @@
 #	define amm_load_ps(a)     _mm_loadu_ps((a))
 #endif
 
-#define amm_load96_ps(a) _mm_movelh_ps(_mm_loadl_pi( 						     \
-													_mm_setzero_ps(), (__m64*)(a)),    \
-													_mm_load_ss((float*)(a) + 2))	   
-
-#define amm_store96_ps(a, b) (_mm_storel_pi((__m64*)(a), (b)),            \
-										_mm_store_ss((float*)(a) + 2, 				  \
-										             _mm_shuffle_ps((b), (b), 2)))
-
 #define amm_set96r_ps(e3, e2, e1) _mm_setr_ps(e3, e2, e1, 0.f)
+
+#define amm_load96_ps(a) 			 _mm_movelh_ps(_mm_loadl_pi( 						  \
+																_mm_setzero_ps(), (__m64*)(a)), \
+																_mm_load_ss((float*)(a) + 2))	   
+
+#define amm_store96_ps(a, b) 		(_mm_storel_pi((__m64*)(a), (b)),              \
+											 _mm_store_ss((float*)(a) + 2, 				     \
+										             	  _mm_shuffle_ps((b), (b), 2)))

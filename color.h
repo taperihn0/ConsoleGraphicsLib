@@ -5,8 +5,7 @@
 
 typedef uint8_t _ncurses_pair_id;
 
-#define _COL_BRIGHTNESS(col) \
-	(((col)->r + (col)->g + (col)->b) / 3.f)
+#define _COL_BRIGHTNESS(col) (((col)->r + (col)->g + (col)->b) / 3.f)
 
 void _init_colors();
 
