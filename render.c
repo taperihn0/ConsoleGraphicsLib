@@ -114,11 +114,11 @@ void swap_terminal_buffers() {
 	_sync_with_next_frame();
 }
 
-void set_elem(int x, int y, CHAR_T c, PREC_T d, _ncurses_pair_id col) {
+void set_elem(int x, int y, PREC_T d, CHAR_T c, _ncurses_pair_id col) {
 	set(_get_current_buffer(&_dbl_buff), x, y, d, c, col);
 }
 
-void set_elem_force(int x, int y, CHAR_T c, PREC_T d, _ncurses_pair_id col) {
+void set_elem_force(int x, int y, PREC_T d, CHAR_T c, _ncurses_pair_id col) {
 	set_force(_get_current_buffer(&_dbl_buff), x, y, d, c, col);
 }
 
@@ -148,7 +148,7 @@ int draw_buffer(shader_t* shader, buff_idx_t id, void* attrib) {
 		fprintf(stderr, "Invalid buffer index (null buffer)\n");
 		return -1;
 	}
-
+	
 	for (UINT i = 0; i < size; i += 3 * entry_size) {
 		_triangle_pipeline(shader, 
 		                   &mem[i], &mem[i + entry_size], 

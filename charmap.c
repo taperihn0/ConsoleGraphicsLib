@@ -29,11 +29,11 @@ _ft_state _ft;
 _STATIC _FORCE_INLINE UINT _bitmap_brightness(FT_Bitmap* bitmap) {
 	UINT sum = 0;
 	for (UINT y = 0; y < bitmap->rows; y++) {
-		  for (UINT x = 0; x < bitmap->width; x++) {
+		for (UINT x = 0; x < bitmap->width; x++) {
 			sum += (UINT)bitmap->buffer[y * bitmap->width + x];
-		  }
-	 }
-	 return sum;
+		}
+	}
+	return sum;
 }
 
 _STATIC _FORCE_INLINE void _add(CHAR_T ch) {
@@ -66,25 +66,29 @@ int cmp_brightness(const void* a, const void* b) {
 #define _BITMAP_SIZE 8
 
 int _init_char_map() {
-	 if (FT_Init_FreeType(&_ft.lib)) {
-		  fprintf(stderr, "Could not initialize FreeType\n");
-		  return 1;
-	 }
-	 
-	 if (FT_New_Face(_ft.lib, "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 0, &_ft.face)) {
-		  fprintf(stderr, "Could not load font\n");
-		  return 1;
-	 }
-	 
-	 FT_Set_Pixel_Sizes(_ft.face, 0, _BITMAP_SIZE);
+	if (FT_Init_FreeType(&_ft.lib)) {
+		fprintf(stderr, "Could not initialize FreeType\n");
+		return 1;
+	}
+
+	if (FT_New_Face(_ft.lib, "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 0, &_ft.face)) {
+		fprintf(stderr, "Could not load font\n");
+		return 1;
+	}
+
+	FT_Set_Pixel_Sizes(_ft.face, 0, _BITMAP_SIZE);
 
 	// add standart ASCII characters
 	_add_range(' ', (CHAR_T)126);
+	//_add_range((CHAR_T)0x2586, (CHAR_T)0x2589);
+	//_add((CHAR_T)0x2588);
+	//_add((CHAR_T)0x2588);
+	//_add_range((CHAR_T)0x2591, (CHAR_T)0x2593);
 
 	qsort(_chtab.chars, _chtab.idx, sizeof(_char_data), cmp_brightness);
 
-	 FT_Done_Face(_ft.face);
-	 FT_Done_FreeType(_ft.lib);
+	FT_Done_Face(_ft.face);
+	FT_Done_FreeType(_ft.lib);
 
 	return 0;
 }

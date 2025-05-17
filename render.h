@@ -13,7 +13,7 @@ typedef struct _double_buffer {
 } _double_buffer;
 
 #define _get_current_buffer(dbl) &(dbl)->buff[(dbl)->curr_buff]
-#define _flip_buffer_index(dbl) (dbl)->curr_buff ^= 1
+#define _flip_buffer_index(dbl)  (dbl)->curr_buff ^= 1
 
 void _resize_buffers(_double_buffer* dbl, size_t width, size_t height);
 void _close_buffers(_double_buffer* dbl);
@@ -25,8 +25,8 @@ void _close_flush_ctx();
 
 #define RENDER_MODE_SOLID 0
 #define RENDER_MODE_EDGES 1
-#define _RENDER_MODE_MIN 0
-#define _RENDER_MODE_MAX 1
+#define _RENDER_MODE_MIN  0
+#define _RENDER_MODE_MAX  1
 #define _RENDER_MODE_CNT _RENDER_MODE_MAX + 1
 
 typedef int render_mode_t;
@@ -35,8 +35,8 @@ void set_render_mode(render_mode_t mode);
 
 void clear_terminal(CHAR_T c);
 void swap_terminal_buffers();
-void set_elem(int x, int y, CHAR_T c, PREC_T d, _ncurses_pair_id col);
-void set_elem_force(int x, int y, CHAR_T c, PREC_T d, _ncurses_pair_id col);
+void set_elem(int x, int y, PREC_T d, CHAR_T c, _ncurses_pair_id col);
+void set_elem_force(int x, int y, PREC_T d, CHAR_T c, _ncurses_pair_id col);
 
 // Writes data containing number of how many times 
 // flushing thread or rendering (main) thread was late comparing

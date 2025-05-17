@@ -5,9 +5,6 @@
 #include "color.h"
 #include "coremath.h"
 
-#define _plot_with_col(x, y, d, c, col) \
-	set_elem_force((x), (y), (c), (d), (col))
-
 _STATIC _FORCE_INLINE int _line_rectange_intersect(
 	int x1, int y1, int x2, int y2,
 	int l, int r, int d, int u) 
@@ -111,7 +108,7 @@ _STATIC _FORCE_INLINE void _draw_line_horizontal(
 		stage_fragment(&normalized, attrib);
 
 		const float brightness = min(_COL_BRIGHTNESS(&rgb), 1.f);
-		_plot_with_col(x, y, z, 
+		set_elem_force(x, y, z, 
 		               _char_by_brightness(brightness), 
 		               _color_by_rgb(&rgb));
 		
@@ -173,7 +170,7 @@ _STATIC _FORCE_INLINE void _draw_line_vertical(
 		stage_fragment(&normalized, attrib);
 
 		const float brightness = min(_COL_BRIGHTNESS(&rgb), 1.f);
-		_plot_with_col(x, y, z, 
+		set_elem_force(x, y, z, 
 		               _char_by_brightness(brightness), 
 		               _color_by_rgb(&rgb));
 
@@ -356,14 +353,14 @@ void _draw_triangle_solid(
 	                              &triangle.a3a1, &triangle.a3a2,
 	                              &triangle.a1a2, &triangle.a1a3);
 #endif
-
-	const int l = max(minof3(v1->x, v2->x, v3->x), -half_width);
-	const int u = max(minof3(v1->y, v2->y, v3->y), -half_height);
-	const int r = min(maxof3(v1->x, v2->x, v3->x),  half_width);
-	const int d = max(maxof3(v1->y, v2->y, v3->y),  half_height);
 	
-	vec3 v1wv2wv3w = vec3f(v1->w, v2->w, v3->w);
+	const int l = max(minof3(v1->x, v2->x, v3->x), -half_width);
+	const int r = min(maxof3(v1->x, v2->x, v3->x),  half_width);
+	const int d = max(minof3(v1->y, v2->y, v3->y), -half_height);
+	const int u = min(maxof3(v1->y, v2->y, v3->y),  half_height);
+	
 	vec3 v1zv2zv3z = vec3f(v1->z, v2->z, v3->z);
+	vec3 v1wv2wv3w = vec3f(v1->w, v2->w, v3->w);
 	vec3 c1xc2xc3x = vec3f(col1->x, col2->x, col3->x);
 	vec3 c1yc2yc3y = vec3f(col1->y, col2->y, col3->y);
 	vec3 c1zc2zc3z = vec3f(col1->z, col2->z, col3->z);
@@ -380,7 +377,7 @@ void _draw_triangle_solid(
 	// I'm guaranteed to not getting inside the triangle again.
 	bool found, fill;
 
-	for (int y = u; y <= d; y++) {
+	for (int y = u; y >= d; y--) {
 		found =  false;
 		fill = false;
 
@@ -426,7 +423,7 @@ void _draw_triangle_solid(
 
 				const float brightness = min(_COL_BRIGHTNESS(_ENTRY_COL(&normalized)), 
 				                             1.f);
-				_plot_with_col(x, y, z, 
+				set_elem_force(x, y, z, 
 				               _char_by_brightness(brightness), 
 				               _color_by_rgb(&rgb));
 			}

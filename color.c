@@ -66,7 +66,6 @@ _STATIC _FORCE_INLINE _ncurses_pair_id _closest_color(short r, short g, short b)
 _ncurses_pair_id idmap[_PREDEF_COLOR_NUM][_PREDEF_COLOR_NUM][_PREDEF_COLOR_NUM];
 
 void _init_idmap() {
-	// TEMPORARY
 	#pragma omp parallel for
 	for (short r = 0; r < _PREDEF_COLOR_NUM; r++) {
 		for (short g = 0; g < _PREDEF_COLOR_NUM; g++) {

@@ -7,6 +7,8 @@
 #include "ctx.h"
 #include "light.h"
 
+#include <omp.h>
+
 static vec3 cam_pos = {
 	.x = 0.f, 
 	.y = 0.f, 
@@ -127,7 +129,7 @@ void log_msg(int x, int y, char* msg) {
 	int half_height = get_terminal_height() / 2;
 
 	for (int i = 0; msg[i] != 0; i++) {
-		set_elem(-half_width + x + i, half_height - y, msg[i], -1.f, COLOR_WHITE + 1);
+		set_elem_force(-half_width + x + i, half_height - y, -1.f, msg[i], COLOR_WHITE + 1);
 	}
 }
 
@@ -201,12 +203,12 @@ int main() {
 	set_render_mode(mode);
 
 	float cube[] = {
-		10.f, -10.f, 10.f,   0.f, 1.f, 0.f, 1.f, 0.f, 0.f,
-		10.f, 10.f, 10.f,     1.f, 0.f, 0.f, 1.f, 0.f, 0.f,
-		10.f, 10.f, -10.f,   0.f, 1.f, 0.f, 1.f, 0.f, 0.f,
-		10.f, -10.f, 10.f,   1.f, 0.f, 0.f, 1.f, 0.f, 0.f,
+		10.f, -10.f, 10.f, 0.f, 1.f, 0.f, 1.f, 0.f, 0.f,
+		10.f, 10.f, 10.f, 1.f, 0.f, 0.f, 1.f, 0.f, 0.f,
+		10.f, 10.f, -10.f, 0.f, 1.f, 0.f, 1.f, 0.f, 0.f,
+		10.f, -10.f, 10.f, 1.f, 0.f, 0.f, 1.f, 0.f, 0.f,
 		10.f, -10.f, -10.f, 1.f, 0.f, 0.f, 1.f, 0.f, 0.f,
-		10.f, 10.f, -10.f,   1.f, 0.f, 0.f, 1.f, 0.f, 0.f,
+		10.f, 10.f, -10.f, 1.f, 0.f, 0.f, 1.f, 0.f, 0.f,
 
 		-10.f, -10.f, 10.f, 0.f, 0.5f, 1.f, 0.f, 0.f, 1.f,
 		-10.f, 10.f, 10.f, 1.f, 0.2f, 1.f, 0.f, 0.f, 1.f,
@@ -301,7 +303,7 @@ int main() {
 
 		mat4 rot = diagmat4f(1);
 		utime_t time = gettime_mls(CLOCK_MONOTONIC_RAW);
-		if (time - start_tp > 20000) break;
+		//if (time - start_tp > 20000) break;
 		utime_t delta_time = time - prev_time;
 		prev_time = time;
 		angle += 0.001f * delta_time;
