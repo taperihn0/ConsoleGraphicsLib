@@ -40,12 +40,10 @@ _flush_thread_ctx _flush_ctx = {
 	.thread = NULL
 };
 
-bool byte_false = false;
-bool byte_true = true;
 _core_buffer* null_buffer = NULL;
 
 void* _flush_thread_loop(_UNUSED void* args) {
-	bool ready = false;
+	byte ready = 0;
 
 	while (true) {
 		_read_mutex_data(&_flush_ctx.to_flush, &ready);
@@ -63,7 +61,7 @@ void* _flush_thread_loop(_UNUSED void* args) {
 }
 
 void _init_flush_ctx() {
-	_init_mutex(&_flush_ctx.to_flush, &byte_false, sizeof(bool));
+	_init_mutex(&_flush_ctx.to_flush, &byte_false, sizeof(byte));
 	_init_mutex(&_flush_ctx.flushed_buff, &null_buffer, sizeof(_core_buffer*));
 	_flush_ctx.thread = _get_thread();
 	pthread_create(_flush_ctx.thread, NULL, _flush_thread_loop, NULL);
@@ -93,8 +91,13 @@ void get_late_data(ULONGLONG* flush_late_cnt, ULONGLONG* render_late_cnt) {
 
 #endif // DEBUG
 
+#define _wait4flusher() 											\
+	do { 																	\
+		_read_mutex_data(&_flush_ctx.to_flush, &flushing); \
+	} while (flushing); 												\
+
 void swap_terminal_buffers() {
-	bool flushing;
+	byte flushing;
 	
 #ifdef DEBUG
 	_read_mutex_data(&_flush_ctx.to_flush, &flushing);
@@ -102,10 +105,9 @@ void swap_terminal_buffers() {
 	else lateness.writer_late_cnt++;
 #endif // DEBUG
 
-	do {
-		_read_mutex_data(&_flush_ctx.to_flush, &flushing);
-	} while (flushing);
+	_wait4flusher();
 	
+	// run flusher again with current buffer index
 	_core_buffer* to_flush_buff = _get_current_buffer(&_dbl_buff);
 	_write_mutex_data(&_flush_ctx.flushed_buff, &to_flush_buff);
 	_write_mutex_data(&_flush_ctx.to_flush, &byte_true);

@@ -20,6 +20,10 @@
 #	define _UNUSED __attribute__((unused))
 #endif
 
+#ifndef _MAYBE_UNUSED
+#	define _MAYBE_UNUSED _UNUSED
+#endif
+
 // Got problems with static functions while trying to compile the code under 
 // different optimization flags with GCC.
 // For instance, -Og requires every function defined here needs to be explicitly
@@ -38,7 +42,12 @@
 #	define ULONGLONG unsigned long long
 #endif
 
-typedef unsigned char byte;
+// for compatibility
+typedef uint8_t byte;
+
+#ifndef BYTE
+#	define BYTE byte
+#endif
 
 #define _LIKELY(x)   __builtin_expect(!!(x), 1)
 #define _UNLIKELY(x) __builtin_expect(!!(x), 0)
@@ -77,3 +86,6 @@ _STATIC _FORCE_INLINE void swap(int* a, int* b) {
 }
 
 #define static_strlen(str) (sizeof(str) / sizeof(char) - 1)
+
+_MAYBE_UNUSED static byte byte_false = 0;
+_MAYBE_UNUSED static byte byte_true  = 1;

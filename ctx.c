@@ -6,6 +6,7 @@
 #include "render.h"
 #include "charmap.h"
 #include "color.h"
+#include "input.h"
 
 void _terminate() {
 	_terminal.over = true;
@@ -32,7 +33,7 @@ void _terminate() {
 
 void init_mode() {
 	_init_terminal_state();
-
+	
 	_init_char_map();
 
 	_init_cursor();

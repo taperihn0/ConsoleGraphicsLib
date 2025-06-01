@@ -193,7 +193,7 @@ int main() {
 
 	keyboard* kbd = malloc(sizeof(keyboard));
 	init_keyboard(kbd);
-	make_terminal_fullscreen();
+	//make_terminal_fullscreen();
 	set_terminal_title("ASCIIGRAPHICS");
 	disable_console_cursor();
 	hide_cursor();
@@ -302,8 +302,7 @@ int main() {
 		process_kbd_events(kbd);
 
 		mat4 rot = diagmat4f(1);
-		utime_t time = gettime_mls(CLOCK_MONOTONIC_RAW);
-		//if (time - start_tp > 20000) break;
+		utime_t time = gettime_mls(CLOCK_MONOTONIC_RAW);		
 		utime_t delta_time = time - prev_time;
 		prev_time = time;
 		angle += 0.001f * delta_time;
@@ -365,7 +364,7 @@ int main() {
 	free(kbd);
 	free(mice);
 	
-	unmake_terminal_fullscreen();
+	//unmake_terminal_fullscreen();
 	disable_raw_mode();
 	disable_focus_events();
 	show_cursor();
